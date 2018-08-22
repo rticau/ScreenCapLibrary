@@ -17,11 +17,11 @@ The library is based on RobotFramework's standard Screenshot library. It has alm
 the same functionality, except that the screenshots are captured in PNG by default.
 
 ScreenCapLibrary has the following extra features:
-
     - Taking screenshots in both PNG and JPG/JPEG formats
     - Adjusting the compression/quality of the screenshots
 
 Features to be implemented in the future:
+
     - Support for GIFs
     - Configurable monitor screen grabbing
     - Taking multiple screenshots in a given amount of time

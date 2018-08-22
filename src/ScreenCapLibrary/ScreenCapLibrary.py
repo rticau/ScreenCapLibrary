@@ -27,7 +27,7 @@ __version__ = VERSION
 class ScreenCapLibrary:
     """ Test Library for taking screenshots on the machine where tests are run.
 
-    Notice that successfully taking screenshots requires tests to be run with
+    Note that successfully taking screenshots requires tests to be run with
     a physical or virtual display.
 
     = Usage =
@@ -46,7 +46,7 @@ class ScreenCapLibrary:
     = Where screenshots are saved =
 
     By default screenshots are saved into the same directory where the Robot
-    Framework log file is written. If no log log is created, screenshots are
+    Framework log file is written. If no log is created, screenshots are
     saved into the directory where the XML output file is written.
 
     It is possible to specify a custom location for screenshots using
@@ -70,8 +70,8 @@ class ScreenCapLibrary:
 
         ``quality`` can take values in range [0, 100]. Value 0 is lowest quality,
         while value 100 is maximum quality. The quality is directly proportional
-        with file size. Because PNG useless loseless compression its size is
-        significantly larger than of the JPG file. The default value is 50.
+        with file size. Because PNG uses lossless compression its size
+        may be larger than the size of the JPG file. The default value is 50.
 
         Examples (use only one of these):
         | =Setting= |  =Value=   |  =Value=   |
@@ -185,12 +185,13 @@ class ScreenCapLibrary:
         return path
 
     def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px'):
-        """Takes a screenshot in PNG format and embeds it into the log file.
+        """Takes a screenshot in the specified format at library import and
+        embeds it into the log file (PNG by default).
 
         Name of the file where the screenshot is stored is derived from the
         given ``name``. If the ``name`` ends with extension ``.jpg``, ``.jpeg``
-        or, the screenshot will be stored with that exact name. Otherwise a
-        unique name is created by adding an underscore, a running
+        or ``.png``, the screenshot will be stored with that exact name.
+        Otherwise a unique name is created by adding an underscore, a running
         index and an extension to the ``name``.
 
         The name will be interpreted to be relative to the directory where
@@ -202,8 +203,8 @@ class ScreenCapLibrary:
         ``png`` by default. Can be either ``jpg``, ``jpeg`` or ``png``, case
         insensitive.
 
-        ``quality`` can take values in range [0, 100]. In case of JPEG format it can drastically reduce
-        the file size of the image.
+        ``quality`` can take values in range [0, 100]. In case of JPEG format
+        it can drastically reduce the file size of the image.
 
         ``width`` specifies the size of the screenshot in the log file.
 
@@ -237,7 +238,7 @@ class ScreenCapLibrary:
         link = get_link_path(path, self._log_dir)
         logger.info('<a href="%s"><img src="%s" width="%s"></a>' % (link, link, width), html=True)
 
-    def take_screenshot_without_embedding(self, name="screenshot", format='png', quality=50):
+    def take_screenshot_without_embedding(self, name="screenshot", format=None, quality=None):
         """Takes a screenshot and links it from the log file.
         This keyword is otherwise identical to `Take Screenshot` but the saved
         screenshot is not embedded into the log file. The screenshot is linked
