@@ -13,7 +13,7 @@ and downloads can be found from PyPI_.
 ScreenCapLibrary is operating system independent and supports Python_ 2.7 as well
 as Python_ 3.4 or newer.
 
-The library is based on RobotFramework's standard Screenshot library. It has almost
+The library is based on RobotFramework's standard Screenshot_ library. It has almost
 the same functionality, except that the screenshots are captured in PNG by default.
 
 ScreenCapLibrary has the following extra features:
