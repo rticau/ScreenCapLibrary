@@ -1,0 +1,15 @@
+build
+dist
+atest/results
+.idea
+.*project
+*.pyc
+*$py.class
+*.iml
+*.egg-info
+*.egg
+MANIFEST
+log.html
+output.xml
+report.html
+
