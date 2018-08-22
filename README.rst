@@ -105,7 +105,7 @@ available:
 .. _mss: https://python-mss.readthedocs.io
 .. _pillow: https://pillow.readthedocs.io
 .. _Screenshot: http://robotframework.org/robotframework/latest/libraries/Screenshot.html
-.. _Keyword Documentation: https://mihaiparvu.github.io/robotframework-screencaplibrary/
+.. _Keyword Documentation: https://mihaiparvu.github.io/ScreenCapLibrary/ScreenCapLibrary.html
 .. _robotframework-users: http://groups.google.com/group/robotframework-users
 .. _Slack community: https://robotframework-slack-invite.herokuapp.com
 .. _issue tracker: https://github.com/mihaiparvu/ScreenCapLibrary/issues
