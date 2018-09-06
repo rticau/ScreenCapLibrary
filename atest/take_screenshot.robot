@@ -12,8 +12,8 @@ ${FIRST_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo_1.png
 ${SECOND_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo_2.png
 ${PNG_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo.png
 ${JPG_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo.jpg
-${GDK_PNG_SCREENSHOT}  ${OUTPUTDIR}${/}gdk_png.png
-${GDK_JPEG_SCREENSHOT}  ${OUTPUTDIR}${/}gdk_jpeg.jpeg
+${GTK_PNG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_png.png
+${GTK_JPEG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_jpeg.jpeg
 
 *** Test Cases ***
 Screenshot Is Taken
@@ -50,9 +50,9 @@ Png Screenshot Quality
 Jpg Screenshot Quality
     Compare Size  ${JPG_CUSTOM_SCREENSHOT}  jpg
 
-Png Screenshot Gdk
-    ScreenCapLibraryGdk.Take Screenshot  ${GDK_PNG_SCREENSHOT}  png
-    ScreenCapLibraryGdk.Take Screenshot  ${GDK_JPEG_SCREENSHOT}  jpeg
+Png Screenshot Gtk
+    ScreenCapLibraryGtk.Take Screenshot  ${GTK_PNG_SCREENSHOT}  png
+    ScreenCapLibraryGtk.Take Screenshot  ${GTK_JPEG_SCREENSHOT}  jpeg
 
 *** Keywords ***
 Take Screenshot And Verify
