@@ -1,5 +1,6 @@
 *** Settings ***
 Library  ScreenCapLibrary
+Library  ScreenCapLibrary  screenshot_module=gdk  WITH NAME  ScreenCapLibraryGdk
 Library  OperatingSystem
 Library  Collections
 

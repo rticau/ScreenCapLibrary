@@ -12,6 +12,8 @@ ${FIRST_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo_1.png
 ${SECOND_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo_2.png
 ${PNG_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo.png
 ${JPG_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo.jpg
+${GDK_PNG_SCREENSHOT}  ${OUTPUTDIR}${/}gdk_png.png
+${GDK_JPEG_SCREENSHOT}  ${OUTPUTDIR}${/}gdk_jpeg.jpeg
 
 *** Test Cases ***
 Screenshot Is Taken
@@ -23,24 +25,24 @@ Each Screenshot Gets Separate Index
     Take Screenshot and Verify  ${FIRST_SCREENSHOT}  ${SECOND_SCREENSHOT}
 
 Basename May Be Defined
-    Repeat Keyword  2  Take Screenshot  foo
+    Repeat Keyword  2  ScreenCapLibrary.Take Screenshot  foo
     Screenshots Should Exist  ${OUTPUTDIR}  ${FIRST_CUSTOM_SCREENSHOT}  ${SECOND_CUSTOM_SCREENSHOT}
 
 Basename With Extension Turns Off Index Generation
-    Repeat Keyword  3  Take Screenshot  xxx.jpg  jpg
-    Repeat Keyword  2  Take Screenshot  yyy.jpeg  jpeg
+    Repeat Keyword  3  ScreenCapLibrary.Take Screenshot  xxx.jpg  jpg
+    Repeat Keyword  2  ScreenCapLibrary.Take Screenshot  yyy.jpeg  jpeg
     Screenshots Should Exist  ${OUTPUTDIR}  ${OUTPUTDIR}${/}xxx.jpg  ${OUTPUTDIR}${/}yyy.jpeg
 
 Screenshot Width Can Be Given
-    Take Screenshot  width=300px
+    ScreenCapLibrary.Take Screenshot  width=300px
     Screenshots Should Exist  ${OUTPUTDIR}  ${FIRST_SCREENSHOT}
 
 Basename With Non-existing Directories Fails
     [Documentation]  FAIL Directory '${OUTPUTDIR}${/}non-existing' where to save the screenshot does not exist
-    Take Screenshot  ${OUTPUTDIR}${/}non-existing${/}foo
+    ScreenCapLibrary.Take Screenshot  ${OUTPUTDIR}${/}non-existing${/}foo
 
 Without Embedding
-    Take Screenshot Without Embedding  no_embed.png
+    ScreenCapLibrary.Take Screenshot Without Embedding  no_embed.png
 
 Png Screenshot Quality
     Compare Size  ${PNG_CUSTOM_SCREENSHOT}  png
@@ -48,18 +50,22 @@ Png Screenshot Quality
 Jpg Screenshot Quality
     Compare Size  ${JPG_CUSTOM_SCREENSHOT}  jpg
 
+Png Screenshot Gdk
+    ScreenCapLibraryGdk.Take Screenshot  ${GDK_PNG_SCREENSHOT}  png
+    ScreenCapLibraryGdk.Take Screenshot  ${GDK_JPEG_SCREENSHOT}  jpeg
+
 *** Keywords ***
 Take Screenshot And Verify
     [Arguments]  @{expected files}
-    ${path}=  Take Screenshot  format=png
+    ${path}=  ScreenCapLibrary.Take Screenshot  format=png
     Screenshots Should Exist  ${OUTPUTDIR}  @{expected files}
     [Return]  ${path}
 
 Compare Size
     [Arguments]  ${screenshot_name}  ${screenshot_format}
-    Take Screenshot  ${screenshot_name}  ${screenshot_format}  quality=100
+    ScreenCapLibrary.Take Screenshot  ${screenshot_name}  ${screenshot_format}  quality=100
     ${high_quality_size}=  Get File Size  ${screenshot_name}
-    Take Screenshot    ${screenshot_name}  ${screenshot_format}  quality=0
+    ScreenCapLibrary.Take Screenshot    ${screenshot_name}  ${screenshot_format}  quality=0
     ${low_quality_size}=  Get File Size  ${screenshot_name}
     ${decrease}=  Evaluate  ${high_quality_size} - ${low_quality_size}
     ${percentage_size_decrease}=  Evaluate  float(${decrease}) / float(${high_quality_size}) * 100

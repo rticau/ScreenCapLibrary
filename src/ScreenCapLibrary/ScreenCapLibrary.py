@@ -14,6 +14,11 @@
 #  limitations under the License.
 
 import os
+
+try:
+    from gtk import gdk
+except ImportError:
+    gdk = None
 from mss import mss
 from PIL import Image
 from robot.api import logger
@@ -57,7 +62,7 @@ class ScreenCapLibrary:
 
     ROBOT_LIBRARY_VERSION = __version__
 
-    def __init__(self, screenshot_directory=None, format='png', quality=50):
+    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50):
         """Configure where screenshots are saved.
 
         If ``screenshot_directory`` is not given, screenshots are saved into
@@ -80,6 +85,7 @@ class ScreenCapLibrary:
         | Library   | Screenshot | format=jpg |
         | Library   | Screenshot | quality=0  |
         """
+        self._screenshot_module = screenshot_module
         self._given_screenshot_dir = self._norm_path(screenshot_directory)
         self._format = format
         self._quality = quality
@@ -184,6 +190,44 @@ class ScreenCapLibrary:
             img.save(path, quality=self._pil_quality_conversion(quality))
         return path
 
+    def _gtk_quality(self, format, quality):
+        quality = self._compression_value_conversion(quality)
+        quality_setting = {}
+        if format == 'png':
+            quality_setting['compression'] = str(quality)
+        else:
+            quality_setting['quality'] = str(quality)
+        return quality_setting
+
+    def _gtk_screenshot(self, name, format, quality):
+        window = gdk.get_default_root_window()
+        if not window:
+            raise RuntimeError('Taking screenshot failed.')
+        width, height = window.get_size()
+        pb = gdk.Pixbuf(gdk.COLORSPACE_RGB, False, 8, width, height)
+        pb = pb.get_from_drawable(window, window.get_colormap(),
+                                  0, 0, 0, 0, width, height)
+        if not pb:
+            raise RuntimeError('Taking screenshot failed.')
+        quality_setting = self._gtk_quality(format, quality)
+        path = self._save_screenshot_path(name, format)
+        pb.save(path, format, quality_setting)
+        return path
+
+    def _take_screenshot(self, name, format, quality):
+        format = (format or self._format).lower()
+        quality = quality or self._quality
+        if self._screenshot_module:
+            path = self._gtk_screenshot(name, format, quality)
+        else:
+            if format == 'png':
+                path = self._take_png_screenshot(name, format, quality)
+            elif format in ['jpg', 'jpeg']:
+                path = self._take_jpg_screenshot(name, format, quality)
+            else:
+                raise RuntimeError("Invalid screenshot format.")
+        return path
+
     def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px'):
         """Takes a screenshot in the specified format at library import and
         embeds it into the log file (PNG by default).
@@ -221,17 +265,6 @@ class ScreenCapLibrary:
         """
         path = self._take_screenshot(name, format, quality)
         self._embed_screenshot(path, width)
-        return path
-
-    def _take_screenshot(self, name, format, quality):
-        format = (format or self._format).lower()
-        quality = quality or self._quality
-        if format == 'png':
-            path = self._take_png_screenshot(name, format, quality)
-        elif format in ['jpg', 'jpeg']:
-            path = self._take_jpg_screenshot(name, format, quality)
-        else:
-            raise RuntimeError("Invalid screenshot format.")
         return path
 
     def _embed_screenshot(self, path, width):
