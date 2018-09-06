@@ -221,7 +221,7 @@ class ScreenCapLibrary:
         if screenshot_module:
             if screenshot_module.lower() == 'pygtk':
                 path = self._gtk_screenshot(name, format, quality)
-        elif screenshot_module is None:
+        else:
             if format == 'png':
                 path = self._take_png_screenshot(name, format, quality)
             elif format in ['jpg', 'jpeg']:
