@@ -15,16 +15,13 @@
 
 import os
 
-try:
-    from gtk import gdk
-except ImportError:
-    gdk = None
 from mss import mss
 from PIL import Image
 from robot.api import logger
 from robot.utils import get_link_path, abspath
 from robot.libraries.BuiltIn import BuiltIn
 from .version import VERSION
+from .pygtk import _take_gtk_screenshot
 
 __version__ = VERSION
 
@@ -48,6 +45,8 @@ class ScreenCapLibrary:
 
     - [https://pillow.readthedocs.io | Pillow] used on top of ``mss`` in order to save the screenshots in JPG/JPEG format.
 
+    - [http://pygtk.org/ | PyGTK] is an alternative to ``mss`` for taking screenshots when using VNC.
+
     = Where screenshots are saved =
 
     By default screenshots are saved into the same directory where the Robot
@@ -63,10 +62,13 @@ class ScreenCapLibrary:
     ROBOT_LIBRARY_VERSION = __version__
 
     def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50):
-        """Configure where screenshots are saved.
+        """
+        ``screenshot_module`` specifies the module or tool to use when taking screenshots using this library.
+        If no tool or module is specified, ``mss`` will be used by default. For running
+        on Linux with VNC, use ``PyGTK``.
 
-        If ``screenshot_directory`` is not given, screenshots are saved into
-        same directory as the log file. The directory can also be set using
+        To configure where screenshots are saved use ``screenshot_directory``. If no value is given,
+        screenshots are saved into same directory as the log file. The directory can also be set using
         `Set Screenshot Directory` keyword.
 
         ``format`` specifies the format in which the screenshots will be saved.
@@ -190,45 +192,22 @@ class ScreenCapLibrary:
             img.save(path, quality=self._pil_quality_conversion(quality))
         return path
 
-    def _gtk_quality(self, format, quality):
-        quality = self._compression_value_conversion(quality)
-        quality_setting = {}
-        if format == 'png':
-            quality_setting['compression'] = str(quality)
-        else:
-            quality_setting['quality'] = str(quality)
-        return quality_setting
-
-    def _gtk_screenshot(self, name, format, quality):
-        window = gdk.get_default_root_window()
-        if not window:
-            raise RuntimeError('Taking screenshot failed.')
-        width, height = window.get_size()
-        pb = gdk.Pixbuf(gdk.COLORSPACE_RGB, False, 8, width, height)
-        pb = pb.get_from_drawable(window, window.get_colormap(),
-                                  0, 0, 0, 0, width, height)
-        if not pb:
-            raise RuntimeError('Taking screenshot failed.')
-        quality_setting = self._gtk_quality(format, quality)
-        path = self._save_screenshot_path(name, format)
-        pb.save(path, format, quality_setting)
-        return path
-
     def _take_screenshot(self, name, format, quality):
         format = (format or self._format).lower()
         quality = quality or self._quality
-        screenshot_module = self._screenshot_module
-        if screenshot_module:
-            if screenshot_module.lower() == 'pygtk':
-                path = self._gtk_screenshot(name, format, quality)
+        if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
+            format = 'jpeg' if format == 'jpg' else format
+            if format == 'png':
+                quality = self._compression_value_conversion(quality)
+            path = self._save_screenshot_path(name, format)
+            return _take_gtk_screenshot(path, format, quality)
         else:
             if format == 'png':
-                path = self._take_png_screenshot(name, format, quality)
+                return self._take_png_screenshot(name, format, quality)
             elif format in ['jpg', 'jpeg']:
-                path = self._take_jpg_screenshot(name, format, quality)
+                return self._take_jpg_screenshot(name, format, quality)
             else:
                 raise RuntimeError("Invalid screenshot format.")
-        return path
 
     def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px'):
         """Takes a screenshot in the specified format at library import and
