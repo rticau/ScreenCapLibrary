@@ -19,6 +19,8 @@ except ImportError:
     gdk = None
 
 try:
+    from gi import require_version
+    require_version('Gdk', '3.0')
     from gi.repository import Gdk
 except ImportError:
     Gdk = None
@@ -37,9 +39,9 @@ def _take_gtk_screenshot(path, format, quality):
     if not gdk and not Gdk:
         raise RuntimeError('PyGTK not installed/supported on this platform.')
     if gdk:
-        _take_gtk_screenshot_py2(path, format, quality)
+        return _take_gtk_screenshot_py2(path, format, quality)
     elif Gdk:
-        _take_gtk_screenshot_py3(path, format, quality)
+        return _take_gtk_screenshot_py3(path, format, quality)
 
 
 def _take_gtk_screenshot_py2(path, format, quality):
