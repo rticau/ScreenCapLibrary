@@ -14,7 +14,6 @@
 #  limitations under the License.
 
 import os
-
 from mss import mss
 from PIL import Image
 from robot.api import logger
