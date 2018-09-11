@@ -80,11 +80,12 @@ class ScreenCapLibrary:
         may be larger than the size of the JPG file. The default value is 50.
 
         Examples (use only one of these):
-        | =Setting= |  =Value=   |  =Value=   |
-        | Library   | Screenshot |            |
-        | Library   | Screenshot | ${TEMPDIR} |
-        | Library   | Screenshot | format=jpg |
-        | Library   | Screenshot | quality=0  |
+        | =Setting= |  =Value=   |  =Value=                        |
+        | Library   | Screenshot |                                 |
+        | Library   | Screenshot | PyGTK                           |
+        | Library   | Screenshot | screenshot_directory=${TEMPDIR} |
+        | Library   | Screenshot | format=jpg                      |
+        | Library   | Screenshot | quality=0                       |
         """
         self._screenshot_module = screenshot_module
         self._given_screenshot_dir = self._norm_path(screenshot_directory)

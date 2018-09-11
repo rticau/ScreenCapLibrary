@@ -84,6 +84,28 @@ easy-to-understand tests as possible.
         Take Screenshot    name=screenshot  format=jpg  quality=0
         File Should Exist  screenshot_1.jpg
 
+
+Using with VNC
+--------------
+
+At the time of this release ``mss``, does not work on GNU/Linux with VNC virtual desktop.
+As a workaround you can change the ``screenshot_module`` value at library import to ``PyGTK``.
+
+.. code:: robotframework
+
+    *** Settings ***
+    Library                ScreenCapLibrary  screenshot_module=PyGTK
+
+For this to work you need to have the following dependencies installed.
+
+- With Python 2::
+
+    sudo apt install python-gtk2
+
+- With Python 3::
+
+    sudo apt install python-gi python-gi-cairo python3-gi python3-gi-cairo gir1.2-gtk-3.0
+
 Support
 -------
 
