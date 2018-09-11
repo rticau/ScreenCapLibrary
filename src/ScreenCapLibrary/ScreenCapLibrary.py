@@ -20,6 +20,7 @@ from robot.api import logger
 from robot.utils import get_link_path, abspath
 from robot.libraries.BuiltIn import BuiltIn
 from .version import VERSION
+from .pygtk import _take_gtk_screenshot
 
 __version__ = VERSION
 
@@ -43,6 +44,8 @@ class ScreenCapLibrary:
 
     - [https://pillow.readthedocs.io | Pillow] used on top of ``mss`` in order to save the screenshots in JPG/JPEG format.
 
+    - [http://pygtk.org/ | PyGTK] is an alternative to ``mss`` for taking screenshots when using VNC.
+
     = Where screenshots are saved =
 
     By default screenshots are saved into the same directory where the Robot
@@ -57,11 +60,14 @@ class ScreenCapLibrary:
 
     ROBOT_LIBRARY_VERSION = __version__
 
-    def __init__(self, screenshot_directory=None, format='png', quality=50):
-        """Configure where screenshots are saved.
+    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50):
+        """
+        ``screenshot_module`` specifies the module or tool to use when taking screenshots using this library.
+        If no tool or module is specified, ``mss`` will be used by default. For running
+        on Linux with VNC, use ``PyGTK``.
 
-        If ``screenshot_directory`` is not given, screenshots are saved into
-        same directory as the log file. The directory can also be set using
+        To configure where screenshots are saved use ``screenshot_directory``. If no value is given,
+        screenshots are saved into same directory as the log file. The directory can also be set using
         `Set Screenshot Directory` keyword.
 
         ``format`` specifies the format in which the screenshots will be saved.
@@ -80,6 +86,7 @@ class ScreenCapLibrary:
         | Library   | Screenshot | format=jpg |
         | Library   | Screenshot | quality=0  |
         """
+        self._screenshot_module = screenshot_module
         self._given_screenshot_dir = self._norm_path(screenshot_directory)
         self._format = format
         self._quality = quality
@@ -184,6 +191,23 @@ class ScreenCapLibrary:
             img.save(path, quality=self._pil_quality_conversion(quality))
         return path
 
+    def _take_screenshot(self, name, format, quality):
+        format = (format or self._format).lower()
+        quality = quality or self._quality
+        if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
+            format = 'jpeg' if format == 'jpg' else format
+            if format == 'png':
+                quality = self._compression_value_conversion(quality)
+            path = self._save_screenshot_path(name, format)
+            return _take_gtk_screenshot(path, format, quality)
+        else:
+            if format == 'png':
+                return self._take_png_screenshot(name, format, quality)
+            elif format in ['jpg', 'jpeg']:
+                return self._take_jpg_screenshot(name, format, quality)
+            else:
+                raise RuntimeError("Invalid screenshot format.")
+
     def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px'):
         """Takes a screenshot in the specified format at library import and
         embeds it into the log file (PNG by default).
@@ -221,17 +245,6 @@ class ScreenCapLibrary:
         """
         path = self._take_screenshot(name, format, quality)
         self._embed_screenshot(path, width)
-        return path
-
-    def _take_screenshot(self, name, format, quality):
-        format = (format or self._format).lower()
-        quality = quality or self._quality
-        if format == 'png':
-            path = self._take_png_screenshot(name, format, quality)
-        elif format in ['jpg', 'jpeg']:
-            path = self._take_jpg_screenshot(name, format, quality)
-        else:
-            raise RuntimeError("Invalid screenshot format.")
         return path
 
     def _embed_screenshot(self, path, width):

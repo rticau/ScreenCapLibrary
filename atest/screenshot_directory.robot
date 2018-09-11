@@ -11,9 +11,9 @@ ${FIRST_SCREENSHOT} =   ${BASENAME}_1.png
 
 *** Test Cases ***
 Set Screenshot Directory
-    ${old} =                 Set Screenshot Directory  ${SCREENSHOT DIR}
+    ${old} =                 ScreenCapLibrary.Set Screenshot Directory  ${SCREENSHOT DIR}
     Paths Should Be Equal    ${OUTPUT DIR}             ${old}
-    Take Screenshot
+    ScreenCapLibrary.Take Screenshot
     Screenshot Should Exist  ${FIRST SCREENSHOT}
 
 *** Keywords ***
