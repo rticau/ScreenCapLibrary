@@ -14,6 +14,8 @@
 #  limitations under the License.
 
 import os
+import time
+
 from mss import mss
 from PIL import Image
 from robot.api import logger
@@ -60,7 +62,7 @@ class ScreenCapLibrary:
 
     ROBOT_LIBRARY_VERSION = __version__
 
-    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50):
+    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0):
         """
         ``screenshot_module`` specifies the module or tool to use when taking screenshots using this library.
         If no tool or module is specified, ``mss`` will be used by default. For running
@@ -79,6 +81,8 @@ class ScreenCapLibrary:
         with file size. Because PNG uses lossless compression its size
         may be larger than the size of the JPG file. The default value is 50.
 
+        ``delay`` specifies the time(seconds) by which the user has to wait before taking a screenshot.
+
         Examples (use only one of these):
         | =Setting= |  =Value=   |  =Value=                        |
         | Library   | Screenshot |                                 |
@@ -91,6 +95,7 @@ class ScreenCapLibrary:
         self._given_screenshot_dir = self._norm_path(screenshot_directory)
         self._format = format
         self._quality = quality
+        self._delay = delay
 
     @staticmethod
     def _norm_path(path):
@@ -209,7 +214,7 @@ class ScreenCapLibrary:
             else:
                 raise RuntimeError("Invalid screenshot format.")
 
-    def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px'):
+    def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px', delay=None):
         """Takes a screenshot in the specified format at library import and
         embeds it into the log file (PNG by default).
 
@@ -233,6 +238,8 @@ class ScreenCapLibrary:
 
         ``width`` specifies the size of the screenshot in the log file.
 
+        ``delay`` specifies the time(seconds) by which the user has to wait before taking a screenshot.
+
         Examples: (LOGDIR is determined automatically by the library)
         | Take Screenshot |                  |            | # LOGDIR/screenshot_1.png (index automatically incremented) |
         | Take Screenshot | mypic            |            | # LOGDIR/mypic_1.png (index automatically incremented) |
@@ -244,6 +251,9 @@ class ScreenCapLibrary:
 
         The path where the screenshot is saved is returned.
         """
+        delay = delay or self._delay
+        if delay:
+            time.sleep(int(delay))
         path = self._take_screenshot(name, format, quality)
         self._embed_screenshot(path, width)
         return path

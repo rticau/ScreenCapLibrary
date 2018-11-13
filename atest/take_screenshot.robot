@@ -54,6 +54,9 @@ Png Screenshot Gtk
     ScreenCapLibraryGtk.Take Screenshot  ${GTK_PNG_SCREENSHOT}  png
     ScreenCapLibraryGtk.Take Screenshot  ${GTK_JPEG_SCREENSHOT}  jpeg
 
+Take Screenshot When Delay Is Given
+    ScreenCapLibrary.Take Screenshot  screenshot_with_delay  delay=10
+
 *** Keywords ***
 Take Screenshot And Verify
     [Arguments]  @{expected files}
