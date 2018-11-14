@@ -54,6 +54,9 @@ Png Screenshot Gtk
     ScreenCapLibraryGtk.Take Screenshot  ${GTK_PNG_SCREENSHOT}  png
     ScreenCapLibraryGtk.Take Screenshot  ${GTK_JPEG_SCREENSHOT}  jpeg
 
+Take Screenshot With Partial Dimensions
+    ScreenCapLibrary.Take Partial Screenshot  left=50  height=1000  width=1700
+
 *** Keywords ***
 Take Screenshot And Verify
     [Arguments]  @{expected files}

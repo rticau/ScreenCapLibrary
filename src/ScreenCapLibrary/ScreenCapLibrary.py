@@ -60,7 +60,8 @@ class ScreenCapLibrary:
 
     ROBOT_LIBRARY_VERSION = __version__
 
-    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50):
+    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50,
+                 left=50, top=50, width=700, height=300):
         """
         ``screenshot_module`` specifies the module or tool to use when taking screenshots using this library.
         If no tool or module is specified, ``mss`` will be used by default. For running
@@ -91,6 +92,10 @@ class ScreenCapLibrary:
         self._given_screenshot_dir = self._norm_path(screenshot_directory)
         self._format = format
         self._quality = quality
+        self._left = left
+        self._top = top
+        self._width = width
+        self._height = height
 
     @staticmethod
     def _norm_path(path):
@@ -247,6 +252,22 @@ class ScreenCapLibrary:
         path = self._take_screenshot(name, format, quality)
         self._embed_screenshot(path, width)
         return path
+
+    def take_partial_screenshot(self, name='screenshot', format=None, quality=None,
+                                left=None, top=None, width=None, height=None):
+        left = int(left or self._left)
+        top = int(top or self._top)
+        width = int(width or self._width)
+        height = int(height or self._height)
+        format = format or self._format
+
+        with mss():
+            original_image = self.take_screenshot(name, format, quality)
+            image = Image.open(original_image)
+            box = (left, top, width, height)
+            croped_image = image.crop(box)
+            os.remove(original_image)
+        return croped_image.save(self._save_screenshot_path(basename=name, format=format), format=format, quality=quality)
 
     def _embed_screenshot(self, path, width):
         link = get_link_path(path, self._log_dir)
