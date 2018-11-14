@@ -55,7 +55,11 @@ Png Screenshot Gtk
     ScreenCapLibraryGtk.Take Screenshot  ${GTK_JPEG_SCREENSHOT}  jpeg
 
 Take Screenshot When Delay Is Given
+    ${start_date}=  DateTime.Get Current Date
     ScreenCapLibrary.Take Screenshot  screenshot_with_delay  delay=10seconds
+    ${end_date}=  DateTime.Get Current Date
+    ${actual_time}=  DateTime.Subtract Date From Date  ${end_date}  ${start_date}
+    Should Be True  ${actual_time} > 10
 
 *** Keywords ***
 Take Screenshot And Verify
