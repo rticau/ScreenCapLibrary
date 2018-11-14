@@ -19,7 +19,7 @@ import time
 from mss import mss
 from PIL import Image
 from robot.api import logger
-from robot.utils import get_link_path, abspath
+from robot.utils import get_link_path, abspath, timestr_to_secs
 from robot.libraries.BuiltIn import BuiltIn
 from .version import VERSION
 from .pygtk import _take_gtk_screenshot
@@ -252,8 +252,7 @@ class ScreenCapLibrary:
         The path where the screenshot is saved is returned.
         """
         delay = delay or self._delay
-        if delay:
-            time.sleep(int(delay))
+        time.sleep(timestr_to_secs(delay)) if delay else None
         path = self._take_screenshot(name, format, quality)
         self._embed_screenshot(path, width)
         return path
