@@ -81,7 +81,8 @@ class ScreenCapLibrary:
         with file size. Because PNG uses lossless compression its size
         may be larger than the size of the JPG file. The default value is 50.
 
-        ``delay`` specifies the time(seconds) by which the user has to wait before taking a screenshot.
+        ```delay`` specifies the waiting time(seconds) before taking a screenshot.
+        By default the delay is 0 seconds.
 
         Examples (use only one of these):
         | =Setting= |  =Value=   |  =Value=                        |
@@ -214,7 +215,7 @@ class ScreenCapLibrary:
             else:
                 raise RuntimeError("Invalid screenshot format.")
 
-    def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px', delay=None):
+    def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px', delay=0):
         """Takes a screenshot in the specified format at library import and
         embeds it into the log file (PNG by default).
 
@@ -238,7 +239,8 @@ class ScreenCapLibrary:
 
         ``width`` specifies the size of the screenshot in the log file.
 
-        ``delay`` specifies the time(seconds) by which the user has to wait before taking a screenshot.
+        ``delay`` specifies the waiting time(seconds) before taking a screenshot.
+        By default the delay is 0 seconds.
 
         Examples: (LOGDIR is determined automatically by the library)
         | Take Screenshot |                  |            | # LOGDIR/screenshot_1.png (index automatically incremented) |
@@ -252,7 +254,8 @@ class ScreenCapLibrary:
         The path where the screenshot is saved is returned.
         """
         delay = delay or self._delay
-        time.sleep(timestr_to_secs(delay)) if delay else None
+        if delay:
+            time.sleep(timestr_to_secs(delay))
         path = self._take_screenshot(name, format, quality)
         self._embed_screenshot(path, width)
         return path
@@ -261,12 +264,14 @@ class ScreenCapLibrary:
         link = get_link_path(path, self._log_dir)
         logger.info('<a href="%s"><img src="%s" width="%s"></a>' % (link, link, width), html=True)
 
-    def take_screenshot_without_embedding(self, name="screenshot", format=None, quality=None):
+    def take_screenshot_without_embedding(self, name="screenshot", format=None, quality=None, delay=0):
         """Takes a screenshot and links it from the log file.
         This keyword is otherwise identical to `Take Screenshot` but the saved
         screenshot is not embedded into the log file. The screenshot is linked
         so it is nevertheless easily available.
         """
+        if delay:
+            time.sleep(timestr_to_secs(delay))
         path = self._take_screenshot(name, format, quality)
         self._link_screenshot(path)
         return path
