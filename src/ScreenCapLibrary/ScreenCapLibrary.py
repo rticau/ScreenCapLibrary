@@ -305,7 +305,9 @@ class ScreenCapLibrary:
             box = (offset_X, offset_Y, width, height)
             cropped_image = image.crop(box)
             os.remove(original_image)
-        return cropped_image.save(self._save_screenshot_path(basename=name, format=format), format)
+            path = self._save_screenshot_path(basename=name, format=format)
+            cropped_image.save(path, format)
+        return path
 
     def _embed_screenshot(self, path, width):
         link = get_link_path(path, self._log_dir)
