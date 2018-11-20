@@ -44,7 +44,7 @@ Basename With Non-existing Directories Fails
 Without Embedding
     ScreenCapLibrary.Take Screenshot Without Embedding  no_embed.png
 
-Without Embedding When Delay Is Given
+Without Embedding With Delay
     ScreenCapLibrary.Take Screenshot Without Embedding  delay=10seconds
 
 Png Screenshot Quality
