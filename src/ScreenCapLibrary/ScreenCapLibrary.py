@@ -14,6 +14,7 @@
 #  limitations under the License.
 
 import os
+import time
 from mss import mss
 from PIL import Image
 from robot.api import logger
@@ -208,6 +209,26 @@ class ScreenCapLibrary:
                 return self._take_jpg_screenshot(name, format, quality)
             else:
                 raise RuntimeError("Invalid screenshot format.")
+
+    def take_gif_screenshot(self, name="screenshot", duration=100, loop=0):
+        """
+        Takes a GIF screenshot with the specified ``name``
+        :param name: specifies the name by which the screenshot will be saved.
+        :param duration: the duration between switching to another frame of the GIF.
+        :param loop: specifies the number of times the GIF must start over. By default
+        this value is 0 i.e. infinitely.
+        """
+        with mss() as sct:
+            start = time.time()
+            new_img = []
+            while time.time() <= start + 10:
+                sct_img = sct.grab(sct.monitors[0])
+                img = Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX').resize((1200, 400))
+                new_img.append(img)
+            path = self._save_screenshot_path(basename=name, format='gif')
+            new_img[0].save(path, save_all=True, append_images=new_img[1:], optimize=True, duration=duration, loop=loop)
+            self._embed_screenshot(path, width='800px')
+        return path
 
     def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px'):
         """Takes a screenshot in the specified format at library import and

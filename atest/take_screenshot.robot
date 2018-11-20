@@ -1,7 +1,7 @@
 *** Settings ***
 Suite Setup    Remove Files  ${OUTPUT_DIR}/*.jp*g  ${OUTPUT_DIR}/*.png
 Test Setup     Save Start Time
-Test Teardown  Remove Files  ${OUTPUT_DIR}/*.jp*g  ${OUTPUT_DIR}/*.png
+Test Teardown  Remove Files  ${OUTPUT_DIR}/*.jp*g  ${OUTPUT_DIR}/*.png  ${OUTPUT_DIR}/*.gif
 Resource       resources/common.robot
 
 *** Variables ***
@@ -14,6 +14,7 @@ ${PNG_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo.png
 ${JPG_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo.jpg
 ${GTK_PNG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_png.png
 ${GTK_JPEG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_jpeg.jpeg
+${GIF_SCREENSHOT}  ${OUTPUTDIR}${/}screenshot_1.gif
 
 *** Test Cases ***
 Screenshot Is Taken
@@ -53,6 +54,10 @@ Jpg Screenshot Quality
 Png Screenshot Gtk
     ScreenCapLibraryGtk.Take Screenshot  ${GTK_PNG_SCREENSHOT}  png
     ScreenCapLibraryGtk.Take Screenshot  ${GTK_JPEG_SCREENSHOT}  jpeg
+
+Take Gif
+    ScreenCapLibrary.Take Gif Screenshot
+    common.Screenshot Should Exist  ${GIF_SCREENSHOT}
 
 *** Keywords ***
 Take Screenshot And Verify
