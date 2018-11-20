@@ -210,10 +210,12 @@ class ScreenCapLibrary:
             else:
                 raise RuntimeError("Invalid screenshot format.")
 
-    def take_gif_screenshot(self, name="screenshot", duration=100, loop=0):
+    def take_gif_screenshot(self, name="screenshot", capture_time=10, duration=100, loop=0):
         """
         Takes a GIF screenshot with the specified ``name``
         :param name: specifies the name by which the screenshot will be saved.
+        :param capture_time: specifies the number of seconds in which the screen will be captured.
+        Default value for this parameter is 10.
         :param duration: the duration between switching to another frame of the GIF.
         :param loop: specifies the number of times the GIF must start over. By default
         this value is 0 i.e. infinitely.
@@ -221,7 +223,7 @@ class ScreenCapLibrary:
         with mss() as sct:
             start = time.time()
             new_img = []
-            while time.time() <= start + 10:
+            while time.time() <= start + int(capture_time):
                 sct_img = sct.grab(sct.monitors[0])
                 img = Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX').resize((1200, 400))
                 new_img.append(img)
