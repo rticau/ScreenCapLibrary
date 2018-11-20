@@ -58,6 +58,14 @@ class ScreenCapLibrary:
     ``screenshot_directory`` argument when `importing` the library and using
     `Set Screenshot Directory` keyword during execution. It is also possible
     to save screenshots using an absolute path.
+
+    ==Time format==
+
+    All delays and time intervals can be given as numbers considered seconds
+    (e.g. ``0.5`` or ``42``) or in Robot Framework's time syntax
+    (e.g. ``1.5 seconds`` or ``1 min 30 s``). For more information about
+    the time syntax see the
+    [http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#time-format|Robot Framework User Guide].
     """
 
     ROBOT_LIBRARY_VERSION = __version__
@@ -81,8 +89,9 @@ class ScreenCapLibrary:
         with file size. Because PNG uses lossless compression its size
         may be larger than the size of the JPG file. The default value is 50.
 
-        ```delay`` specifies the waiting time(seconds) before taking a screenshot.
-        By default the delay is 0 seconds.
+        ``delay`` specifies the waiting time before taking a screenshot.
+        By default the delay can be given as number considered seconds (e.g. ``0.5`` or ``42``) or in
+        Robot Framework's time syntax (e.g. ``1.5 seconds`` or ``1 min 30 s``).
 
         Examples (use only one of these):
         | =Setting= |  =Value=   |  =Value=                        |
@@ -239,8 +248,10 @@ class ScreenCapLibrary:
 
         ``width`` specifies the size of the screenshot in the log file.
 
-        ``delay`` specifies the waiting time(seconds) before taking a screenshot.
-        By default the delay is 0 seconds.
+        If ``delay`` is given, this keyword waits that amount of time before
+        taking a screenshot. By default the delay can be given as number
+        considered seconds (e.g. ``0.5`` or ``42``) or in Robot Framework's
+        time syntax (e.g. ``1.5 seconds`` or ``1 min 30 s``).
 
         Examples: (LOGDIR is determined automatically by the library)
         | Take Screenshot |                  |            | # LOGDIR/screenshot_1.png (index automatically incremented) |
