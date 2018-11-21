@@ -44,6 +44,9 @@ Basename With Non-existing Directories Fails
 Without Embedding
     ScreenCapLibrary.Take Screenshot Without Embedding  no_embed.png
 
+Without Embedding With Delay
+    ScreenCapLibrary.Take Screenshot Without Embedding  delay=10seconds
+
 Png Screenshot Quality
     Compare Size  ${PNG_CUSTOM_SCREENSHOT}  png
 
@@ -53,6 +56,14 @@ Jpg Screenshot Quality
 Png Screenshot Gtk
     ScreenCapLibraryGtk.Take Screenshot  ${GTK_PNG_SCREENSHOT}  png
     ScreenCapLibraryGtk.Take Screenshot  ${GTK_JPEG_SCREENSHOT}  jpeg
+
+Take Screenshot With Delay
+    ${start_date}=  DateTime.Get Current Date
+    ${screenshot_with_delay}=  ScreenCapLibrary.Take Screenshot  screenshot_with_delay  delay=10seconds
+    ${end_date}=  DateTime.Get Current Date
+    Screenshots Should Exist  ${OUTPUTDIR}  ${screenshot_with_delay}
+    ${actual_time}=  DateTime.Subtract Date From Date  ${end_date}  ${start_date}
+    Should Be True  ${actual_time} > 10
 
 *** Keywords ***
 Take Screenshot And Verify
