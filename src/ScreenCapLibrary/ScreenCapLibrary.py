@@ -243,8 +243,6 @@ class ScreenCapLibrary:
 
             while time.time() <= start_time + int(duration):
                 sct_img = sct.grab(sct.monitors[0])
-
-                print(sct_img.size.width)
                 img = Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX').resize((gif_width, gif_height))
                 frames.append(img)
             path = self._save_screenshot_path(basename=name, format='gif')
