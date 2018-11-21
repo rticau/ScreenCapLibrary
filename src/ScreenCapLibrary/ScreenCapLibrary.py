@@ -90,7 +90,7 @@ class ScreenCapLibrary:
         may be larger than the size of the JPG file. The default value is 50.
 
         ``delay`` specifies the waiting time before taking a screenshot. See
-        `time format` section for more information. By default the delay is 0.
+        `Time format` section for more information. By default the delay is 0.
 
         Examples (use only one of these):
         | =Setting= |  =Value=   |  =Value=                        |
@@ -248,7 +248,7 @@ class ScreenCapLibrary:
         ``width`` specifies the size of the screenshot in the log file.
 
         ``delay`` specifies the waiting time before taking a screenshot. See
-        `time format` section for more information. By default the delay is 0.
+        `Time format` section for more information. By default the delay is 0.
 
         Examples: (LOGDIR is determined automatically by the library)
         | Take Screenshot |                  |            | # LOGDIR/screenshot_1.png (index automatically incremented) |
