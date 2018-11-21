@@ -89,9 +89,8 @@ class ScreenCapLibrary:
         with file size. Because PNG uses lossless compression its size
         may be larger than the size of the JPG file. The default value is 50.
 
-        ``delay`` specifies the waiting time before taking a screenshot.
-        By default the delay can be given as number considered seconds (e.g. ``0.5`` or ``42``) or in
-        Robot Framework's time syntax (e.g. ``1.5 seconds`` or ``1 min 30 s``).
+        ``delay`` specifies the waiting time before taking a screenshot. See
+        `time format` section for more information. By default the delay is 0.
 
         Examples (use only one of these):
         | =Setting= |  =Value=   |  =Value=                        |
@@ -248,10 +247,8 @@ class ScreenCapLibrary:
 
         ``width`` specifies the size of the screenshot in the log file.
 
-        If ``delay`` is given, this keyword waits that amount of time before
-        taking a screenshot. By default the delay can be given as number
-        considered seconds (e.g. ``0.5`` or ``42``) or in Robot Framework's
-        time syntax (e.g. ``1.5 seconds`` or ``1 min 30 s``).
+        ``delay`` specifies the waiting time before taking a screenshot. See
+        `time format` section for more information. By default the delay is 0.
 
         Examples: (LOGDIR is determined automatically by the library)
         | Take Screenshot |                  |            | # LOGDIR/screenshot_1.png (index automatically incremented) |
@@ -281,6 +278,7 @@ class ScreenCapLibrary:
         screenshot is not embedded into the log file. The screenshot is linked
         so it is nevertheless easily available.
         """
+        delay = delay or self._delay
         if delay:
             time.sleep(timestr_to_secs(delay))
         path = self._take_screenshot(name, format, quality)
