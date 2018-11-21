@@ -23,3 +23,6 @@ Screenshots Should Exist
     @{actual_jpg_files}=  List Directory  ${directory}  *.jp*g  absolute
     @{all_files}=  Combine Lists  ${actual_png_files}  ${actual_jpg_files}
     List Should Contain Sub List  ${files}  ${all_files}
+
+Cleanup Files
+    Remove Files  ${OUTPUT_DIR}/*.jp*g  ${OUTPUT_DIR}/*.png  ${OUTPUT_DIR}/*.gif  ${OUTPUT_DIR}/*.webp

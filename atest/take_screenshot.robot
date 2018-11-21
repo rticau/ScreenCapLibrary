@@ -1,7 +1,7 @@
 *** Settings ***
-Suite Setup    Remove Files  ${OUTPUT_DIR}/*.jp*g  ${OUTPUT_DIR}/*.png
+Suite Setup    Cleanup Files
 Test Setup     Save Start Time
-Test Teardown  Remove Files  ${OUTPUT_DIR}/*.jp*g  ${OUTPUT_DIR}/*.png  ${OUTPUT_DIR}/*.gif
+Test Teardown  Cleanup Files
 Resource       resources/common.robot
 
 *** Variables ***
@@ -57,7 +57,7 @@ Png Screenshot Gtk
 
 Take Gif
     ScreenCapLibrary.Take Gif Screenshot
-    common.Screenshot Should Exist  ${GIF_SCREENSHOT}
+    Screenshot Should Exist  ${GIF_SCREENSHOT}
 
 *** Keywords ***
 Take Screenshot And Verify

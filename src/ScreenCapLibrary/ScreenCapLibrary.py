@@ -18,7 +18,7 @@ import time
 from mss import mss
 from PIL import Image
 from robot.api import logger
-from robot.utils import get_link_path, abspath
+from robot.utils import get_link_path, abspath, timestr_to_secs
 from robot.libraries.BuiltIn import BuiltIn
 from .version import VERSION
 from .pygtk import _take_gtk_screenshot
@@ -210,25 +210,45 @@ class ScreenCapLibrary:
             else:
                 raise RuntimeError("Invalid screenshot format.")
 
-    def take_gif_screenshot(self, name="screenshot", capture_time=10, duration=100, loop=0):
+    def take_gif_screenshot(self, name="screenshot", duration=10, frame_time=100, width=None, height=None):
         """
-        Takes a GIF screenshot with the specified ``name``
-        :param name: specifies the name by which the screenshot will be saved.
-        :param capture_time: specifies the number of seconds in which the screen will be captured.
+        Takes a GIF with the specified ``name``.
+
+        ``name`` specifies the name by which the screenshot will be saved.
+
+        ``duration`` specifies the time (seconds) in which the screen will be captured.
         Default value for this parameter is 10.
-        :param duration: the duration between switching to another frame of the GIF.
-        :param loop: specifies the number of times the GIF must start over. By default
-        this value is 0 i.e. infinitely.
+
+        ``frame_time`` When replaying a GIF this parameter indicates how much time (milliseconds)
+        will pass until switching to another frame of the GIF.
+
+        ``width`` specifies the width by which the gif will be resized in order to reduce its size.
+        If the ``width`` is not specified the default will be 35 percent of the initial width of the capture.
+
+        ``height`` specifies the height by which the gif will be resized in order to reduce its size.
+        If the ``height`` is not specified the default will be 35 percent of the initial height of the capture.
         """
         with mss() as sct:
-            start = time.time()
-            new_img = []
-            while time.time() <= start + int(capture_time):
+            start_time = time.time()
+            frames = []
+            if width:
+                gif_width = width
+            else:
+                gif_width = int(sct.grab(sct.monitors[0]).size.width * 0.35)
+
+            if height:
+                gif_height = height
+            else:
+                gif_height = int(sct.grab(sct.monitors[0]).size.height * 0.35)
+
+            while time.time() <= start_time + int(duration):
                 sct_img = sct.grab(sct.monitors[0])
-                img = Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX').resize((1200, 400))
-                new_img.append(img)
+
+                print(sct_img.size.width)
+                img = Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX').resize((gif_width, gif_height))
+                frames.append(img)
             path = self._save_screenshot_path(basename=name, format='gif')
-            new_img[0].save(path, save_all=True, append_images=new_img[1:], optimize=True, duration=duration, loop=loop)
+            frames[0].save(path, save_all=True, append_images=frames[1:], optimize=True, duration=frame_time, loop=0)
             self._embed_screenshot(path, width='800px')
         return path
 
