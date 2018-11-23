@@ -48,6 +48,7 @@ Png Screenshot Quality
     Compare Size  ${PNG_CUSTOM_SCREENSHOT}  png
 
 Jpg Screenshot Quality
+    [Tags]  no-xvfb
     Compare Size  ${JPG_CUSTOM_SCREENSHOT}  jpg
 
 Png Screenshot Gtk
