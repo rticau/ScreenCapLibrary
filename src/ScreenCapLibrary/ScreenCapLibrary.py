@@ -61,7 +61,7 @@ class ScreenCapLibrary:
     ROBOT_LIBRARY_VERSION = __version__
 
     def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50,
-                 offset_X=50, offset_Y=50, width=700, height=300):
+                 left=50, top=50, width=700, height=300):
         """
         ``screenshot_module`` specifies the module or tool to use when taking screenshots using this library.
         If no tool or module is specified, ``mss`` will be used by default. For running
@@ -80,9 +80,9 @@ class ScreenCapLibrary:
         with file size. Because PNG uses lossless compression its size
         may be larger than the size of the JPG file. The default value is 50.
 
-        ``offset_X`` specifies the cropping distance on the X axis from the left of the screen capture.
+        ``left`` specifies the cropping distance on the X axis from the left of the screen capture.
 
-        ``offset_Y`` specifies the cropping distance on the Y axis from the top of the screen capture.
+        ``top`` specifies the cropping distance on the Y axis from the top of the screen capture.
 
         ``width`` specifies the width of a screen capture when using partial screen captures.
 
@@ -100,8 +100,8 @@ class ScreenCapLibrary:
         self._given_screenshot_dir = self._norm_path(screenshot_directory)
         self._format = format
         self._quality = quality
-        self._offset_X = offset_X
-        self._offset_Y = offset_Y
+        self._left = left
+        self._top = top
         self._width = width
         self._height = height
 
@@ -262,7 +262,7 @@ class ScreenCapLibrary:
         return path
 
     def take_partial_screenshot(self, name='screenshot', format=None, quality=None,
-                                offset_X=None, offset_Y=None, width=None, height=None):
+                                left=None, top=None, width=None, height=None):
         """
         Takes a partial screenshot in the specified format and dimensions at
         library import and embeds it into the log file (PNG by default).
@@ -285,28 +285,27 @@ class ScreenCapLibrary:
         ``quality`` can take values in range [0, 100]. In case of JPEG format
         it can drastically reduce the file size of the image.
 
-        ``offset_X`` specifies the cropping distance on the X axis from the left of the screen capture.
+        ``left`` specifies the cropping distance on the X axis from the left of the screen capture.
 
-        ``offset_Y`` specifies the cropping distance on the Y axis from the top of the screen capture.
+        ``top`` specifies the cropping distance on the Y axis from the top of the screen capture.
 
         ``width`` specifies the width of a screen capture when using partial screen captures.
 
          ``height`` specifies the heigth of a screen capture when using partial screen captures.
          """
-        offset_X = int(offset_X or self._offset_X)
-        offset_Y = int(offset_Y or self._offset_Y)
+        left = int(left or self._left)
+        top = int(top or self._top)
         width = int(width or self._width)
         height = int(height or self._height)
         format = format or self._format
 
-        with mss():
-            original_image = self.take_screenshot(name, format, quality)
-            image = Image.open(original_image)
-            box = (offset_X, offset_Y, width, height)
-            cropped_image = image.crop(box)
-            os.remove(original_image)
-            path = self._save_screenshot_path(basename=name, format=format)
-            cropped_image.save(path, format)
+        original_image = self.take_screenshot(name, format, quality)
+        image = Image.open(original_image)
+        box = (left, top, width, height)
+        cropped_image = image.crop(box)
+        os.remove(original_image)
+        path = self._save_screenshot_path(basename=name, format=format)
+        cropped_image.save(path, format)
         return path
 
     def _embed_screenshot(self, path, width):
