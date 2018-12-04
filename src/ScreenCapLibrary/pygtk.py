@@ -71,3 +71,42 @@ def _take_gtk_screenshot_py3(path, format, quality):
     quality_setting = _gtk_quality(format, quality)
     pb.savev(path, format, [list(quality_setting.keys())[0]], [list(quality_setting.values())[0]])
     return path
+
+
+def _take_partial_gtk_screenshot(path, format, quality, left, top, width, height):
+    if not gdk and not Gdk:
+        raise RuntimeError('PyGTK not installed/supported on this platform.')
+    if gdk:
+        return _take_partial_gtk_screenshot_py2(path, format, quality, left, top, width, height)
+    elif Gdk:
+        return _take_partial_gtk_screenshot_py3(path, format, quality, left, top, width, height)
+
+
+def _take_partial_gtk_screenshot_py2(path, format, quality, left, top, width, height):
+    window = gdk.get_default_root_window()
+    if not window:
+        raise RuntimeError('Taking screenshot failed.')
+    screen_width, screen_height = window.get_size()
+    source_pb = gdk.Pixbuf(gdk.COLORSPACE_RGB, False, 8, screen_width, screen_height)
+    source_pb = source_pb.get_from_drawable(window, window.get_colormap(),
+                              0, 0, 0, 0, screen_width, screen_height)
+    if not source_pb:
+        raise RuntimeError('Taking screenshot failed.')
+    quality_setting = _gtk_quality(format, quality)
+    cropped_pb = source_pb.subpixbuf(left, top, width, height)
+    if not cropped_pb:
+        raise RuntimeError('Taking screenshot failed.')
+    cropped_pb.save(path, format, quality_setting)
+    return path
+
+
+def _take_partial_gtk_screenshot_py3(path, format, quality, left, top, width, height):
+    window = Gdk.get_default_root_window()
+    if not window:
+        raise RuntimeError('Taking screenshot failed.')
+    cropped_pb = Gdk.pixbuf_get_from_window(window, left, top, width, height)
+    if not cropped_pb:
+        raise RuntimeError('Taking screenshot failed.')
+    quality_setting = _gtk_quality(format, quality)
+    cropped_pb.savev(path, format, [list(quality_setting.keys())[0]], [list(quality_setting.values())[0]])
+    return path

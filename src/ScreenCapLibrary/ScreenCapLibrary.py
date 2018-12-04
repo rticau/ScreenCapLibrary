@@ -20,7 +20,7 @@ from robot.api import logger
 from robot.utils import get_link_path, abspath
 from robot.libraries.BuiltIn import BuiltIn
 from .version import VERSION
-from .pygtk import _take_gtk_screenshot
+from .pygtk import _take_gtk_screenshot, _take_partial_gtk_screenshot
 
 __version__ = VERSION
 
@@ -297,16 +297,24 @@ class ScreenCapLibrary:
         top = int(top or self._top)
         width = int(width or self._width)
         height = int(height or self._height)
-        format = format or self._format
+        format = (format or self._format).lower()
+        quality = quality or self._quality
 
-        original_image = self.take_screenshot(name, format, quality)
-        image = Image.open(original_image)
-        box = (left, top, width, height)
-        cropped_image = image.crop(box)
-        os.remove(original_image)
-        path = self._save_screenshot_path(basename=name, format=format)
-        cropped_image.save(path, format)
-        return path
+        if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
+            format = 'jpeg' if format == 'jpg' else format
+            if format == 'png':
+                quality = self._compression_value_conversion(quality)
+            path = self._save_screenshot_path(name, format)
+            return _take_partial_gtk_screenshot(path, format, quality, left, top, width, height)
+        else:
+            original_image = self.take_screenshot(name, format, quality)
+            image = Image.open(original_image)
+            box = (left, top, width, height)
+            cropped_image = image.crop(box)
+            os.remove(original_image)
+            path = self._save_screenshot_path(basename=name, format=format)
+            cropped_image.save(path, format)
+            return path
 
     def _embed_screenshot(self, path, width):
         link = get_link_path(path, self._log_dir)

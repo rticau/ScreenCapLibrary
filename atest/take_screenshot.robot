@@ -58,6 +58,10 @@ Take Screenshot With Partial Dimensions
     ${partial_screenshot}=  ScreenCapLibrary.Take Partial Screenshot  left=50  height=1000  width=1700
     Screenshot Should Exist  ${partial_screenshot}
 
+Take Partial Gtk Screenshot
+    ${partial_screenshot}=  ScreenCapLibraryGtk.Take Partial Screenshot  left=50  height=1000  width=1700
+    Screenshot Should Exist  ${partial_screenshot}
+
 *** Keywords ***
 Take Screenshot And Verify
     [Arguments]  @{expected files}
