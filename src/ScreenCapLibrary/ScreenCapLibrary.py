@@ -19,7 +19,7 @@ import time
 from mss import mss
 from PIL import Image
 from robot.api import logger
-from robot.utils import get_link_path, abspath, timestr_to_secs, is_truthy, is_string
+from robot.utils import get_link_path, abspath, timestr_to_secs, is_truthy
 from robot.libraries.BuiltIn import BuiltIn
 from .version import VERSION
 from .pygtk import _take_gtk_screenshot
