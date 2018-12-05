@@ -19,7 +19,7 @@ import time
 from mss import mss
 from PIL import Image
 from robot.api import logger
-from robot.utils import get_link_path, abspath, timestr_to_secs
+from robot.utils import get_link_path, abspath, timestr_to_secs, is_truthy, is_string
 from robot.libraries.BuiltIn import BuiltIn
 from .version import VERSION
 from .pygtk import _take_gtk_screenshot
@@ -288,3 +288,56 @@ class ScreenCapLibrary:
     def _link_screenshot(self, path):
         link = get_link_path(path, self._log_dir)
         logger.info("Screenshot saved to '<a href=\"%s\">%s</a>'." % (link, path), html=True)
+
+    def take_multiple_screenshots(self, name="screenshot", format=None, quality=None, screenshot_number=2, delay_time=0,
+                                  embed=None, width='800px', ):
+        """Takes the specified number of screenshots in the specified format
+        at library import and embeds it into the log file (PNG by default).
+
+        Name of the file where the screenshot is stored is derived from the
+        given ``name``. If the ``name`` ends with extension ``.jpg``, ``.jpeg``
+        or ``.png``, the screenshot will be stored with that exact name.
+        Otherwise a unique name is created by adding an underscore, a running
+        index and an extension to the ``name``.
+
+        The name will be interpreted to be relative to the directory where
+        the log file is written. It is also possible to use absolute paths.
+        Using ``/`` as a path separator works in all operating systems.
+
+        ``format`` specifies the format in which the screenshot is saved. If
+        no format is provided the library import value will be used which is
+        ``png`` by default. Can be either ``jpg``, ``jpeg`` or ``png``, case
+        insensitive.
+
+        ``quality`` can take values in range [0, 100]. In case of JPEG format
+        it can drastically reduce the file size of the image.
+
+        ``screenshot_number`` specifies the number of screenshots to be taken.
+        By default this number is 2.
+
+        ``delay_time`` specifies the waiting time before taking another
+        screenshot. See `Time format` section for more information. By
+        default the delay time  is 0.
+
+        ``embed`` parameter specifies if the screenshots should be embedded
+        or not.
+
+        Validation rules:
+        - If the value is a string, it is considered `True` if it is not `FALSE`,
+        `NO`, 'NONE' or '', case-insensitively.
+        - Other values are handled by using the standard `bool()` function.
+
+        `width`` specifies the size of the screenshot in the log file.
+        """
+        paths = []
+        try:
+            for i in range(int(screenshot_number)):
+                path = self.take_screenshot(name, format, quality)
+                if delay_time:
+                    time.sleep(timestr_to_secs(delay_time))
+                paths.append(path)
+                if is_truthy(embed):
+                    self._embed_screenshot(path, width)
+        except ValueError:
+            raise RuntimeError("Screenshot number argument must be of type integer.")
+        return paths

@@ -66,6 +66,10 @@ Take Screenshot With Delay
     ${actual_time}=  DateTime.Subtract Date From Date  ${end_date}  ${start_date}
     Should Be True  ${actual_time} > 10
 
+Take Screenshots
+    @{screenshots}=  ScreenCapLibraryGtk.Take Multiple Screenshots  screenshot_number=4  delay_time=3seconds  embed=False
+    Screenshots Should Exist  ${OUTPUTDIR}  @{screenshots}
+
 *** Keywords ***
 Take Screenshot And Verify
     [Arguments]  @{expected files}
