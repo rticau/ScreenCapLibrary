@@ -17,7 +17,7 @@ import os
 from mss import mss
 from PIL import Image
 from robot.api import logger
-from robot.utils import get_link_path, abspath
+from robot.utils import get_link_path, abspath, is_truthy
 from robot.libraries.BuiltIn import BuiltIn
 from .version import VERSION
 from .pygtk import _take_gtk_screenshot, _take_partial_gtk_screenshot
@@ -262,7 +262,7 @@ class ScreenCapLibrary:
         return path
 
     def take_partial_screenshot(self, name='screenshot', format=None, quality=None,
-                                left=None, top=None, width=None, height=None):
+                                left=None, top=None, width=None, height=None, embed=False, embed_width='800px'):
         """
         Takes a partial screenshot in the specified format and dimensions at
         library import and embeds it into the log file (PNG by default).
@@ -305,16 +305,26 @@ class ScreenCapLibrary:
             if format == 'png':
                 quality = self._compression_value_conversion(quality)
             path = self._save_screenshot_path(name, format)
-            return _take_partial_gtk_screenshot(path, format, quality, left, top, width, height)
+            path = _take_partial_gtk_screenshot(path, format, quality, left, top, width, height)
         else:
-            original_image = self.take_screenshot(name, format, quality)
-            image = Image.open(original_image)
-            box = (left, top, width, height)
+            try:
+                original_image = self.take_screenshot(name, format, quality)
+                image = Image.open(original_image)
+                box = (left, top, width, height)
+            except IOError:
+                raise IOError('Cropping the screenshot failed.')
+            except RuntimeError:
+                raise RuntimeError('Taking screenshot failed.')
+            except SystemError:
+                raise SystemError("``top`` or ``left`` parameters greater than screen resolution. "
+                                  "Please select other values.")
             cropped_image = image.crop(box)
             os.remove(original_image)
             path = self._save_screenshot_path(basename=name, format=format)
             cropped_image.save(path, format)
-            return path
+        if is_truthy(embed):
+            self._embed_screenshot(path, embed_width)
+        return path
 
     def _embed_screenshot(self, path, width):
         link = get_link_path(path, self._log_dir)
