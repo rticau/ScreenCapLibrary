@@ -223,7 +223,10 @@ class ScreenCapLibrary:
                 quality = self._compression_value_conversion(quality)
             path = self._save_screenshot_path(name, format)
             if format == 'webp':
-                return _take_gtk_screenshot(path, 'png', self._compression_value_conversion(100))
+                png_img = _take_gtk_screenshot(path, 'png', self._compression_value_conversion(100))
+                im = Image.open(png_img)
+                im.save(path, format, quality=quality)
+                return path
             return _take_gtk_screenshot(path, format, quality)
         else:
             if format == 'png':
