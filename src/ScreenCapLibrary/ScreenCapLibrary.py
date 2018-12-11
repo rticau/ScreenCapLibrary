@@ -86,6 +86,27 @@ class ScreenCapLibrary:
         | Library   | Screenshot | screenshot_directory=${TEMPDIR} |
         | Library   | Screenshot | format=jpg                      |
         | Library   | Screenshot | quality=0                       |
+
+        = Boolean arguments =
+
+        Some keywords accept arguments that are handled as Boolean values true or
+        false. If such an argument is given as a string, it is considered false if
+        it is either an empty string or case-insensitively equal to ``false``,
+        ``none`` or ``no``. Other strings are considered true regardless
+        their value, and other argument types are tested using the same
+        [http://docs.python.org/2/library/stdtypes.html#truth-value-testing|rules
+        as in Python].
+
+        True examples:
+        | `Take Partial Screenshot` | embed=True    | # Strings are generally true.    |
+        | `Take Partial Screenshot` | embed=yes     | # Same as the above.             |
+        | `Take Partial Screenshot` | embed=${TRUE} | # Python ``True`` is true.       |
+        | `Take Partial Screenshot` | embed=${42}   | # Numbers other than 0 are true. |
+        False examples:
+        | `Take Partial Screenshot` | embed=False    | # String ``false`` is false.   |
+        | `Take Partial Screenshot` | embed=no       | # Also string ``no`` is false. |
+        | `Take Partial Screenshot` | embed=${EMPTY} | # Empty string is false.       |
+        | `Take Partial Screenshot` | embed=${FALSE} | # Python ``False`` is false.   |
         """
         self._screenshot_module = screenshot_module
         self._given_screenshot_dir = self._norm_path(screenshot_directory)
@@ -263,7 +284,12 @@ class ScreenCapLibrary:
 
         ``width`` specifies the width of a screen capture when using partial screen captures.
 
-         ``height`` specifies the heigth of a screen capture when using partial screen captures.
+         ``height`` specifies the height of a screen capture when using partial screen captures.
+
+         ``embed`` boolean argument specifying if the screenshot should be embedded or not.  See
+         `Boolean arguments`  for more details.
+
+          ``embed_width`` specifies the size of the screenshot in the log file.
          """
         left = int(left)
         top = int(top)
@@ -289,8 +315,7 @@ class ScreenCapLibrary:
             except RuntimeError:
                 raise RuntimeError('Taking screenshot failed.')
             except SystemError:
-                raise SystemError("``top`` or ``left`` parameters greater than screen resolution. "
-                                  "Please select other values.")
+                raise SystemError("Top and  left parameters must be lower than screen resolution.")
             os.remove(original_image)
             path = self._save_screenshot_path(basename=name, format=format)
             cropped_image.save(path, format)
