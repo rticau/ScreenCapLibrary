@@ -21,7 +21,7 @@ from robot.api import logger
 from robot.utils import get_link_path, abspath, timestr_to_secs
 from robot.libraries.BuiltIn import BuiltIn
 from .version import VERSION
-from .pygtk import _take_gtk_screenshot
+from .pygtk import _take_gtk_screenshot, _take_gtk_screen_size
 
 __version__ = VERSION
 
@@ -210,7 +210,7 @@ class ScreenCapLibrary:
             else:
                 raise RuntimeError("Invalid screenshot format.")
 
-    def take_gif_screenshot(self, name="screenshot", duration=10, frame_time=100, width=None, height=None):
+    def take_gif_screenshot(self, name="screenshot", duration=10, frame_time=100, size_percentage=0.25):
         """
         Takes a GIF with the specified ``name``.
 
@@ -222,32 +222,35 @@ class ScreenCapLibrary:
         ``frame_time`` When replaying a GIF this parameter indicates how much time (milliseconds)
         will pass until switching to another frame of the GIF.
 
-        ``width`` specifies the width by which the gif will be resized in order to reduce its size.
-        If the ``width`` is not specified the default will be 35 percent of the initial width of the capture.
-
-        ``height`` specifies the height by which the gif will be resized in order to reduce its size.
-        If the ``height`` is not specified the default will be 35 percent of the initial height of the capture.
+        ``size_percentage`` in order to reduce the size of the GIFs a resize of the
+        screencaptures was needed. ``size_percentage`` will specify how much this
+        reduction is with respect to screen resolution. By default this parameter
+        is set to resize the images to 0.25 of the screen resolution.
         """
-        with mss() as sct:
-            start_time = time.time()
-            frames = []
-            if width:
-                gif_width = width
-            else:
-                gif_width = int(sct.grab(sct.monitors[0]).size.width * 0.35)
-
-            if height:
-                gif_height = height
-            else:
-                gif_height = int(sct.grab(sct.monitors[0]).size.height * 0.35)
-
+        frames = []
+        start_time = time.time()
+        if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
+            width, height = _take_gtk_screen_size()
+            gif_width = int(width * size_percentage)
+            gif_height = int(height * size_percentage)
+            quality = self._compression_value_conversion(100)
             while time.time() <= start_time + int(duration):
-                sct_img = sct.grab(sct.monitors[0])
-                img = Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX').resize((gif_width, gif_height))
-                frames.append(img)
-            path = self._save_screenshot_path(basename=name, format='gif')
-            frames[0].save(path, save_all=True, append_images=frames[1:], optimize=True, duration=frame_time, loop=0)
-            self._embed_screenshot(path, width='800px')
+                path = self._save_screenshot_path(name + repr(time.time()), 'png')
+                pygtk_img = _take_gtk_screenshot(path, 'png', quality)
+                im = Image.open(pygtk_img).resize((gif_width, gif_height))
+                frames.append(im)
+                os.remove(pygtk_img)
+        else:
+            with mss() as sct:
+                gif_width = int(sct.grab(sct.monitors[0]).size.width * size_percentage)
+                gif_height = int(sct.grab(sct.monitors[0]).size.height * size_percentage)
+                while time.time() <= start_time + int(duration):
+                    sct_img = sct.grab(sct.monitors[0])
+                    img = Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX').resize((gif_width, gif_height))
+                    frames.append(img)
+        path = self._save_screenshot_path(basename=name, format='gif')
+        frames[0].save(path, save_all=True, append_images=frames[1:], optimize=True, duration=frame_time, loop=0)
+        self._embed_screenshot(path, width='800px')
         return path
 
     def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px'):

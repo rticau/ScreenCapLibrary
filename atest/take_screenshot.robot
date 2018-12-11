@@ -59,6 +59,9 @@ Take Gif
     ScreenCapLibrary.Take Gif Screenshot
     Screenshot Should Exist  ${GIF_SCREENSHOT}
 
+Take Gtk Gif
+    ScreenCapLibraryGtk.Take Gif Screenshot
+    Screenshot Should Exist  ${GIF_SCREENSHOT}
 *** Keywords ***
 Take Screenshot And Verify
     [Arguments]  @{expected files}

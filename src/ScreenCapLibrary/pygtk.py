@@ -12,7 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import os
+import time
 try:
     from gtk import gdk
 except ImportError:
@@ -71,3 +72,21 @@ def _take_gtk_screenshot_py3(path, format, quality):
     quality_setting = _gtk_quality(format, quality)
     pb.savev(path, format, [list(quality_setting.keys())[0]], [list(quality_setting.values())[0]])
     return path
+
+
+def _take_gtk_screen_size():
+    if not gdk and not Gdk:
+        raise RuntimeError('PyGTK not installed/supported on this platform.')
+    if gdk:
+        window = gdk.get_default_root_window()
+        if not window:
+            raise RuntimeError('Taking screenshot failed.')
+        width, height = window.get_size()
+        return width, height
+    elif Gdk:
+        window = Gdk.get_default_root_window()
+        if not window:
+            raise RuntimeError('Taking screenshot failed.')
+        width = window.get_width()
+        height = window.get_height()
+        return width, height
