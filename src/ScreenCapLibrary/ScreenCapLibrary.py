@@ -311,11 +311,11 @@ class ScreenCapLibrary:
                 box = (left, top, width, height)
                 cropped_image = image.crop(box)
             except IOError:
-                raise IOError('Cropping the screenshot failed.')
+                raise IOError('File not found.')
             except RuntimeError:
                 raise RuntimeError('Taking screenshot failed.')
             except SystemError:
-                raise SystemError("Top and  left parameters must be lower than screen resolution.")
+                raise SystemError("Top and left parameters must be lower than screen resolution.")
             os.remove(original_image)
             path = self._save_screenshot_path(basename=name, format=format)
             cropped_image.save(path, format)
