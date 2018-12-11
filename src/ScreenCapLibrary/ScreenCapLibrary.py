@@ -294,23 +294,8 @@ class ScreenCapLibrary:
         """Takes the specified number of screenshots in the specified format
         at library import and embeds it into the log file (PNG by default).
 
-        Name of the file where the screenshot is stored is derived from the
-        given ``name``. If the ``name`` ends with extension ``.jpg``, ``.jpeg``
-        or ``.png``, the screenshot will be stored with that exact name.
-        Otherwise a unique name is created by adding an underscore, a running
-        index and an extension to the ``name``.
-
-        The name will be interpreted to be relative to the directory where
-        the log file is written. It is also possible to use absolute paths.
-        Using ``/`` as a path separator works in all operating systems.
-
-        ``format`` specifies the format in which the screenshot is saved. If
-        no format is provided the library import value will be used which is
-        ``png`` by default. Can be either ``jpg``, ``jpeg`` or ``png``, case
-        insensitive.
-
-        ``quality`` can take values in range [0, 100]. In case of JPEG format
-        it can drastically reduce the file size of the image.
+        This keyword is similar with ``Take Screenshot`` with some parameters
+        exception found only in this keyword.
 
         ``screenshot_number`` specifies the number of screenshots to be taken.
         By default this number is 2.
