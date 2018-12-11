@@ -60,8 +60,7 @@ class ScreenCapLibrary:
 
     ROBOT_LIBRARY_VERSION = __version__
 
-    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50,
-                 left=50, top=50, width=700, height=300):
+    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50):
         """
         ``screenshot_module`` specifies the module or tool to use when taking screenshots using this library.
         If no tool or module is specified, ``mss`` will be used by default. For running
@@ -80,14 +79,6 @@ class ScreenCapLibrary:
         with file size. Because PNG uses lossless compression its size
         may be larger than the size of the JPG file. The default value is 50.
 
-        ``left`` specifies the cropping distance on the X axis from the left of the screen capture.
-
-        ``top`` specifies the cropping distance on the Y axis from the top of the screen capture.
-
-        ``width`` specifies the width of a screen capture when using partial screen captures.
-
-         ``height`` specifies the heigth of a screen capture when using partial screen captures.
-
         Examples (use only one of these):
         | =Setting= |  =Value=   |  =Value=                        |
         | Library   | Screenshot |                                 |
@@ -100,10 +91,6 @@ class ScreenCapLibrary:
         self._given_screenshot_dir = self._norm_path(screenshot_directory)
         self._format = format
         self._quality = quality
-        self._left = left
-        self._top = top
-        self._width = width
-        self._height = height
 
     @staticmethod
     def _norm_path(path):
@@ -262,28 +249,13 @@ class ScreenCapLibrary:
         return path
 
     def take_partial_screenshot(self, name='screenshot', format=None, quality=None,
-                                left=None, top=None, width=None, height=None, embed=False, embed_width='800px'):
+                                left=0, top=0, width=700, height=300, embed=False, embed_width='800px'):
         """
         Takes a partial screenshot in the specified format and dimensions at
         library import and embeds it into the log file (PNG by default).
 
-        Name of the file where the screenshot is stored is derived from the
-        given ``name``. If the ``name`` ends with extension ``.jpg``, ``.jpeg``
-        or ``.png``, the screenshot will be stored with that exact name.
-        Otherwise a unique name is created by adding an underscore, a running
-        index and an extension to the ``name``.
-
-        The name will be interpreted to be relative to the directory where
-        the log file is written. It is also possible to use absolute paths.
-        Using ``/`` as a path separator works in all operating systems.
-
-        ``format`` specifies the format in which the screenshot is saved. If
-        no format is provided the library import value will be used which is
-        ``png`` by default. Can be either ``jpg``, ``jpeg`` or ``png``, case
-        insensitive.
-
-        ``quality`` can take values in range [0, 100]. In case of JPEG format
-        it can drastically reduce the file size of the image.
+        This keyword has similar parameters like ``Take Screenshot`` the difference between them
+        are the last four parameters.
 
         ``left`` specifies the cropping distance on the X axis from the left of the screen capture.
 
@@ -293,10 +265,10 @@ class ScreenCapLibrary:
 
          ``height`` specifies the heigth of a screen capture when using partial screen captures.
          """
-        left = int(left or self._left)
-        top = int(top or self._top)
-        width = int(width or self._width)
-        height = int(height or self._height)
+        left = int(left)
+        top = int(top)
+        width = int(width)
+        height = int(height)
         format = (format or self._format).lower()
         quality = quality or self._quality
 
@@ -311,6 +283,7 @@ class ScreenCapLibrary:
                 original_image = self.take_screenshot(name, format, quality)
                 image = Image.open(original_image)
                 box = (left, top, width, height)
+                cropped_image = image.crop(box)
             except IOError:
                 raise IOError('Cropping the screenshot failed.')
             except RuntimeError:
@@ -318,7 +291,6 @@ class ScreenCapLibrary:
             except SystemError:
                 raise SystemError("``top`` or ``left`` parameters greater than screen resolution. "
                                   "Please select other values.")
-            cropped_image = image.crop(box)
             os.remove(original_image)
             path = self._save_screenshot_path(basename=name, format=format)
             cropped_image.save(path, format)
