@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
+<title>ScreenCapLibrary</title>
+<link rel="stylesheet" href="style.css" type="text/css" />
+<link rel="stylesheet" href="extra.css" type="text/css" />
+</head>
+<body>
+<div class="document" id="screencaplibrary">
+<h1 class="title">ScreenCapLibrary</h1>
+
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#introduction" id="id2">Introduction</a></p></li>
+<li><p><a class="reference internal" href="#documentation" id="id3">Documentation</a></p></li>
+<li><p><a class="reference internal" href="#installation" id="id4">Installation</a></p></li>
+<li><p><a class="reference internal" href="#usage" id="id5">Usage</a></p></li>
+<li><p><a class="reference internal" href="#using-with-vnc" id="id6">Using with VNC</a></p></li>
+<li><p><a class="reference internal" href="#support" id="id7">Support</a></p></li>
+</ul>
+</div>
+<div class="section" id="introduction">
+<h1><a class="toc-backref" href="#id2">Introduction</a></h1>
+<p><a class="reference external" href="https://github.com/mihaiparvu/ScreenCapLibrary">ScreenCapLibrary</a> is a <a class="reference external" href="http://robotframework.org">Robot Framework</a> test
+library for taking screenshots.  The project is hosted on <a class="reference external" href="https://github.com/mihaiparvu/ScreenCapLibrary">GitHub</a>
+and downloads can be found from <a class="reference external" href="https://pypi.python.org/pypi/robotframework-screencaplibrary">PyPI</a>.</p>
+<p>ScreenCapLibrary is operating system independent and supports <a class="reference external" href="http://python.org">Python</a> 2.7 as well
+as <a class="reference external" href="http://python.org">Python</a> 3.4 or newer.</p>
+<p>The library is based on RobotFramework's standard <a class="reference external" href="http://robotframework.org/robotframework/latest/libraries/Screenshot.html">Screenshot</a> library. It has almost
+the same functionality, except that the screenshots are captured in PNG by default.</p>
+<dl class="simple">
+<dt>ScreenCapLibrary has the following extra features:</dt>
+<dd><ul class="simple">
+<li><p>Taking screenshots in both PNG and JPG/JPEG formats</p></li>
+<li><p>Adjusting the compression/quality of the screenshots</p></li>
+</ul>
+</dd>
+</dl>
+<p>Features to be implemented in the future:</p>
+<blockquote>
+<ul class="simple">
+<li><p>Support for GIFs</p></li>
+<li><p>Configurable monitor screen grabbing</p></li>
+<li><p>Taking multiple screenshots in a given amount of time</p></li>
+<li><p>Support for partial screen captures</p></li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="documentation">
+<h1><a class="toc-backref" href="#id3">Documentation</a></h1>
+<p>See <a class="reference external" href="https://mihaiparvu.github.io/ScreenCapLibrary/ScreenCapLibrary.html">keyword documentation</a> for available keywords and more information
+about the library in general.</p>
+<p>For general information about using test libraries with Robot Framework, see
+<a class="reference external" href="http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#using-test-libraries">Robot Framework User Guide</a>.</p>
+</div>
+<div class="section" id="installation">
+<h1><a class="toc-backref" href="#id4">Installation</a></h1>
+<p>The recommended installation method is using <a class="reference external" href="http://pip-installer.org">pip</a>:</p>
+<pre class="literal-block">pip install --upgrade robotframework-screencaplibrary</pre>
+<p>Running this command installs also the latest Robot Framework, <a class="reference external" href="https://python-mss.readthedocs.io">mss</a> and
+<a class="reference external" href="https://pillow.readthedocs.io">pillow</a> versions. The minimum supported mss version is <span class="docutils literal">3.2.1</span> and the
+minimum supported pillow version is <span class="docutils literal">5.2.0</span>.
+The <span class="docutils literal"><span class="pre">--upgrade</span></span> option can be omitted when installing the library for the
+first time.</p>
+<p>With recent versions of <span class="docutils literal">pip</span> it is possible to install directly from the
+<a class="reference external" href="https://github.com/mihaiparvu/ScreenCapLibrary">GitHub</a> repository. To install latest source from the master branch, use
+this command:</p>
+<pre class="literal-block">pip install git+https://github.com/mihaiparvu/ScreenCapLibrary.git</pre>
+<p>Alternatively you can download the source distribution from <a class="reference external" href="https://pypi.python.org/pypi/robotframework-screencaplibrary">PyPI</a>, extract
+it, and install it:</p>
+<pre class="literal-block">python setup.py install</pre>
+</div>
+<div class="section" id="usage">
+<h1><a class="toc-backref" href="#id5">Usage</a></h1>
+<p>To use ScreenCapLibrary in Robot Framework tests, the library needs to first be
+imported using the Library setting as any other library.</p>
+<p>When using Robot Framework, it is generally recommended to write as
+easy-to-understand tests as possible.</p>
+<pre class="code robotframework literal-block"><code><span class="generic heading">*** Settings ***</span><span class="punctuation">
+</span><span class="keyword namespace">Documentation</span><span class="punctuation">          </span><span class="literal string">This example demonstrates capturing a screenshot on the local</span><span class="punctuation">
+...                    </span><span class="literal string">machine.</span><span class="punctuation">
+
+</span><span class="keyword namespace">Library</span><span class="punctuation">                </span><span class="name namespace">ScreenCapLibrary</span><span class="punctuation">
+</span><span class="keyword namespace">Library</span><span class="punctuation">                </span><span class="name namespace">OperatingSystem</span><span class="punctuation">
+</span><span class="keyword namespace">Test Teardown</span><span class="punctuation">          </span><span class="name function">Remove File</span><span class="punctuation">  </span><span class="literal string">screenshot_1.jpg</span><span class="punctuation">
+
+</span><span class="generic heading">*** Test Cases ***</span><span class="punctuation">
+</span><span class="generic subheading">Take A Low File Size Jpg Screenshot</span><span class="punctuation">
+    </span><span class="name function">Take Screenshot</span><span class="punctuation">    </span><span class="literal string">name=screenshot</span><span class="punctuation">  </span><span class="literal string">format=jpg</span><span class="punctuation">  </span><span class="literal string">quality=0</span><span class="punctuation">
+    </span><span class="name function">File Should Exist</span><span class="punctuation">  </span><span class="literal string">screenshot_1.jpg</span></code></pre>
+</div>
+<div class="section" id="using-with-vnc">
+<h1><a class="toc-backref" href="#id6">Using with VNC</a></h1>
+<p>At the time of this release <span class="docutils literal">mss</span>, does not work on GNU/Linux with VNC virtual desktop.
+As a workaround you can change the <span class="docutils literal">screenshot_module</span> value at library import to <span class="docutils literal">PyGTK</span>.</p>
+<pre class="code robotframework literal-block"><code><span class="generic heading">*** Settings ***</span><span class="punctuation">
+</span><span class="keyword namespace">Library</span><span class="punctuation">                </span><span class="name namespace">ScreenCapLibrary</span><span class="punctuation">  </span><span class="literal string">screenshot_module=PyGTK</span></code></pre>
+<p>For this to work you need to have the following dependencies installed.</p>
+<ul>
+<li><p>With Python 2:</p>
+<pre class="literal-block">sudo apt install python-gtk2</pre>
+</li>
+<li><p>With Python 3:</p>
+<pre class="literal-block">sudo apt install python-gi python-gi-cairo python3-gi python3-gi-cairo gir1.2-gtk-3.0</pre>
+</li>
+</ul>
+</div>
+<div class="section" id="support">
+<h1><a class="toc-backref" href="#id7">Support</a></h1>
+<p>If the provided documentation is not enough, there are various support forums
+available:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://groups.google.com/group/robotframework-users">robotframework-users</a> mailing list</p></li>
+<li><p>channels in Robot Framework <a class="reference external" href="https://robotframework-slack-invite.herokuapp.com">Slack community</a></p></li>
+<li><p>ScreenCapLibrary <a class="reference external" href="https://github.com/mihaiparvu/ScreenCapLibrary/issues">issue tracker</a> for bug reports and concrete enhancement
+requests</p></li>
+</ul>
+</div>
+</div>
+</body>
+</html>
