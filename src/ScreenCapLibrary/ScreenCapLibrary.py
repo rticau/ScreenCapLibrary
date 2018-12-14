@@ -18,7 +18,7 @@ import time
 from mss import mss
 from PIL import Image
 from robot.api import logger
-from robot.utils import get_link_path, abspath, timestr_to_secs
+from robot.utils import get_link_path, abspath, timestr_to_secs, is_truthy
 from robot.libraries.BuiltIn import BuiltIn
 from .version import VERSION
 from .pygtk import _take_gtk_screenshot, _take_gtk_screen_size
@@ -210,7 +210,8 @@ class ScreenCapLibrary:
             else:
                 raise RuntimeError("Invalid screenshot format.")
 
-    def take_gif_screenshot(self, name="screenshot", duration=10, frame_time=100, size_percentage=0.25):
+    def take_gif_screenshot(self, name="screenshot", duration=10, frame_time=100, size_percentage=0.25,
+                            embed=None, embed_width='800px'):
         """
         Takes a GIF with the specified ``name``.
 
@@ -226,6 +227,12 @@ class ScreenCapLibrary:
         screencaptures was needed. ``size_percentage`` will specify how much this
         reduction is with respect to screen resolution. By default this parameter
         is set to resize the images to 0.25 of the screen resolution.
+
+        ``embed`` specifies if the screenshot should be embedded in the log file
+        or not. See `Boolean arguments` for more details.
+
+        ``embed_width`` specifies the size of the screenshot that is
+        embedded in the log file.
         """
         frames = []
         start_time = time.time()
@@ -250,7 +257,8 @@ class ScreenCapLibrary:
                     frames.append(img)
         path = self._save_screenshot_path(basename=name, format='gif')
         frames[0].save(path, save_all=True, append_images=frames[1:], optimize=True, duration=frame_time, loop=0)
-        self._embed_screenshot(path, width='800px')
+        if is_truthy(embed):
+            self._embed_screenshot(path, embed_width)
         return path
 
     def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px'):
