@@ -1,7 +1,7 @@
 *** Settings ***
-Suite Setup    Remove Files  ${OUTPUT_DIR}/*.jp*g  ${OUTPUT_DIR}/*.png  ${OUTPUT_DIR}/*.webp
+Suite Setup    Cleanup Files
 Test Setup     Save Start Time
-Test Teardown  Remove Files  ${OUTPUT_DIR}/*.jp*g  ${OUTPUT_DIR}/*.png  ${OUTPUT_DIR}/*.webp
+Test Teardown  Cleanup Files
 Resource       resources/common.robot
 
 *** Variables ***
@@ -16,6 +16,7 @@ ${WEBP_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo.webp
 ${GTK_PNG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_png.png
 ${GTK_JPEG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_jpeg.jpeg
 ${GTK_WEBP_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_webp.webp
+${GIF_SCREENSHOT}  ${OUTPUTDIR}${/}screenshot_1.gif
 
 *** Test Cases ***
 Screenshot Is Taken
@@ -88,6 +89,13 @@ Take Partial Gtk Screenshot
     ${partial_screenshot}=  ScreenCapLibraryGtk.Take Partial Screenshot  left=50  height=300  width=700
     Screenshot Should Exist  ${partial_screenshot}
 
+Take Gif
+    ScreenCapLibrary.Take Gif Screenshot
+    Screenshot Should Exist  ${GIF_SCREENSHOT}
+
+Take Gtk Gif
+    ScreenCapLibraryGtk.Take Gif Screenshot
+    Screenshot Should Exist  ${GIF_SCREENSHOT}
 *** Keywords ***
 Take Screenshot And Verify
     [Arguments]  @{expected files}
