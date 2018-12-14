@@ -44,7 +44,7 @@ class ScreenCapLibrary:
     - [https://python-mss.readthedocs.io| mss ] a fast cross-platform module used for taking screenshots and saving
      them in PNG format.
 
-    - [https://pillow.readthedocs.io | Pillow] used on top of ``mss`` in order to save the screenshots in JPG/JPEG format.
+    - [https://pillow.readthedocs.io | Pillow] used on top of ``mss`` in order to save the screenshots in JPG/JPEG/WebP format.
 
     - [http://pygtk.org/ | PyGTK] is an alternative to ``mss`` for taking screenshots when using VNC.
 
@@ -81,7 +81,7 @@ class ScreenCapLibrary:
         `Set Screenshot Directory` keyword.
 
         ``format`` specifies the format in which the screenshots will be saved.
-        Possible values are ``png``,  ``jpeg`` and ``jpg``, case-insensitively.
+        Possible values are ``png``,  ``jpeg``, ``jpg`` and ``webp``, case-insensitively.
         If no value is given the format is set by default to ``png``.
 
         ``quality`` can take values in range [0, 100]. Value 0 is lowest quality,
@@ -171,7 +171,7 @@ class ScreenCapLibrary:
 
     def _get_screenshot_path(self, basename, format, directory):
         directory = self._norm_path(directory) if directory else self._screenshot_dir
-        if basename.lower().endswith(('.jpg', '.jpeg', '.png')):
+        if basename.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
             return os.path.join(directory, basename)
         index = 0
         while True:
@@ -206,6 +206,14 @@ class ScreenCapLibrary:
             img.save(path, quality=self._pil_quality_conversion(quality))
         return path
 
+    def _take_webp_screenshot(self, name, format, quality):
+        with mss() as sct:
+            sct_img = sct.grab(sct.monitors[0])
+            img = Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX')
+            path = self._save_screenshot_path(name, format)
+            img.save(path, quality=quality)
+        return path
+
     def _take_screenshot(self, name, format, quality):
         format = (format or self._format).lower()
         quality = quality or self._quality
@@ -214,12 +222,19 @@ class ScreenCapLibrary:
             if format == 'png':
                 quality = self._compression_value_conversion(quality)
             path = self._save_screenshot_path(name, format)
+            if format == 'webp':
+                png_img = _take_gtk_screenshot(path, 'png', self._compression_value_conversion(100))
+                im = Image.open(png_img)
+                im.save(path, format, quality=quality)
+                return path
             return _take_gtk_screenshot(path, format, quality)
         else:
             if format == 'png':
                 return self._take_png_screenshot(name, format, quality)
             elif format in ['jpg', 'jpeg']:
                 return self._take_jpg_screenshot(name, format, quality)
+            elif format == 'webp':
+                return self._take_webp_screenshot(name, format, quality)
             else:
                 raise RuntimeError("Invalid screenshot format.")
 
@@ -228,8 +243,8 @@ class ScreenCapLibrary:
         embeds it into the log file (PNG by default).
 
         Name of the file where the screenshot is stored is derived from the
-        given ``name``. If the ``name`` ends with extension ``.jpg``, ``.jpeg``
-        or ``.png``, the screenshot will be stored with that exact name.
+        given ``name``. If the ``name`` ends with extension ``.jpg``, ``.jpeg``,
+        ``.png`` or ``.webp``, the screenshot will be stored with that exact name.
         Otherwise a unique name is created by adding an underscore, a running
         index and an extension to the ``name``.
 
@@ -239,8 +254,8 @@ class ScreenCapLibrary:
 
         ``format`` specifies the format in which the screenshot is saved. If
         no format is provided the library import value will be used which is
-        ``png`` by default. Can be either ``jpg``, ``jpeg`` or ``png``, case
-        insensitive.
+        ``png`` by default. Can be either ``jpg``, ``jpeg``, ``png``, or ``webp``,
+        case insensitive.
 
         ``quality`` can take values in range [0, 100]. In case of JPEG format
         it can drastically reduce the file size of the image.

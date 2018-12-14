@@ -1,7 +1,7 @@
 *** Settings ***
-Suite Setup    Remove Files  ${OUTPUT_DIR}/*.jp*g  ${OUTPUT_DIR}/*.png
+Suite Setup    Remove Files  ${OUTPUT_DIR}/*.jp*g  ${OUTPUT_DIR}/*.png  ${OUTPUT_DIR}/*.webp
 Test Setup     Save Start Time
-Test Teardown  Remove Files  ${OUTPUT_DIR}/*.jp*g  ${OUTPUT_DIR}/*.png
+Test Teardown  Remove Files  ${OUTPUT_DIR}/*.jp*g  ${OUTPUT_DIR}/*.png  ${OUTPUT_DIR}/*.webp
 Resource       resources/common.robot
 
 *** Variables ***
@@ -12,8 +12,10 @@ ${FIRST_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo_1.png
 ${SECOND_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo_2.png
 ${PNG_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo.png
 ${JPG_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo.jpg
+${WEBP_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo.webp
 ${GTK_PNG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_png.png
 ${GTK_JPEG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_jpeg.jpeg
+${GTK_WEBP_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_webp.webp
 
 *** Test Cases ***
 Screenshot Is Taken
@@ -54,9 +56,17 @@ Jpg Screenshot Quality
     [Tags]  no-xvfb
     Compare Size  ${JPG_CUSTOM_SCREENSHOT}  jpg
 
-Png Screenshot Gtk
+Webp Screenshot Quality
+    [Tags]  no-xvfb
+    Compare Size  ${WEBP_CUSTOM_SCREENSHOT}  webp
+
+Screenshot Formats Gtk
     ScreenCapLibraryGtk.Take Screenshot  ${GTK_PNG_SCREENSHOT}  png
+    Screenshot Should Exist  ${GTK_PNG_SCREENSHOT}
     ScreenCapLibraryGtk.Take Screenshot  ${GTK_JPEG_SCREENSHOT}  jpeg
+    Screenshot Should Exist  ${GTK_JPEG_SCREENSHOT}
+    ScreenCapLibraryGtk.Take Screenshot  ${GTK_WEBP_SCREENSHOT}  webp
+    Screenshot Should Exist  ${GTK_WEBP_SCREENSHOT}
 
 Take Screenshot With Delay
     ${start_date}=  DateTime.Get Current Date
