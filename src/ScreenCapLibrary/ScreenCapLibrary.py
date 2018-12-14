@@ -321,10 +321,10 @@ class ScreenCapLibrary:
 
         ``height`` specifies the height of a screen capture when using partial screen captures.
 
-        ``embed`` boolean argument specifying if the screenshot should be embedded or not.  See
+        ``embed`` specifies if the screenshot should be embedded in the log file or not.  See
         `Boolean arguments`  for more details.
 
-        ``embed_width`` specifies the size of the screenshot in the log file.
+        ``embed_width`` specifies the size of the screenshot that is embedded in the log file.
          """
         left = int(left)
         top = int(top)
