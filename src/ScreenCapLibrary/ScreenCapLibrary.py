@@ -19,10 +19,11 @@ import time
 from mss import mss
 from PIL import Image
 from robot.api import logger
+
 from robot.utils import get_link_path, abspath, timestr_to_secs, is_truthy
 from robot.libraries.BuiltIn import BuiltIn
 from .version import VERSION
-from .pygtk import _take_gtk_screenshot
+from .pygtk import _take_gtk_screenshot, _take_partial_gtk_screenshot
 
 __version__ = VERSION
 
@@ -99,6 +100,27 @@ class ScreenCapLibrary:
         | Library   | Screenshot | screenshot_directory=${TEMPDIR} |
         | Library   | Screenshot | format=jpg                      |
         | Library   | Screenshot | quality=0                       |
+
+        = Boolean arguments =
+
+        Some keywords accept arguments that are handled as Boolean values true or
+        false. If such an argument is given as a string, it is considered false if
+        it is either an empty string or case-insensitively equal to ``false``,
+        ``none`` or ``no``. Other strings are considered true regardless
+        their value, and other argument types are tested using the same
+        [http://docs.python.org/2/library/stdtypes.html#truth-value-testing|rules
+        as in Python].
+
+        True examples:
+        | `Take Partial Screenshot` | embed=True    | # Strings are generally true.    |
+        | `Take Partial Screenshot` | embed=yes     | # Same as the above.             |
+        | `Take Partial Screenshot` | embed=${TRUE} | # Python ``True`` is true.       |
+        | `Take Partial Screenshot` | embed=${42}   | # Numbers other than 0 are true. |
+        False examples:
+        | `Take Partial Screenshot` | embed=False    | # String ``false`` is false.   |
+        | `Take Partial Screenshot` | embed=no       | # Also string ``no`` is false. |
+        | `Take Partial Screenshot` | embed=${EMPTY} | # Empty string is false.       |
+        | `Take Partial Screenshot` | embed=${FALSE} | # Python ``False`` is false.   |
         """
         self._screenshot_module = screenshot_module
         self._given_screenshot_dir = self._norm_path(screenshot_directory)
@@ -281,6 +303,59 @@ class ScreenCapLibrary:
             time.sleep(timestr_to_secs(delay))
         path = self._take_screenshot(name, format, quality)
         self._embed_screenshot(path, width)
+        return path
+
+    def take_partial_screenshot(self, name='screenshot', format=None, quality=None,
+                                left=0, top=0, width=700, height=300, embed=False, embed_width='800px'):
+        """
+        Takes a partial screenshot in the specified format and dimensions at
+        library import and embeds it into the log file (PNG by default).
+
+        This keyword is similar with ``Take Screenshot`` but has some extra parameters listed below:.
+
+        ``left`` specifies the cropping distance on the X axis from the left of the screen capture.
+
+        ``top`` specifies the cropping distance on the Y axis from the top of the screen capture.
+
+        ``width`` specifies the width of a screen capture when using partial screen captures.
+
+        ``height`` specifies the height of a screen capture when using partial screen captures.
+
+        ``embed`` specifies if the screenshot should be embedded in the log file or not.  See
+        `Boolean arguments`  for more details.
+
+        ``embed_width`` specifies the size of the screenshot that is embedded in the log file.
+         """
+        left = int(left)
+        top = int(top)
+        width = int(width)
+        height = int(height)
+        format = (format or self._format).lower()
+        quality = quality or self._quality
+
+        if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
+            format = 'jpeg' if format == 'jpg' else format
+            if format == 'png':
+                quality = self._compression_value_conversion(quality)
+            path = self._save_screenshot_path(name, format)
+            path = _take_partial_gtk_screenshot(path, format, quality, left, top, width, height)
+        else:
+            try:
+                original_image = self.take_screenshot(name, format, quality)
+                image = Image.open(original_image)
+                box = (left, top, width, height)
+                cropped_image = image.crop(box)
+            except IOError:
+                raise IOError('File not found.')
+            except RuntimeError:
+                raise RuntimeError('Taking screenshot failed.')
+            except SystemError:
+                raise SystemError("Top and left parameters must be lower than screen resolution.")
+            os.remove(original_image)
+            path = self._save_screenshot_path(basename=name, format=format)
+            cropped_image.save(path, format)
+        if is_truthy(embed):
+            self._embed_screenshot(path, embed_width)
         return path
 
     def _embed_screenshot(self, path, width):

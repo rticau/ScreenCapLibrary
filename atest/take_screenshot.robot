@@ -80,6 +80,14 @@ Take Screenshots
     @{screenshots}=  ScreenCapLibraryGtk.Take Multiple Screenshots  screenshot_number=4  delay_time=3seconds  embed=False
     Screenshots Should Exist  ${OUTPUTDIR}  @{screenshots}
 
+Take Screenshot With Partial Dimensions
+    ${partial_screenshot}=  ScreenCapLibrary.Take Partial Screenshot  left=50  height=300  width=700
+    Screenshot Should Exist  ${partial_screenshot}
+
+Take Partial Gtk Screenshot
+    ${partial_screenshot}=  ScreenCapLibraryGtk.Take Partial Screenshot  left=50  height=300  width=700
+    Screenshot Should Exist  ${partial_screenshot}
+
 *** Keywords ***
 Take Screenshot And Verify
     [Arguments]  @{expected files}
