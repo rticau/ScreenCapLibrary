@@ -15,6 +15,7 @@
 
 import os
 import time
+
 from mss import mss
 from PIL import Image
 from robot.api import logger
@@ -22,6 +23,16 @@ from robot.utils import get_link_path, abspath, timestr_to_secs, is_truthy
 from robot.libraries.BuiltIn import BuiltIn
 from .version import VERSION
 from .pygtk import _take_gtk_screenshot, _take_gtk_screen_size
+
+
+from mss import mss
+from PIL import Image
+from robot.api import logger
+
+from robot.utils import get_link_path, abspath, timestr_to_secs, is_truthy
+from robot.libraries.BuiltIn import BuiltIn
+from .version import VERSION
+from .pygtk import _take_gtk_screenshot, _take_partial_gtk_screenshot, _take_gtk_screen_size
 
 __version__ = VERSION
 
@@ -43,7 +54,7 @@ class ScreenCapLibrary:
     - [https://python-mss.readthedocs.io| mss ] a fast cross-platform module used for taking screenshots and saving
      them in PNG format.
 
-    - [https://pillow.readthedocs.io | Pillow] used on top of ``mss`` in order to save the screenshots in JPG/JPEG format.
+    - [https://pillow.readthedocs.io | Pillow] used on top of ``mss`` in order to save the screenshots in JPG/JPEG/WebP format.
 
     - [http://pygtk.org/ | PyGTK] is an alternative to ``mss`` for taking screenshots when using VNC.
 
@@ -57,11 +68,19 @@ class ScreenCapLibrary:
     ``screenshot_directory`` argument when `importing` the library and using
     `Set Screenshot Directory` keyword during execution. It is also possible
     to save screenshots using an absolute path.
+
+    ==Time format==
+
+    All delays and time intervals can be given as numbers considered seconds
+    (e.g. ``0.5`` or ``42``) or in Robot Framework's time syntax
+    (e.g. ``1.5 seconds`` or ``1 min 30 s``). For more information about
+    the time syntax see the
+    [http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#time-format|Robot Framework User Guide].
     """
 
     ROBOT_LIBRARY_VERSION = __version__
 
-    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50):
+    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0):
         """
         ``screenshot_module`` specifies the module or tool to use when taking screenshots using this library.
         If no tool or module is specified, ``mss`` will be used by default. For running
@@ -72,13 +91,16 @@ class ScreenCapLibrary:
         `Set Screenshot Directory` keyword.
 
         ``format`` specifies the format in which the screenshots will be saved.
-        Possible values are ``png``,  ``jpeg`` and ``jpg``, case-insensitively.
+        Possible values are ``png``,  ``jpeg``, ``jpg`` and ``webp``, case-insensitively.
         If no value is given the format is set by default to ``png``.
 
         ``quality`` can take values in range [0, 100]. Value 0 is lowest quality,
         while value 100 is maximum quality. The quality is directly proportional
         with file size. Because PNG uses lossless compression its size
         may be larger than the size of the JPG file. The default value is 50.
+
+        ``delay`` specifies the waiting time before taking a screenshot. See
+        `Time format` section for more information. By default the delay is 0.
 
         Examples (use only one of these):
         | =Setting= |  =Value=   |  =Value=                        |
@@ -87,11 +109,33 @@ class ScreenCapLibrary:
         | Library   | Screenshot | screenshot_directory=${TEMPDIR} |
         | Library   | Screenshot | format=jpg                      |
         | Library   | Screenshot | quality=0                       |
+
+        = Boolean arguments =
+
+        Some keywords accept arguments that are handled as Boolean values true or
+        false. If such an argument is given as a string, it is considered false if
+        it is either an empty string or case-insensitively equal to ``false``,
+        ``none`` or ``no``. Other strings are considered true regardless
+        their value, and other argument types are tested using the same
+        [http://docs.python.org/2/library/stdtypes.html#truth-value-testing|rules
+        as in Python].
+
+        True examples:
+        | `Take Partial Screenshot` | embed=True    | # Strings are generally true.    |
+        | `Take Partial Screenshot` | embed=yes     | # Same as the above.             |
+        | `Take Partial Screenshot` | embed=${TRUE} | # Python ``True`` is true.       |
+        | `Take Partial Screenshot` | embed=${42}   | # Numbers other than 0 are true. |
+        False examples:
+        | `Take Partial Screenshot` | embed=False    | # String ``false`` is false.   |
+        | `Take Partial Screenshot` | embed=no       | # Also string ``no`` is false. |
+        | `Take Partial Screenshot` | embed=${EMPTY} | # Empty string is false.       |
+        | `Take Partial Screenshot` | embed=${FALSE} | # Python ``False`` is false.   |
         """
         self._screenshot_module = screenshot_module
         self._given_screenshot_dir = self._norm_path(screenshot_directory)
         self._format = format
         self._quality = quality
+        self._delay = delay
 
     @staticmethod
     def _norm_path(path):
@@ -158,7 +202,7 @@ class ScreenCapLibrary:
 
     def _get_screenshot_path(self, basename, format, directory):
         directory = self._norm_path(directory) if directory else self._screenshot_dir
-        if basename.lower().endswith(('.jpg', '.jpeg', '.png')):
+        if basename.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
             return os.path.join(directory, basename)
         index = 0
         while True:
@@ -193,6 +237,14 @@ class ScreenCapLibrary:
             img.save(path, quality=self._pil_quality_conversion(quality))
         return path
 
+    def _take_webp_screenshot(self, name, format, quality):
+        with mss() as sct:
+            sct_img = sct.grab(sct.monitors[0])
+            img = Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX')
+            path = self._save_screenshot_path(name, format)
+            img.save(path, quality=quality)
+        return path
+
     def _take_screenshot(self, name, format, quality):
         format = (format or self._format).lower()
         quality = quality or self._quality
@@ -201,12 +253,19 @@ class ScreenCapLibrary:
             if format == 'png':
                 quality = self._compression_value_conversion(quality)
             path = self._save_screenshot_path(name, format)
+            if format == 'webp':
+                png_img = _take_gtk_screenshot(path, 'png', self._compression_value_conversion(100))
+                im = Image.open(png_img)
+                im.save(path, format, quality=quality)
+                return path
             return _take_gtk_screenshot(path, format, quality)
         else:
             if format == 'png':
                 return self._take_png_screenshot(name, format, quality)
             elif format in ['jpg', 'jpeg']:
                 return self._take_jpg_screenshot(name, format, quality)
+            elif format == 'webp':
+                return self._take_webp_screenshot(name, format, quality)
             else:
                 raise RuntimeError("Invalid screenshot format.")
 
@@ -261,13 +320,13 @@ class ScreenCapLibrary:
             self._embed_screenshot(path, embed_width)
         return path
 
-    def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px'):
+    def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px', delay=0):
         """Takes a screenshot in the specified format at library import and
         embeds it into the log file (PNG by default).
 
         Name of the file where the screenshot is stored is derived from the
-        given ``name``. If the ``name`` ends with extension ``.jpg``, ``.jpeg``
-        or ``.png``, the screenshot will be stored with that exact name.
+        given ``name``. If the ``name`` ends with extension ``.jpg``, ``.jpeg``,
+        ``.png`` or ``.webp``, the screenshot will be stored with that exact name.
         Otherwise a unique name is created by adding an underscore, a running
         index and an extension to the ``name``.
 
@@ -277,13 +336,16 @@ class ScreenCapLibrary:
 
         ``format`` specifies the format in which the screenshot is saved. If
         no format is provided the library import value will be used which is
-        ``png`` by default. Can be either ``jpg``, ``jpeg`` or ``png``, case
-        insensitive.
+        ``png`` by default. Can be either ``jpg``, ``jpeg``, ``png``, or ``webp``,
+        case insensitive.
 
         ``quality`` can take values in range [0, 100]. In case of JPEG format
         it can drastically reduce the file size of the image.
 
         ``width`` specifies the size of the screenshot in the log file.
+
+        ``delay`` specifies the waiting time before taking a screenshot. See
+        `Time format` section for more information. By default the delay is 0.
 
         Examples: (LOGDIR is determined automatically by the library)
         | Take Screenshot |                  |            | # LOGDIR/screenshot_1.png (index automatically incremented) |
@@ -296,20 +358,79 @@ class ScreenCapLibrary:
 
         The path where the screenshot is saved is returned.
         """
+        delay = delay or self._delay
+        if delay:
+            time.sleep(timestr_to_secs(delay))
         path = self._take_screenshot(name, format, quality)
         self._embed_screenshot(path, width)
+        return path
+
+    def take_partial_screenshot(self, name='screenshot', format=None, quality=None,
+                                left=0, top=0, width=700, height=300, embed=False, embed_width='800px'):
+        """
+        Takes a partial screenshot in the specified format and dimensions at
+        library import and embeds it into the log file (PNG by default).
+
+        This keyword is similar with ``Take Screenshot`` but has some extra parameters listed below:.
+
+        ``left`` specifies the cropping distance on the X axis from the left of the screen capture.
+
+        ``top`` specifies the cropping distance on the Y axis from the top of the screen capture.
+
+        ``width`` specifies the width of a screen capture when using partial screen captures.
+
+        ``height`` specifies the height of a screen capture when using partial screen captures.
+
+        ``embed`` specifies if the screenshot should be embedded in the log file or not.  See
+        `Boolean arguments`  for more details.
+
+        ``embed_width`` specifies the size of the screenshot that is embedded in the log file.
+         """
+        left = int(left)
+        top = int(top)
+        width = int(width)
+        height = int(height)
+        format = (format or self._format).lower()
+        quality = quality or self._quality
+
+        if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
+            format = 'jpeg' if format == 'jpg' else format
+            if format == 'png':
+                quality = self._compression_value_conversion(quality)
+            path = self._save_screenshot_path(name, format)
+            path = _take_partial_gtk_screenshot(path, format, quality, left, top, width, height)
+        else:
+            try:
+                original_image = self.take_screenshot(name, format, quality)
+                image = Image.open(original_image)
+                box = (left, top, width, height)
+                cropped_image = image.crop(box)
+            except IOError:
+                raise IOError('File not found.')
+            except RuntimeError:
+                raise RuntimeError('Taking screenshot failed.')
+            except SystemError:
+                raise SystemError("Top and left parameters must be lower than screen resolution.")
+            os.remove(original_image)
+            path = self._save_screenshot_path(basename=name, format=format)
+            cropped_image.save(path, format)
+        if is_truthy(embed):
+            self._embed_screenshot(path, embed_width)
         return path
 
     def _embed_screenshot(self, path, width):
         link = get_link_path(path, self._log_dir)
         logger.info('<a href="%s"><img src="%s" width="%s"></a>' % (link, link, width), html=True)
 
-    def take_screenshot_without_embedding(self, name="screenshot", format=None, quality=None):
+    def take_screenshot_without_embedding(self, name="screenshot", format=None, quality=None, delay=0):
         """Takes a screenshot and links it from the log file.
         This keyword is otherwise identical to `Take Screenshot` but the saved
         screenshot is not embedded into the log file. The screenshot is linked
         so it is nevertheless easily available.
         """
+        delay = delay or self._delay
+        if delay:
+            time.sleep(timestr_to_secs(delay))
         path = self._take_screenshot(name, format, quality)
         self._link_screenshot(path)
         return path
@@ -317,3 +438,37 @@ class ScreenCapLibrary:
     def _link_screenshot(self, path):
         link = get_link_path(path, self._log_dir)
         logger.info("Screenshot saved to '<a href=\"%s\">%s</a>'." % (link, path), html=True)
+
+    def take_multiple_screenshots(self, name="screenshot", format=None, quality=None, screenshot_number=2, delay_time=0,
+                                  embed=None, embed_width='800px'):
+        """Takes the specified number of screenshots in the specified format
+        at library import and embeds it into the log file (PNG by default).
+
+        This keyword is similar with `Take Screenshot` but has some extra
+        parameters listed below:
+
+        ``screenshot_number`` specifies the number of screenshots to be taken.
+        By default this number is 2.
+
+        ``delay_time`` specifies the waiting time before taking another
+        screenshot. See `Time format` section for more information. By
+        default the delay time  is 0.
+
+        ``embed`` specifies if the screenshot should be embedded in the log file
+        or not. See `Boolean arguments` for more details.
+
+        ``embed_width`` specifies the size of the screenshot that is
+        embedded in the log file.
+        """
+        paths = []
+        try:
+            for i in range(int(screenshot_number)):
+                path = self.take_screenshot(name, format, quality)
+                if delay_time:
+                    time.sleep(timestr_to_secs(delay_time))
+                paths.append(path)
+                if is_truthy(embed):
+                    self._embed_screenshot(path, embed_width)
+        except ValueError:
+            raise RuntimeError("Screenshot number argument must be of type integer.")
+        return paths

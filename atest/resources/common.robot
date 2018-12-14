@@ -3,6 +3,7 @@ Library  ScreenCapLibrary
 Library  ScreenCapLibrary  screenshot_module=PyGTK  WITH NAME  ScreenCapLibraryGtk
 Library  OperatingSystem
 Library  Collections
+Library  DateTime
 
 *** Keywords ***
 Screenshot Should Exist

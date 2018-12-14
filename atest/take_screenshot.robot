@@ -12,8 +12,10 @@ ${FIRST_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo_1.png
 ${SECOND_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo_2.png
 ${PNG_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo.png
 ${JPG_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo.jpg
+${WEBP_CUSTOM_SCREENSHOT}  ${OUTPUTDIR}${/}foo.webp
 ${GTK_PNG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_png.png
 ${GTK_JPEG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_jpeg.jpeg
+${GTK_WEBP_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_webp.webp
 ${GIF_SCREENSHOT}  ${OUTPUTDIR}${/}screenshot_1.gif
 
 *** Test Cases ***
@@ -45,15 +47,47 @@ Basename With Non-existing Directories Fails
 Without Embedding
     ScreenCapLibrary.Take Screenshot Without Embedding  no_embed.png
 
+Without Embedding With Delay
+    ScreenCapLibrary.Take Screenshot Without Embedding  delay=10seconds
+
 Png Screenshot Quality
     Compare Size  ${PNG_CUSTOM_SCREENSHOT}  png
 
 Jpg Screenshot Quality
+    [Tags]  no-xvfb
     Compare Size  ${JPG_CUSTOM_SCREENSHOT}  jpg
 
-Png Screenshot Gtk
+Webp Screenshot Quality
+    [Tags]  no-xvfb
+    Compare Size  ${WEBP_CUSTOM_SCREENSHOT}  webp
+
+Screenshot Formats Gtk
     ScreenCapLibraryGtk.Take Screenshot  ${GTK_PNG_SCREENSHOT}  png
+    Screenshot Should Exist  ${GTK_PNG_SCREENSHOT}
     ScreenCapLibraryGtk.Take Screenshot  ${GTK_JPEG_SCREENSHOT}  jpeg
+    Screenshot Should Exist  ${GTK_JPEG_SCREENSHOT}
+    ScreenCapLibraryGtk.Take Screenshot  ${GTK_WEBP_SCREENSHOT}  webp
+    Screenshot Should Exist  ${GTK_WEBP_SCREENSHOT}
+
+Take Screenshot With Delay
+    ${start_date}=  DateTime.Get Current Date
+    ${screenshot_with_delay}=  ScreenCapLibrary.Take Screenshot  screenshot_with_delay  delay=10seconds
+    ${end_date}=  DateTime.Get Current Date
+    Screenshots Should Exist  ${OUTPUTDIR}  ${screenshot_with_delay}
+    ${actual_time}=  DateTime.Subtract Date From Date  ${end_date}  ${start_date}
+    Should Be True  ${actual_time} > 10
+
+Take Screenshots
+    @{screenshots}=  ScreenCapLibraryGtk.Take Multiple Screenshots  screenshot_number=4  delay_time=3seconds  embed=False
+    Screenshots Should Exist  ${OUTPUTDIR}  @{screenshots}
+
+Take Screenshot With Partial Dimensions
+    ${partial_screenshot}=  ScreenCapLibrary.Take Partial Screenshot  left=50  height=300  width=700
+    Screenshot Should Exist  ${partial_screenshot}
+
+Take Partial Gtk Screenshot
+    ${partial_screenshot}=  ScreenCapLibraryGtk.Take Partial Screenshot  left=50  height=300  width=700
+    Screenshot Should Exist  ${partial_screenshot}
 
 Take Gif
     ScreenCapLibrary.Take Gif Screenshot

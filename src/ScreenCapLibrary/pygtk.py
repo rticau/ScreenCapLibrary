@@ -36,6 +36,20 @@ def _gtk_quality(format, quality):
     return quality_setting
 
 
+def _grab_screenshot_gtk_py2():
+    window = gdk.get_default_root_window()
+    if not window:
+        raise RuntimeError('Taking screenshot failed.')
+    width, height = window.get_size()
+    pb = gdk.Pixbuf(gdk.COLORSPACE_RGB, False, 8, width, height)
+    pb = pb.get_from_drawable(window, window.get_colormap(),
+                              0, 0, 0, 0, width, height)
+    if not pb:
+        raise RuntimeError('Taking screenshot failed.')
+    else:
+        return pb
+
+
 def _take_gtk_screenshot(path, format, quality):
     if not gdk and not Gdk:
         raise RuntimeError('PyGTK not installed/supported on this platform.')
@@ -46,15 +60,7 @@ def _take_gtk_screenshot(path, format, quality):
 
 
 def _take_gtk_screenshot_py2(path, format, quality):
-    window = gdk.get_default_root_window()
-    if not window:
-        raise RuntimeError('Taking screenshot failed.')
-    width, height = window.get_size()
-    pb = gdk.Pixbuf(gdk.COLORSPACE_RGB, False, 8, width, height)
-    pb = pb.get_from_drawable(window, window.get_colormap(),
-                              0, 0, 0, 0, width, height)
-    if not pb:
-        raise RuntimeError('Taking screenshot failed.')
+    pb = _grab_screenshot_gtk_py2()
     quality_setting = _gtk_quality(format, quality)
     pb.save(path, format, quality_setting)
     return path
@@ -90,3 +96,33 @@ def _take_gtk_screen_size():
         width = window.get_width()
         height = window.get_height()
         return width, height
+
+def _take_partial_gtk_screenshot(path, format, quality, left, top, width, height):
+    if not gdk and not Gdk:
+        raise RuntimeError('PyGTK not installed/supported on this platform.')
+    if gdk:
+        return _take_partial_gtk_screenshot_py2(path, format, quality, left, top, width, height)
+    elif Gdk:
+        return _take_partial_gtk_screenshot_py3(path, format, quality, left, top, width, height)
+
+
+def _take_partial_gtk_screenshot_py2(path, format, quality, left, top, width, height):
+    source_pb = _grab_screenshot_gtk_py2()
+    quality_setting = _gtk_quality(format, quality)
+    cropped_pb = source_pb.subpixbuf(left, top, width, height)
+    if not cropped_pb:
+        raise RuntimeError('Taking screenshot failed.')
+    cropped_pb.save(path, format, quality_setting)
+    return path
+
+
+def _take_partial_gtk_screenshot_py3(path, format, quality, left, top, width, height):
+    window = Gdk.get_default_root_window()
+    if not window:
+        raise RuntimeError('Taking screenshot failed.')
+    cropped_pb = Gdk.pixbuf_get_from_window(window, left, top, width, height)
+    if not cropped_pb:
+        raise RuntimeError('Taking screenshot failed.')
+    quality_setting = _gtk_quality(format, quality)
+    cropped_pb.savev(path, format, [list(quality_setting.keys())[0]], [list(quality_setting.values())[0]])
+    return path
