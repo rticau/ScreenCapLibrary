@@ -290,12 +290,12 @@ class ScreenCapLibrary:
         logger.info("Screenshot saved to '<a href=\"%s\">%s</a>'." % (link, path), html=True)
 
     def take_multiple_screenshots(self, name="screenshot", format=None, quality=None, screenshot_number=2, delay_time=0,
-                                  embed=None, width='800px', ):
+                                  embed=None, embed_width='800px'):
         """Takes the specified number of screenshots in the specified format
         at library import and embeds it into the log file (PNG by default).
 
-        This keyword is similar with ``Take Screenshot`` with some parameters
-        exception found only in this keyword.
+        This keyword is similar with `Take Screenshot` but has some extra
+        parameters listed below:
 
         ``screenshot_number`` specifies the number of screenshots to be taken.
         By default this number is 2.
@@ -304,15 +304,11 @@ class ScreenCapLibrary:
         screenshot. See `Time format` section for more information. By
         default the delay time  is 0.
 
-        ``embed`` parameter specifies if the screenshots should be embedded
-        or not.
+        ``embed`` specifies if the screenshot should be embedded in the log file
+        or not. See `Boolean arguments` for more details.
 
-        Validation rules:
-        - If the value is a string, it is considered `True` if it is not `FALSE`,
-        `NO`, 'NONE' or '', case-insensitively.
-        - Other values are handled by using the standard `bool()` function.
-
-        `width`` specifies the size of the screenshot in the log file.
+        ``embed_width`` specifies the size of the screenshot that is
+        embedded in the log file.
         """
         paths = []
         try:
@@ -322,7 +318,7 @@ class ScreenCapLibrary:
                     time.sleep(timestr_to_secs(delay_time))
                 paths.append(path)
                 if is_truthy(embed):
-                    self._embed_screenshot(path, width)
+                    self._embed_screenshot(path, embed_width)
         except ValueError:
             raise RuntimeError("Screenshot number argument must be of type integer.")
         return paths
