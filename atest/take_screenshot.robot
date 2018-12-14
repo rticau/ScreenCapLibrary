@@ -57,6 +57,7 @@ Jpg Screenshot Quality
     Compare Size  ${JPG_CUSTOM_SCREENSHOT}  jpg
 
 Webp Screenshot Quality
+    [Tags]  no-xvfb
     Compare Size  ${WEBP_CUSTOM_SCREENSHOT}  webp
 
 Screenshot Formats Gtk
