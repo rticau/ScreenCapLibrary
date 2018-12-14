@@ -19,7 +19,7 @@ import time
 from mss import mss
 from PIL import Image
 from robot.api import logger
-from robot.utils import get_link_path, abspath, timestr_to_secs
+from robot.utils import get_link_path, abspath, timestr_to_secs, is_truthy
 from robot.libraries.BuiltIn import BuiltIn
 from .version import VERSION
 from .pygtk import _take_gtk_screenshot
@@ -303,3 +303,37 @@ class ScreenCapLibrary:
     def _link_screenshot(self, path):
         link = get_link_path(path, self._log_dir)
         logger.info("Screenshot saved to '<a href=\"%s\">%s</a>'." % (link, path), html=True)
+
+    def take_multiple_screenshots(self, name="screenshot", format=None, quality=None, screenshot_number=2, delay_time=0,
+                                  embed=None, embed_width='800px'):
+        """Takes the specified number of screenshots in the specified format
+        at library import and embeds it into the log file (PNG by default).
+
+        This keyword is similar with `Take Screenshot` but has some extra
+        parameters listed below:
+
+        ``screenshot_number`` specifies the number of screenshots to be taken.
+        By default this number is 2.
+
+        ``delay_time`` specifies the waiting time before taking another
+        screenshot. See `Time format` section for more information. By
+        default the delay time  is 0.
+
+        ``embed`` specifies if the screenshot should be embedded in the log file
+        or not. See `Boolean arguments` for more details.
+
+        ``embed_width`` specifies the size of the screenshot that is
+        embedded in the log file.
+        """
+        paths = []
+        try:
+            for i in range(int(screenshot_number)):
+                path = self.take_screenshot(name, format, quality)
+                if delay_time:
+                    time.sleep(timestr_to_secs(delay_time))
+                paths.append(path)
+                if is_truthy(embed):
+                    self._embed_screenshot(path, embed_width)
+        except ValueError:
+            raise RuntimeError("Screenshot number argument must be of type integer.")
+        return paths
