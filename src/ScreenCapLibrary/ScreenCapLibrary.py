@@ -46,8 +46,8 @@ class ScreenCapLibrary:
     = Usage =
 
     How screenshots are taken when using Python depends on the chosen format.
-    There are two formats supported: PNG and JPG/JPEG. If no format is specified
-    the screenshots will have the PNG format.
+    There are several supported formats: PNG, JPG/JPEG, GIF and WebP. If no format
+    is specified the screenshots will have the PNG format.
 
     For taking screenshots the following modules are used:
 
@@ -69,13 +69,34 @@ class ScreenCapLibrary:
     `Set Screenshot Directory` keyword during execution. It is also possible
     to save screenshots using an absolute path.
 
-    ==Time format==
+    = Time format =
 
     All delays and time intervals can be given as numbers considered seconds
     (e.g. ``0.5`` or ``42``) or in Robot Framework's time syntax
     (e.g. ``1.5 seconds`` or ``1 min 30 s``). For more information about
     the time syntax see the
     [http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#time-format|Robot Framework User Guide].
+
+    = Boolean arguments =
+
+    Some keywords accept arguments that are handled as Boolean values true or
+    false. If such an argument is given as a string, it is considered false if
+    it is either an empty string or case-insensitively equal to ``false``,
+    ``none`` or ``no``. Other strings are considered true regardless
+    their value, and other argument types are tested using the same
+    [http://docs.python.org/2/library/stdtypes.html#truth-value-testing|rules
+    as in Python].
+
+    True examples:
+    | `Take Partial Screenshot` | embed=True    | # Strings are generally true.    |
+    | `Take Partial Screenshot` | embed=yes     | # Same as the above.             |
+    | `Take Partial Screenshot` | embed=${TRUE} | # Python ``True`` is true.       |
+    | `Take Partial Screenshot` | embed=${42}   | # Numbers other than 0 are true. |
+    False examples:
+    | `Take Partial Screenshot` | embed=False    | # String ``false`` is false.   |
+    | `Take Partial Screenshot` | embed=no       | # Also string ``no`` is false. |
+    | `Take Partial Screenshot` | embed=${EMPTY} | # Empty string is false.       |
+    | `Take Partial Screenshot` | embed=${FALSE} | # Python ``False`` is false.   |
     """
 
     ROBOT_LIBRARY_VERSION = __version__
@@ -110,26 +131,6 @@ class ScreenCapLibrary:
         | Library   | Screenshot | format=jpg                      |
         | Library   | Screenshot | quality=0                       |
 
-        = Boolean arguments =
-
-        Some keywords accept arguments that are handled as Boolean values true or
-        false. If such an argument is given as a string, it is considered false if
-        it is either an empty string or case-insensitively equal to ``false``,
-        ``none`` or ``no``. Other strings are considered true regardless
-        their value, and other argument types are tested using the same
-        [http://docs.python.org/2/library/stdtypes.html#truth-value-testing|rules
-        as in Python].
-
-        True examples:
-        | `Take Partial Screenshot` | embed=True    | # Strings are generally true.    |
-        | `Take Partial Screenshot` | embed=yes     | # Same as the above.             |
-        | `Take Partial Screenshot` | embed=${TRUE} | # Python ``True`` is true.       |
-        | `Take Partial Screenshot` | embed=${42}   | # Numbers other than 0 are true. |
-        False examples:
-        | `Take Partial Screenshot` | embed=False    | # String ``false`` is false.   |
-        | `Take Partial Screenshot` | embed=no       | # Also string ``no`` is false. |
-        | `Take Partial Screenshot` | embed=${EMPTY} | # Empty string is false.       |
-        | `Take Partial Screenshot` | embed=${FALSE} | # Python ``False`` is false.   |
         """
         self._screenshot_module = screenshot_module
         self._given_screenshot_dir = self._norm_path(screenshot_directory)
@@ -269,7 +270,7 @@ class ScreenCapLibrary:
             else:
                 raise RuntimeError("Invalid screenshot format.")
 
-    def take_gif_screenshot(self, name="screenshot", duration=10, frame_time=100, size_percentage=0.25,
+    def take_gif(self, name="screenshot", duration=10, frame_time=100, size_percentage=0.25,
                             embed=None, embed_width='800px'):
         """
         Takes a GIF with the specified ``name``.
@@ -282,13 +283,13 @@ class ScreenCapLibrary:
         ``frame_time`` When replaying a GIF this parameter indicates how much time (milliseconds)
         will pass until switching to another frame of the GIF.
 
-        ``size_percentage`` in order to reduce the size of the GIFs a resize of the
-        screencaptures was needed. ``size_percentage`` will specify how much this
-        reduction is with respect to screen resolution. By default this parameter
-        is set to resize the images to 0.25 of the screen resolution.
+        ``size_percentage`` is used to reduce the size of the GIFs a resize of the
+        screencaptures. It will specify how much this reduction is with respect to
+        screen resolution. By default this parameter is set to resize the images to
+        0.25 of the screen resolution.
 
         ``embed`` specifies if the screenshot should be embedded in the log file
-        or not. See `Boolean arguments` for more details.
+        or not. See `Boolean arguments` section for more details.
 
         ``embed_width`` specifies the size of the screenshot that is
         embedded in the log file.
@@ -371,7 +372,7 @@ class ScreenCapLibrary:
         Takes a partial screenshot in the specified format and dimensions at
         library import and embeds it into the log file (PNG by default).
 
-        This keyword is similar with ``Take Screenshot`` but has some extra parameters listed below:.
+        This keyword is similar with `Take Screenshot` but has some extra parameters listed below:.
 
         ``left`` specifies the cropping distance on the X axis from the left of the screen capture.
 
@@ -381,8 +382,8 @@ class ScreenCapLibrary:
 
         ``height`` specifies the height of a screen capture when using partial screen captures.
 
-        ``embed`` specifies if the screenshot should be embedded in the log file or not.  See
-        `Boolean arguments`  for more details.
+        ``embed`` specifies if the screenshot should be embedded in the log file or not. See
+        `Boolean arguments` section for more details.
 
         ``embed_width`` specifies the size of the screenshot that is embedded in the log file.
          """
@@ -455,7 +456,7 @@ class ScreenCapLibrary:
         default the delay time  is 0.
 
         ``embed`` specifies if the screenshot should be embedded in the log file
-        or not. See `Boolean arguments` for more details.
+        or not. See `Boolean arguments` section for more details.
 
         ``embed_width`` specifies the size of the screenshot that is
         embedded in the log file.
