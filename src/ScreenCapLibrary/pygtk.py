@@ -12,8 +12,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import os
-import time
 try:
     from gtk import gdk
 except ImportError:
@@ -96,6 +94,7 @@ def _take_gtk_screen_size():
         width = window.get_width()
         height = window.get_height()
         return width, height
+
 
 def _take_partial_gtk_screenshot(path, format, quality, left, top, width, height):
     if not gdk and not Gdk:
