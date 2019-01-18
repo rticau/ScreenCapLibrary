@@ -12,7 +12,7 @@ addons:
     - sourceline: 'deb http://us-east-1.ec2.archive.ubuntu.com/ubuntu/ xenial universe multiverse'
     update: true
 before_script:
-- pip install robotframework==3.0.4
+- pip install robotframework==3.1.1
 - export DISPLAY=:99.0
 - sh -e /etc/init.d/xvfb start
 before_install:
