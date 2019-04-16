@@ -130,7 +130,7 @@ class ScreenCapLibrary:
 
         The directory can also be set in `importing`.
         """
-        return self._client._set_screenshot_directory(path)
+        return self._client.set_screenshot_directory(path)
 
     def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px', delay=0):
         """Takes a screenshot in the specified format at library import and
@@ -170,7 +170,7 @@ class ScreenCapLibrary:
 
         The path where the screenshot is saved is returned.
         """
-        return self._client._take_screenshot(name, format, quality, width, delay)
+        return self._client.take_screenshot(name, format, quality, width, delay)
 
     def take_gif(self, name="screenshot", duration=10, frame_time=100, size_percentage=0.25,
                  embed=None, embed_width='800px'):
@@ -196,8 +196,8 @@ class ScreenCapLibrary:
         ``embed_width`` specifies the size of the screenshot that is
         embedded in the log file.
         """
-        return self._client._take_gif(name, duration, frame_time, size_percentage,
-                                      embed, embed_width)
+        return self._client.take_gif(name, duration, frame_time, size_percentage,
+                                     embed, embed_width)
 
     def take_partial_screenshot(self, name='screenshot', format=None, quality=None,
                                 left=0, top=0, width=700, height=300, embed=False, embed_width='800px'):
@@ -220,8 +220,8 @@ class ScreenCapLibrary:
 
         ``embed_width`` specifies the size of the screenshot that is embedded in the log file.
         """
-        return self._client._take_partial_screenshot(name, format, quality,
-                                                     left, top, width, height, embed, embed_width)
+        return self._client.take_partial_screenshot(name, format, quality,
+                                                    left, top, width, height, embed, embed_width)
 
     def take_screenshot_without_embedding(self, name="screenshot", format=None, quality=None, delay=0):
         """Takes a screenshot and links it from the log file.
@@ -229,7 +229,7 @@ class ScreenCapLibrary:
         screenshot is not embedded into the log file. The screenshot is linked
         so it is nevertheless easily available.
         """
-        return  self._client._take_screenshot_without_embedding(name, format, quality, delay)
+        return self._client.take_screenshot_without_embedding(name, format, quality, delay)
 
     def take_multiple_screenshots(self, name="screenshot", format=None, quality=None, screenshot_number=2, delay_time=0,
                                   embed=None, embed_width='800px'):
@@ -252,5 +252,5 @@ class ScreenCapLibrary:
         ``embed_width`` specifies the size of the screenshot that is
         embedded in the log file.
         """
-        return self._client._take_multiple_screenshots(name, format, quality, screenshot_number, delay_time,
-                                                       embed, embed_width)
+        return self._client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time,
+                                                      embed, embed_width)

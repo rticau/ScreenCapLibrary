@@ -47,7 +47,7 @@ class Client:
         log = os.path.dirname(log) if log != 'NONE' else '.'
         return _norm_path(os.path.join(outdir, log))
 
-    def _set_screenshot_directory(self, path):
+    def set_screenshot_directory(self, path):
         path = _norm_path(path)
         if not os.path.isdir(path):
             raise RuntimeError("Directory '%s' does not exist." % path)
@@ -66,7 +66,8 @@ class Client:
             if not os.path.exists(path):
                 return path
 
-    def _validate_screenshot_path(self, path):
+    @staticmethod
+    def _validate_screenshot_path(path):
         path = abspath(_norm_path(path))
         if not os.path.exists(os.path.dirname(path)):
             raise RuntimeError("Directory '%s' where to save the screenshot "
@@ -77,7 +78,7 @@ class Client:
         path = self._get_screenshot_path(basename, format, directory)
         return self._validate_screenshot_path(path)
 
-    def _take_screenshot(self, name, format, quality, width='800px', delay=0):
+    def take_screenshot(self, name, format, quality, width='800px', delay=0):
         delay = delay or self._delay
         if delay:
             time.sleep(timestr_to_secs(delay))
@@ -122,8 +123,8 @@ class Client:
         else:
             raise RuntimeError("Invalid screenshot format.")
 
-    def _take_multiple_screenshots(self, name, format, quality, screenshot_number, delay_time,
-                                   embed, embed_width):
+    def take_multiple_screenshots(self, name, format, quality, screenshot_number, delay_time,
+                                  embed, embed_width):
         paths = []
         try:
             for i in range(int(screenshot_number)):
@@ -137,8 +138,8 @@ class Client:
             raise RuntimeError("Screenshot number argument must be of type integer.")
         return paths
 
-    def _take_partial_screenshot(self, name, format, quality,
-                                 left, top, width, height, embed, embed_width):
+    def take_partial_screenshot(self, name, format, quality,
+                                left, top, width, height, embed, embed_width):
         left = int(left)
         top = int(top)
         width = int(width)
@@ -154,7 +155,7 @@ class Client:
             path = _take_partial_gtk_screenshot(path, format, quality, left, top, width, height)
         else:
             try:
-                original_image = self._take_screenshot(name, format, quality)
+                original_image = self.take_screenshot(name, format, quality)
                 image = Image.open(original_image)
                 box = (left, top, width, height)
                 cropped_image = image.crop(box)
@@ -171,8 +172,8 @@ class Client:
             self._embed_screenshot(path, embed_width)
         return path
 
-    def _take_gif(self, name, duration, frame_time, size_percentage,
-                  embed, embed_width):
+    def take_gif(self, name, duration, frame_time, size_percentage,
+                 embed, embed_width):
         start_time = time.time()
         if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
             frames = self._take_gif_gtk(name, duration, size_percentage, start_time)
@@ -198,7 +199,8 @@ class Client:
             os.remove(pygtk_img)
         return frames
 
-    def _take_gif_mss(self, duration, size_percentage, start_time):
+    @staticmethod
+    def _take_gif_mss(duration, size_percentage, start_time):
         frames = []
         with mss() as sct:
             gif_width = int(sct.grab(sct.monitors[0]).size.width * size_percentage)
@@ -209,7 +211,7 @@ class Client:
                 frames.append(img)
             return frames
 
-    def _take_screenshot_without_embedding(self, name, format, quality, delay):
+    def take_screenshot_without_embedding(self, name, format, quality, delay):
         delay = delay or self._delay
         if delay:
             time.sleep(timestr_to_secs(delay))
