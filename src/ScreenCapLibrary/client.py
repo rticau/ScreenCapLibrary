@@ -29,6 +29,7 @@ from .pygtk import _take_gtk_screenshot, _take_partial_gtk_screenshot, _take_gtk
 from .utils import _norm_path, _compression_value_conversion, _pil_quality_conversion
 
 _THREAD_POOL = ThreadPoolExecutor()
+future_list = []
 
 
 def run_in_background(f, executor=None):
@@ -53,6 +54,7 @@ class Client:
         self.size_percentage = None
         self.embed = None
         self.embed_width = None
+        self.futures = None
 
     @property
     def _screenshot_dir(self):
@@ -158,6 +160,8 @@ class Client:
         return paths
 
     def stop_gif(self):
+        if self.futures._exception:
+            raise self.futures._exception
         _THREAD_POOL._threads.clear()
         _threads_queues.clear()
         path = self._save_screenshot_path(basename=self.name, format='gif')
@@ -205,7 +209,7 @@ class Client:
     def take_gif(self, name, duration, frame_time, size_percentage,
                  embed, embed_width):
         self.set_recording_properties(name, duration, frame_time, size_percentage, embed, embed_width)
-        self.grab_frames(duration, size_percentage)
+        self.futures = self.grab_frames(duration, size_percentage)
 
     def set_recording_properties(self, name, duration, frame_time, size_percentage, embed, embed_width):
         self.name = name
