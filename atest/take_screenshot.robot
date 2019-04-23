@@ -90,11 +90,17 @@ Take Partial Gtk Screenshot
     Screenshot Should Exist  ${partial_screenshot}
 
 Take Gif
+    [Tags]  gif
     ScreenCapLibrary.Take Gif
+    Sleep  2
+    ScreenCapLibrary.Stop Gif
     Screenshot Should Exist  ${GIF_SCREENSHOT}
 
 Take Gtk Gif
+    [Tags]  gif
     ScreenCapLibraryGtk.Take Gif
+    Sleep  2
+    ScreenCapLibraryGtk.Stop Gif
     Screenshot Should Exist  ${GIF_SCREENSHOT}
 *** Keywords ***
 Take Screenshot And Verify

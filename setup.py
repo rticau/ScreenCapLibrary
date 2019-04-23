@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import re
+import sys
 from os.path import abspath, dirname, join
 from setuptools import setup
 
@@ -10,6 +11,8 @@ with open(join(CURDIR, 'src', 'ScreenCapLibrary', 'version.py')) as f:
     VERSION = re.search("\nVERSION = '(.*)'", f.read()).group(1)
 with open(join(CURDIR, 'README.rst')) as f:
     DESCRIPTION = f.read()
+if sys.version_info[0] < 3:
+    REQUIREMENTS.append('futures >= 3.2.0')
 CLASSIFIERS = '''
 Development Status :: 5 - Production/Stable
 License :: OSI Approved :: Apache Software License

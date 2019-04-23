@@ -172,7 +172,7 @@ class ScreenCapLibrary:
         """
         return self._client.take_screenshot(name, format, quality, width, delay)
 
-    def take_gif(self, name="screenshot", duration=10, frame_time=100, size_percentage=0.25,
+    def take_gif(self, name="screenshot", duration=100, frame_time=100, size_percentage=0.25,
                  embed=None, embed_width='800px'):
         """
         Takes a GIF with the specified ``name``.
@@ -198,6 +198,9 @@ class ScreenCapLibrary:
         """
         return self._client.take_gif(name, duration, frame_time, size_percentage,
                                      embed, embed_width)
+
+    def stop_gif(self):
+        self._client.stop_gif()
 
     def take_partial_screenshot(self, name='screenshot', format=None, quality=None,
                                 left=0, top=0, width=700, height=300, embed=False, embed_width='800px'):

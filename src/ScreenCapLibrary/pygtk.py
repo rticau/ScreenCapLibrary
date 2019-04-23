@@ -44,8 +44,28 @@ def _grab_screenshot_gtk_py2():
                               0, 0, 0, 0, width, height)
     if not pb:
         raise RuntimeError('Taking screenshot failed.')
-    else:
-        return pb
+    return pb
+
+
+def _grab_screenshot_gtk_py3():
+    window = Gdk.get_default_root_window()
+    if not window:
+        raise RuntimeError('Taking screenshot failed.')
+    width = window.get_width()
+    height = window.get_height()
+    pb = Gdk.pixbuf_get_from_window(window, 0, 0, width, height)
+    if not pb:
+        raise RuntimeError('Taking screenshot failed.')
+    return pb
+
+
+def _grab_gtk_pb():
+    if not gdk and not Gdk:
+        raise RuntimeError('PyGTK not installed/supported on this platform.')
+    if gdk:
+        return _grab_screenshot_gtk_py2()
+    elif Gdk:
+        return _grab_screenshot_gtk_py3()
 
 
 def _take_gtk_screenshot(path, format, quality):
@@ -65,14 +85,7 @@ def _take_gtk_screenshot_py2(path, format, quality):
 
 
 def _take_gtk_screenshot_py3(path, format, quality):
-    window = Gdk.get_default_root_window()
-    if not window:
-        raise RuntimeError('Taking screenshot failed.')
-    width = window.get_width()
-    height = window.get_height()
-    pb = Gdk.pixbuf_get_from_window(window, 0, 0, width, height)
-    if not pb:
-        raise RuntimeError('Taking screenshot failed.')
+    pb = _grab_screenshot_gtk_py3()
     quality_setting = _gtk_quality(format, quality)
     pb.savev(path, format, [list(quality_setting.keys())[0]], [list(quality_setting.values())[0]])
     return path
