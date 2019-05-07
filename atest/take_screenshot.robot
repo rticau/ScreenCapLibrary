@@ -77,9 +77,15 @@ Take Screenshot With Delay
     ${actual_time}=  DateTime.Subtract Date From Date  ${end_date}  ${start_date}
     Should Be True  ${actual_time} > 10
 
-Take Screenshots
-    @{screenshots}=  ScreenCapLibraryGtk.Take Multiple Screenshots  screenshot_number=4  delay_time=3seconds  embed=False
-    Screenshots Should Exist  ${OUTPUTDIR}  @{screenshots}
+Take Multiple Screenshots
+    ScreenCapLibrary.Take Multiple Screenshots  screenshot_number=4  delay_time=1 second
+    Sleep  10
+    Screenshot Number In ${OUTPUTDIR} Should Be 4
+
+Take Multiple Gtk Screenshots
+    ScreenCapLibraryGtk.Take Multiple Screenshots  format=png  screenshot_number=4  delay_time=1 second
+    Sleep  10
+    Screenshot Number In ${OUTPUTDIR} Should Be 4
 
 Take Screenshot With Partial Dimensions
     ${partial_screenshot}=  ScreenCapLibrary.Take Partial Screenshot  left=50  height=300  width=700
@@ -90,17 +96,15 @@ Take Partial Gtk Screenshot
     Screenshot Should Exist  ${partial_screenshot}
 
 Take Gif
-    [Tags]  gif
-    ScreenCapLibrary.Take Gif
+    ScreenCapLibrary.Start Gif Recording
     Sleep  2
-    ScreenCapLibrary.Stop Gif
+    ScreenCapLibrary.Stop Gif Recording
     Screenshot Should Exist  ${GIF_SCREENSHOT}
 
 Take Gtk Gif
-    [Tags]  gif
-    ScreenCapLibraryGtk.Take Gif
+    ScreenCapLibraryGtk.Start Gif Recording
     Sleep  2
-    ScreenCapLibraryGtk.Stop Gif
+    ScreenCapLibraryGtk.Stop Gif Recording
     Screenshot Should Exist  ${GIF_SCREENSHOT}
 *** Keywords ***
 Take Screenshot And Verify

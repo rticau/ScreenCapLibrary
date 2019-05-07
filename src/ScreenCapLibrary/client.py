@@ -22,14 +22,12 @@ from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures.thread import _threads_queues
 from functools import wraps
 from robot.api import logger
-
 from robot.utils import get_link_path, abspath, timestr_to_secs, is_truthy
 from robot.libraries.BuiltIn import BuiltIn
 from .pygtk import _take_gtk_screenshot, _take_partial_gtk_screenshot, _take_gtk_screen_size, _grab_gtk_pb
 from .utils import _norm_path, _compression_value_conversion, _pil_quality_conversion
 
 _THREAD_POOL = ThreadPoolExecutor()
-future_list = []
 
 
 def run_in_background(f, executor=None):
@@ -48,11 +46,8 @@ class Client:
         self._quality = quality
         self._delay = delay
         self.frames = []
-        self.name = None
-        self.duration = None
-        self.frame_time = None
-        self.size_percentage = None
-        self.embed = None
+        self.name = 'screenshot'
+        self.embed = False
         self.embed_width = None
         self.futures = None
 
@@ -144,33 +139,17 @@ class Client:
         else:
             raise RuntimeError("Invalid screenshot format.")
 
-    def take_multiple_screenshots(self, name, format, quality, screenshot_number, delay_time,
-                                  embed, embed_width):
-        paths = []
-        try:
-            for i in range(int(screenshot_number)):
-                path = self._take_screenshot_client(name, format, quality)
-                if delay_time:
-                    time.sleep(timestr_to_secs(delay_time))
-                paths.append(path)
-                if is_truthy(embed):
-                    self._embed_screenshot(path, embed_width)
-        except ValueError:
-            raise RuntimeError("Screenshot number argument must be of type integer.")
-        return paths
-
-    def stop_gif(self):
-        if self.futures._exception:
-            raise self.futures._exception
-        _THREAD_POOL._threads.clear()
-        _threads_queues.clear()
-        path = self._save_screenshot_path(basename=self.name, format='gif')
-        self.frames[0].save(path, save_all=True, append_images=self.frames[1:],
-                            optimize=True, duration=self.duration, loop=0)
-        if is_truthy(self.embed):
-            self._embed_screenshot(path, self.embed_width)
-        self.reset_recording_properties()
-        return path
+    def take_multiple_screenshots(self, name, format, quality, screenshot_number, delay_time):
+        self.frames = []
+        quality = quality or self._quality
+        format = (format or self._format).lower()
+        format = 'jpeg' if format == 'jpg' else format
+        if format == 'png':
+            quality = _compression_value_conversion(quality)
+        elif format == 'jpeg':
+            quality = _pil_quality_conversion(quality)
+        delay_time = timestr_to_secs(delay_time)
+        self.grab_frames(name, format, quality, delay=delay_time, shot_number=int(screenshot_number))
 
     def take_partial_screenshot(self, name, format, quality,
                                 left, top, width, height, embed, embed_width):
@@ -206,54 +185,6 @@ class Client:
             self._embed_screenshot(path, embed_width)
         return path
 
-    def take_gif(self, name, duration, frame_time, size_percentage,
-                 embed, embed_width):
-        self.set_recording_properties(name, duration, frame_time, size_percentage, embed, embed_width)
-        self.futures = self.grab_frames(duration, size_percentage)
-
-    def set_recording_properties(self, name, duration, frame_time, size_percentage, embed, embed_width):
-        self.name = name
-        self.duration = duration
-        self.frame_time = frame_time
-        self.size_percentage = size_percentage
-        self.embed = embed
-        self.embed_width = embed_width
-
-    def reset_recording_properties(self):
-        self.name = None
-        self.duration = None
-        self.frame_time = None
-        self.size_percentage = None
-        self.embed = None
-        self.embed_width = None
-
-    @run_in_background
-    def grab_frames(self, duration, size_percentage):
-        self.frames = []
-        start_time = time.time()
-        if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
-            self._take_gif_gtk(duration, size_percentage, start_time)
-        else:
-            self._take_gif_mss(duration, size_percentage, start_time)
-
-    def _take_gif_gtk(self, duration, size_percentage, start_time):
-        width, height = _take_gtk_screen_size()
-        gif_width = int(width * size_percentage)
-        gif_height = int(height * size_percentage)
-        while time.time() <= start_time + int(duration):
-            pb = _grab_gtk_pb()
-            img = Image.frombuffer('RGB', (width, height), pb.get_pixels(), 'raw', 'RGB').resize((gif_width, gif_height))
-            self.frames.append(img)
-
-    def _take_gif_mss(self, duration, size_percentage, start_time):
-        with mss() as sct:
-            gif_width = int(sct.grab(sct.monitors[0]).size.width * size_percentage)
-            gif_height = int(sct.grab(sct.monitors[0]).size.height * size_percentage)
-            while time.time() <= start_time + int(duration):
-                sct_img = sct.grab(sct.monitors[0])
-                img = Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX').resize((gif_width, gif_height))
-                self.frames.append(img)
-
     def take_screenshot_without_embedding(self, name, format, quality, delay):
         delay = delay or self._delay
         if delay:
@@ -261,6 +192,63 @@ class Client:
         path = self._take_screenshot_client(name, format, quality)
         self._link_screenshot(path)
         return path
+
+    def start_gif_recording(self, name, size_percentage,
+                            embed, embed_width):
+        self.name = name
+        self.embed = embed
+        self.embed_width = embed_width
+        self.futures = self.grab_frames(name, size_percentage=size_percentage)
+
+    def stop_gif_recording(self):
+        if self.futures._exception:
+            raise self.futures._exception
+        _THREAD_POOL._threads.clear()
+        _threads_queues.clear()
+        path = self._save_screenshot_path(basename=self.name, format='gif')
+        self.frames[0].save(path, save_all=True, append_images=self.frames[1:],
+                            optimize=True, loop=0)
+        if is_truthy(self.embed):
+            self._embed_screenshot(path, self.embed_width)
+        self.frames = []
+        return path
+
+    @run_in_background
+    def grab_frames(self, name, format=None, quality=None, size_percentage=1, delay=0, shot_number=None):
+        if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
+            self._grab_frames_gtk(size_percentage, delay, shot_number)
+        else:
+            self._grab_frames_mss(size_percentage, delay, shot_number)
+        if shot_number:
+            for img in self.frames:
+                path = self._save_screenshot_path(basename=name, format=format)
+                img.save(path, format=format, quality=quality, compress_level=quality)
+
+    def _grab_frames_gtk(self, size_percentage, delay, shot_number):
+        width, height = _take_gtk_screen_size()
+        width = int(width * size_percentage)
+        height = int(height * size_percentage)
+        while True:
+            pb = _grab_gtk_pb()
+            img = Image.frombuffer('RGB', (width, height), pb.get_pixels(), 'raw', 'RGB').resize((width, height))
+            self.frames.append(img)
+            if delay:
+                time.sleep(timestr_to_secs(delay))
+            if shot_number and len(self.frames) == int(shot_number):
+                break
+
+    def _grab_frames_mss(self, size_percentage, delay, shot_number):
+        with mss() as sct:
+            width = int(sct.grab(sct.monitors[0]).size.width * size_percentage)
+            height = int(sct.grab(sct.monitors[0]).size.height * size_percentage)
+            while True:
+                sct_img = sct.grab(sct.monitors[0])
+                img = Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX').resize((width, height))
+                self.frames.append(img)
+                if delay:
+                    time.sleep(timestr_to_secs(delay))
+                if shot_number and len(self.frames) == int(shot_number):
+                    break
 
     def _embed_screenshot(self, path, width):
         link = get_link_path(path, self._log_dir)

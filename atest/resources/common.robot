@@ -25,5 +25,12 @@ Screenshots Should Exist
     @{all_files}=  Combine Lists  ${actual_png_files}  ${actual_jpg_files}
     List Should Contain Sub List  ${files}  ${all_files}
 
+Screenshot Number In ${directory} Should Be ${expected}
+    @{actual_png_files}=  List Directory  ${directory}  *.png  absolute
+    @{actual_jpg_files}=  List Directory  ${directory}  *.jp*g  absolute
+    @{all_files}=  Combine Lists  ${actual_png_files}  ${actual_jpg_files}
+    ${actual}  Get Length  ${all_files}
+    Should Be Equal As Integers  ${actual}  ${expected}
+
 Cleanup Files
     Remove Files  ${OUTPUT_DIR}/*.jp*g  ${OUTPUT_DIR}/*.png  ${OUTPUT_DIR}/*.gif  ${OUTPUT_DIR}/*.webp
