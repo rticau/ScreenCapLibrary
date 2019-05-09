@@ -172,18 +172,12 @@ class ScreenCapLibrary:
         """
         return self._client.take_screenshot(name, format, quality, width, delay)
 
-    def take_gif(self, name="screenshot", duration=10, frame_time=100, size_percentage=0.25,
-                 embed=None, embed_width='800px'):
+    def start_gif_recording(self, name="screenshot", size_percentage=0.25,
+                            embed=None, embed_width='800px'):
         """
         Takes a GIF with the specified ``name``.
 
         ``name`` specifies the name by which the screenshot will be saved.
-
-        ``duration`` specifies the time (seconds) in which the screen will be captured.
-        Default value for this parameter is 10.
-
-        ``frame_time`` When replaying a GIF this parameter indicates how much time (milliseconds)
-        will pass until switching to another frame of the GIF.
 
         ``size_percentage`` is used to reduce the size of the GIFs a resize of the
         screencaptures. It will specify how much this reduction is with respect to
@@ -196,8 +190,10 @@ class ScreenCapLibrary:
         ``embed_width`` specifies the size of the screenshot that is
         embedded in the log file.
         """
-        return self._client.take_gif(name, duration, frame_time, size_percentage,
-                                     embed, embed_width)
+        return self._client.start_gif_recording(name, size_percentage, embed, embed_width)
+
+    def stop_gif_recording(self):
+        self._client.stop_gif_recording()
 
     def take_partial_screenshot(self, name='screenshot', format=None, quality=None,
                                 left=0, top=0, width=700, height=300, embed=False, embed_width='800px'):
@@ -231,8 +227,8 @@ class ScreenCapLibrary:
         """
         return self._client.take_screenshot_without_embedding(name, format, quality, delay)
 
-    def take_multiple_screenshots(self, name="screenshot", format=None, quality=None, screenshot_number=2, delay_time=0,
-                                  embed=None, embed_width='800px'):
+    def take_multiple_screenshots(self, name="screenshot", format=None, quality=None,
+                                  screenshot_number=2, delay_time=0):
         """Takes the specified number of screenshots in the specified format
         at library import and embeds it into the log file (PNG by default).
 
@@ -245,12 +241,5 @@ class ScreenCapLibrary:
         ``delay_time`` specifies the waiting time before taking another
         screenshot. See `Time format` section for more information. By
         default the delay time  is 0.
-
-        ``embed`` specifies if the screenshot should be embedded in the log file
-        or not. See `Boolean arguments` section for more details.
-
-        ``embed_width`` specifies the size of the screenshot that is
-        embedded in the log file.
         """
-        return self._client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time,
-                                                      embed, embed_width)
+        return self._client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time)
