@@ -275,26 +275,26 @@ class Client:
 
     @run_in_background
     def capture_screen(self, name):
+        path = self._save_screenshot_path(basename=name, format='avi')
         if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
-            _record_gtk(name)
+            _record_gtk(path, stop=self._stop_condition)
         else:
-            self._record_mss(name)
+            self._record_mss(path)
 
-    def _record_mss(self, name):
+    def _record_mss(self, path):
         """TODO Look for conversion from .avi to .webm"""
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         with mss() as sct:
             sct_img = sct.grab(sct.monitors[1])
             width = int(sct_img.width)
             height = int(sct_img.height)
-        path = self._save_screenshot_path(name, format)
         vid = cv2.VideoWriter('%s' % path, fourcc, 24, (width, height))
         while not self._stop_condition.isSet():
 
             with mss() as sct:
                 sct_img = sct.grab(sct.monitors[1])
-                ioi = np.array(sct_img)
-                frame = cv2.cvtColor(ioi, cv2.COLOR_RGBA2RGB)
+                numpy_array = np.array(sct_img)
+                frame = cv2.cvtColor(numpy_array, cv2.COLOR_RGBA2RGB)
                 vid.write(frame)
         vid.release()
         cv2.destroyAllWindows()

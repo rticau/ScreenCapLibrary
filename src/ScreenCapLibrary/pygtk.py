@@ -150,21 +150,21 @@ def _take_partial_gtk_screenshot_py3(path, format, quality, left, top, width, he
     return path
 
 
-def _record_gtk(path):
+def _record_gtk(path, stop):
     if not gdk and not Gdk:
         raise RuntimeError('PyGTK not installed/supported on this platform.')
     if gdk:
-        return _record_gtk_py2(path)
+        return _record_gtk_py2(path, stop)
     elif Gdk:
-        return _record_gtk_py3(path)
+        return _record_gtk_py3(path, stop)
 
 
-def _record_gtk_py2(path):
+def _record_gtk_py2(path, stop):
     window = gdk.get_default_root_window()
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     width, height = window.get_size()
     vid = cv2.VideoWriter('%s.avi' % path, fourcc, 24, (width, height))
-    while True:
+    while not stop:
         pb = gdk.Pixbuf(gdk.COLORSPACE_RGB, False, 8, width, height)
         pb = pb.get_from_drawable(window, window.get_colormap(),
                                    0, 0, 0, 0, width, height)
@@ -175,13 +175,13 @@ def _record_gtk_py2(path):
     cv2.destroyAllWindows()
 
 
-def _record_gtk_py3(path):
+def _record_gtk_py3(path, stop):
     window = Gdk.get_default_root_window()
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     width = window.get_width()
     height = window.get_height()
     vid = cv2.VideoWriter('%s.avi' % path, fourcc, 24, (width, height))
-    while(True):
+    while stop:
         pb = Gdk.pixbuf_get_from_window(window, 0, 0, width, height)
         numpy_array = _convert_pixbuf_to_numpy(pb)
         frame = cv2.cvtColor(numpy_array,  cv2.COLOR_RGB2BGR)
