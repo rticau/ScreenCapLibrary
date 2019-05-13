@@ -243,3 +243,10 @@ class ScreenCapLibrary:
         default the delay time  is 0.
         """
         return self._client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time)
+
+    def start_recording(self, name="recording"):
+        """Takes a recording of the screen."""
+        return self._client.start_recording(name)
+
+    def stop_recording(self):
+        self._client.stop_recording()

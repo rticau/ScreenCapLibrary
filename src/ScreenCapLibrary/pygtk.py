@@ -12,6 +12,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import cv2
+import numpy as np
+
 try:
     from gtk import gdk
 except ImportError:
@@ -23,6 +26,13 @@ try:
     from gi.repository import Gdk
 except ImportError:
     Gdk = None
+
+try:
+    from gi.repository import require_version
+    require_version('Gdk', '3.0')
+    from gi.repository import GdkPixbuf
+except ImportError:
+    GdkPixbuf = None
 
 
 def _gtk_quality(format, quality):
@@ -138,3 +148,61 @@ def _take_partial_gtk_screenshot_py3(path, format, quality, left, top, width, he
     quality_setting = _gtk_quality(format, quality)
     cropped_pb.savev(path, format, [list(quality_setting.keys())[0]], [list(quality_setting.values())[0]])
     return path
+
+
+def _record_gtk(path):
+    if not gdk and not Gdk:
+        raise RuntimeError('PyGTK not installed/supported on this platform.')
+    if gdk:
+        return _record_gtk_py2(path)
+    elif Gdk:
+        return _record_gtk_py3(path)
+
+
+def _record_gtk_py2(path):
+    window = gdk.get_default_root_window()
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    width, height = window.get_size()
+    vid = cv2.VideoWriter('%s.avi' % path, fourcc, 24, (width, height))
+    while True:
+        pb = gdk.Pixbuf(gdk.COLORSPACE_RGB, False, 8, width, height)
+        pb = pb.get_from_drawable(window, window.get_colormap(),
+                                   0, 0, 0, 0, width, height)
+        numpy_array = pb.get_pixels_array()
+        frame = cv2.cvtColor(numpy_array, cv2.COLOR_RGBA2RGB)
+        vid.write(frame)
+    vid.release()
+    cv2.destroyAllWindows()
+
+
+def _record_gtk_py3(path):
+    window = Gdk.get_default_root_window()
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    width = window.get_width()
+    height = window.get_height()
+    vid = cv2.VideoWriter('%s.avi' % path, fourcc, 24, (width, height))
+    while(True):
+        pb = Gdk.pixbuf_get_from_window(window, 0, 0, width, height)
+        numpy_array = _convert_pixbuf_to_numpy(pb)
+        frame = cv2.cvtColor(numpy_array,  cv2.COLOR_RGB2BGR)
+        vid.write(frame)
+    vid.release()
+    cv2.destroyAllWindows()
+
+
+def _convert_pixbuf_to_numpy(pixbuf):
+    w, h, c, r = (pixbuf.get_width(), pixbuf.get_height(), pixbuf.get_n_channels(), pixbuf.get_rowstride())
+    assert pixbuf.get_bits_per_sample() == 8
+    if pixbuf.get_has_alpha():
+        assert c == 4
+    else:
+        assert c == 3
+    assert r >= w * c
+    a = np.frombuffer(pixbuf.get_pixels(), dtype=np.uint8)
+    if a.shape[0] == w*c*h:
+        return a.reshape((h, w, c))
+    else:
+        b = np.zeros((h, w*c), 'uint8')
+        for j in range(h):
+            b[j, :] = a[r*j:r*j+w*c]
+        return b.reshape((h, w, c))

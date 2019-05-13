@@ -15,6 +15,9 @@
 
 import os
 import time
+import cv2
+import numpy as np
+import threading
 
 from mss import mss
 from PIL import Image
@@ -24,7 +27,7 @@ from functools import wraps
 from robot.api import logger
 from robot.utils import get_link_path, abspath, timestr_to_secs, is_truthy
 from robot.libraries.BuiltIn import BuiltIn
-from .pygtk import _take_gtk_screenshot, _take_partial_gtk_screenshot, _take_gtk_screen_size, _grab_gtk_pb
+from .pygtk import _take_gtk_screenshot, _take_partial_gtk_screenshot, _take_gtk_screen_size, _grab_gtk_pb, _record_gtk
 from .utils import _norm_path, _compression_value_conversion, _pil_quality_conversion
 
 _THREAD_POOL = ThreadPoolExecutor()
@@ -49,6 +52,7 @@ class Client:
         self.name = 'screenshot'
         self.embed = False
         self.embed_width = None
+        self._stop_condition = threading.Event()
         self.futures = None
 
     @property
@@ -257,3 +261,40 @@ class Client:
     def _link_screenshot(self, path):
         link = get_link_path(path, self._log_dir)
         logger.info("Screenshot saved to '<a href=\"%s\">%s</a>'." % (link, path), html=True)
+
+    def start_recording(self, name):
+        self.name = name
+        self.futures = self.capture_screen(name)
+
+    def stop_recording(self):
+        self._stop_condition.set()
+        if self.futures._exception:
+            raise self.futures._exception
+        _THREAD_POOL._threads.clear()
+        _threads_queues.clear()
+
+    @run_in_background
+    def capture_screen(self, name):
+        if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
+            _record_gtk(name)
+        else:
+            self._record_mss(name)
+
+    def _record_mss(self, name):
+        """TODO Look for conversion from .avi to .webm"""
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        with mss() as sct:
+            sct_img = sct.grab(sct.monitors[1])
+            width = int(sct_img.width)
+            height = int(sct_img.height)
+        path = self._save_screenshot_path(name, format)
+        vid = cv2.VideoWriter('%s' % path, fourcc, 24, (width, height))
+        while not self._stop_condition.isSet():
+
+            with mss() as sct:
+                sct_img = sct.grab(sct.monitors[1])
+                ioi = np.array(sct_img)
+                frame = cv2.cvtColor(ioi, cv2.COLOR_RGBA2RGB)
+                vid.write(frame)
+        vid.release()
+        cv2.destroyAllWindows()
