@@ -34,3 +34,5 @@ Screenshot Number In ${directory} Should Be ${expected}
 
 Cleanup Files
     Remove Files  ${OUTPUT_DIR}/*.jp*g  ${OUTPUT_DIR}/*.png  ${OUTPUT_DIR}/*.gif  ${OUTPUT_DIR}/*.webp
+    Sleep  10
+    Remove Files  ${OUTPUT_DIR}/*.avi

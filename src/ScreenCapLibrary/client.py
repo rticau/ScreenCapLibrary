@@ -262,11 +262,11 @@ class Client:
         link = get_link_path(path, self._log_dir)
         logger.info("Screenshot saved to '<a href=\"%s\">%s</a>'." % (link, path), html=True)
 
-    def start_recording(self, name):
+    def start_video_recording(self, name):
         self.name = name
         self.futures = self.capture_screen(name)
 
-    def stop_recording(self):
+    def stop_video_recording(self):
         self._stop_condition.set()
         if self.futures._exception:
             raise self.futures._exception
