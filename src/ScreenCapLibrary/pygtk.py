@@ -163,7 +163,7 @@ def _record_gtk_py2(path, stop):
     window = gdk.get_default_root_window()
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     width, height = window.get_size()
-    vid = cv2.VideoWriter('%s.avi' % path, fourcc, 24, (width, height))
+    vid = cv2.VideoWriter('%s' % path, fourcc, 24, (width, height))
     while not stop:
         pb = gdk.Pixbuf(gdk.COLORSPACE_RGB, False, 8, width, height)
         pb = pb.get_from_drawable(window, window.get_colormap(),
@@ -180,7 +180,7 @@ def _record_gtk_py3(path, stop):
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     width = window.get_width()
     height = window.get_height()
-    vid = cv2.VideoWriter('%s.avi' % path, fourcc, 24, (width, height))
+    vid = cv2.VideoWriter('%s' % path, fourcc, 24, (width, height))
     while stop:
         pb = Gdk.pixbuf_get_from_window(window, 0, 0, width, height)
         numpy_array = _convert_pixbuf_to_numpy(pb)

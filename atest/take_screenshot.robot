@@ -113,6 +113,12 @@ Video Capture
     Sleep  5
     ScreenCapLibrary.Stop Video Recording
     Screenshot Should Exist  ${VIDEO_SCREENSHOT}
+
+Video Capture Gtk
+    ScreenCapLibraryGtk.Start Video Recording
+    Sleep  5
+    ScreenCapLibraryGtk.Stop Video Recording
+    Screenshot Should Exist  ${VIDEO_SCREENSHOT}
 *** Keywords ***
 Take Screenshot And Verify
     [Arguments]  @{expected files}

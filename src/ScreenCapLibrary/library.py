@@ -245,7 +245,10 @@ class ScreenCapLibrary:
         return self._client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time)
 
     def start_video_recording(self, name="recording"):
-        """Takes a recording of the screen."""
+        """Takes a video recording of the screen with the specified ``name``.
+
+        ``name`` specifies the name by which the screenshot will be saved.
+        """
         return self._client.start_video_recording(name)
 
     def stop_video_recording(self):
