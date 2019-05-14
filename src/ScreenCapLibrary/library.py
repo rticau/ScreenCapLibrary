@@ -244,12 +244,18 @@ class ScreenCapLibrary:
         """
         return self._client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time)
 
-    def start_video_recording(self, name="recording"):
+    def start_video_recording(self, name="recording", embed=None, embed_width='800px'):
         """Takes a video recording of the screen with the specified ``name``.
 
-        ``name`` specifies the name by which the screenshot will be saved.
+        ``name`` specifies the name by which the record will be saved.
+
+        ``embed`` specifies if the record should be embedded in the log file
+        or not. See `Boolean arguments` section for more details.
+
+        ``embed_width`` specifies the size of the video record that is
+        embedded in the log file.
         """
-        return self._client.start_video_recording(name)
+        return self._client.start_video_recording(name, embed, embed_width)
 
     def stop_video_recording(self):
         self._client.stop_video_recording()

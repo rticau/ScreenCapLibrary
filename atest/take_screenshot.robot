@@ -17,7 +17,7 @@ ${GTK_PNG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_png.png
 ${GTK_JPEG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_jpeg.jpeg
 ${GTK_WEBP_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_webp.webp
 ${GIF_SCREENSHOT}  ${OUTPUTDIR}${/}screenshot_1.gif
-${VIDEO_SCREENSHOT}  ${OUTPUTDIR}${/}recording_1.avi
+${VIDEO_SCREENSHOT}  ${OUTPUTDIR}${/}recording_1.webm
 
 *** Test Cases ***
 Screenshot Is Taken

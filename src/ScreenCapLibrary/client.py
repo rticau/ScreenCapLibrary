@@ -50,6 +50,7 @@ class Client:
         self._delay = delay
         self.frames = []
         self.name = 'screenshot'
+        self.path = None
         self.embed = False
         self.embed_width = None
         self._stop_condition = threading.Event()
@@ -77,7 +78,7 @@ class Client:
 
     def _get_screenshot_path(self, basename, format, directory):
         directory = _norm_path(directory) if directory else self._screenshot_dir
-        if basename.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
+        if basename.lower().endswith(('.jpg', '.jpeg', '.png', '.webp', '.webm')):
             return os.path.join(directory, basename)
         index = 0
         while True:
@@ -262,9 +263,12 @@ class Client:
         link = get_link_path(path, self._log_dir)
         logger.info("Screenshot saved to '<a href=\"%s\">%s</a>'." % (link, path), html=True)
 
-    def start_video_recording(self, name):
+    def start_video_recording(self, name, embed, embed_width):
         self.name = name
-        self.futures = self.capture_screen(name)
+        self.embed = embed
+        self.embed_width = embed_width
+        self.path = self._save_screenshot_path(basename=self.name, format='webm')
+        self.futures = self.capture_screen(self.path)
 
     def stop_video_recording(self):
         self._stop_condition.set()
@@ -272,18 +276,19 @@ class Client:
             raise self.futures._exception
         _THREAD_POOL._threads.clear()
         _threads_queues.clear()
+        if is_truthy(self.embed):
+            self._embed_screenshot(self.path, self.embed_width)
+        return self.path
 
     @run_in_background
-    def capture_screen(self, name):
-        path = self._save_screenshot_path(basename=name, format='avi')
+    def capture_screen(self, path):
         if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
             _record_gtk(path, stop=self._stop_condition)
         else:
             self._record_mss(path)
 
     def _record_mss(self, path):
-        """TODO Look for conversion from .avi to .webm"""
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        fourcc = cv2.VideoWriter_fourcc(*'VP08')
         with mss() as sct:
             sct_img = sct.grab(sct.monitors[1])
             width = int(sct_img.width)

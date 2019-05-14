@@ -161,7 +161,7 @@ def _record_gtk(path, stop):
 
 def _record_gtk_py2(path, stop):
     window = gdk.get_default_root_window()
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    fourcc = cv2.VideoWriter_fourcc(*'VP08')
     width, height = window.get_size()
     vid = cv2.VideoWriter('%s' % path, fourcc, 24, (width, height))
     while not stop:
@@ -177,7 +177,7 @@ def _record_gtk_py2(path, stop):
 
 def _record_gtk_py3(path, stop):
     window = Gdk.get_default_root_window()
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    fourcc = cv2.VideoWriter_fourcc(*'VP08')
     width = window.get_width()
     height = window.get_height()
     vid = cv2.VideoWriter('%s' % path, fourcc, 24, (width, height))
