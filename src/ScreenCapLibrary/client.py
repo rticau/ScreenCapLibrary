@@ -265,6 +265,11 @@ class Client:
         link = get_link_path(path, self._log_dir)
         logger.info('<a href="%s"><img src="%s" width="%s"></a>' % (link, link, width), html=True)
 
+    def _embed_record(self, path, width):
+        link = get_link_path(path, self._log_dir)
+        logger.info('<a href="%s"><video width="%s" autoplay><source src="%s" type="video/webm"></video></a>' %
+                    (link, width, link), html=True)
+
     def _link_screenshot(self, path):
         link = get_link_path(path, self._log_dir)
         logger.info("Screenshot saved to '<a href=\"%s\">%s</a>'." % (link, path), html=True)
@@ -284,7 +289,7 @@ class Client:
         _THREAD_POOL._threads.clear()
         _threads_queues.clear()
         if is_truthy(self.embed):
-            self._embed_screenshot(self.path, self.embed_width)
+            self._embed_record(self.path, self.embed_width)
         return self.path
 
     @run_in_background
