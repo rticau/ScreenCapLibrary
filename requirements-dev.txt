@@ -3,3 +3,4 @@ mss
 robotframework
 robotstatuschecker
 pillow
+opencv-python

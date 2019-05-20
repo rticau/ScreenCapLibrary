@@ -14,7 +14,7 @@
 #  limitations under the License.
 import cv2
 import numpy as np
-
+from .utils import suppress_stderr
 try:
     from gtk import gdk
 except ImportError:
@@ -150,20 +150,21 @@ def _take_partial_gtk_screenshot_py3(path, format, quality, left, top, width, he
     return path
 
 
-def _record_gtk(path, stop):
+def _record_gtk(path, fps, stop):
     if not gdk and not Gdk:
         raise RuntimeError('PyGTK not installed/supported on this platform.')
     if gdk:
-        return _record_gtk_py2(path, stop)
+        return _record_gtk_py2(path, fps, stop)
     elif Gdk:
-        return _record_gtk_py3(path, stop)
+        return _record_gtk_py3(path, fps, stop)
 
 
-def _record_gtk_py2(path, stop):
+def _record_gtk_py2(path, fps, stop):
     window = gdk.get_default_root_window()
     fourcc = cv2.VideoWriter_fourcc(*'VP08')
     width, height = window.get_size()
-    vid = cv2.VideoWriter('%s' % path, fourcc, 24, (width, height))
+    with suppress_stderr():
+        vid = cv2.VideoWriter('%s' % path, fourcc, int(fps), (width, height))
     while not stop:
         pb = gdk.Pixbuf(gdk.COLORSPACE_RGB, False, 8, width, height)
         pb = pb.get_from_drawable(window, window.get_colormap(),
@@ -175,12 +176,13 @@ def _record_gtk_py2(path, stop):
     cv2.destroyAllWindows()
 
 
-def _record_gtk_py3(path, stop):
+def _record_gtk_py3(path, fps, stop):
     window = Gdk.get_default_root_window()
     fourcc = cv2.VideoWriter_fourcc(*'VP08')
     width = window.get_width()
     height = window.get_height()
-    vid = cv2.VideoWriter('%s' % path, fourcc, 24, (width, height))
+    with suppress_stderr():
+        vid = cv2.VideoWriter('%s' % path, fourcc, int(fps), (width, height))
     while stop:
         pb = Gdk.pixbuf_get_from_window(window, 0, 0, width, height)
         numpy_array = _convert_pixbuf_to_numpy(pb)

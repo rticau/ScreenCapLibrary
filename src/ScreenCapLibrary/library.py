@@ -83,7 +83,7 @@ class ScreenCapLibrary:
 
     ROBOT_LIBRARY_VERSION = __version__
 
-    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0):
+    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0, fps=8):
         """
         ``screenshot_module`` specifies the module or tool to use when taking screenshots using this library.
         If no tool or module is specified, ``mss`` will be used by default. For running
@@ -119,7 +119,8 @@ class ScreenCapLibrary:
             screenshot_directory=screenshot_directory,
             format=format,
             quality=quality,
-            delay=delay
+            delay=delay,
+            fps=fps
         )
 
     def set_screenshot_directory(self, path):
@@ -240,14 +241,17 @@ class ScreenCapLibrary:
 
         ``delay_time`` specifies the waiting time before taking another
         screenshot. See `Time format` section for more information. By
-        default the delay time  is 0.
+        default the delay time is 0.
         """
         return self._client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time)
 
-    def start_video_recording(self, name="recording", embed=None, embed_width='800px'):
+    def start_video_recording(self, name="recording", fps=24, embed=None, embed_width='800px'):
         """Takes a video recording of the screen with the specified ``name``.
 
         ``name`` specifies the name by which the record will be saved.
+
+        ``fps`` specifies frame rate at which the video is displayed.
+        By default frame rate is 24.
 
         ``embed`` specifies if the record should be embedded in the log file
         or not. See `Boolean arguments` section for more details.
@@ -255,7 +259,7 @@ class ScreenCapLibrary:
         ``embed_width`` specifies the size of the video record that is
         embedded in the log file.
         """
-        return self._client.start_video_recording(name, embed, embed_width)
+        return self._client.start_video_recording(name, fps, embed, embed_width)
 
     def stop_video_recording(self):
         self._client.stop_video_recording()

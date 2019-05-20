@@ -15,9 +15,14 @@
 
 import os
 import time
-import cv2
-import numpy as np
 import threading
+
+try:
+    import cv2
+    import numpy as np
+except ImportError:
+    raise ImportError('Importing cv2 failed. '
+                   'Make sure you have opencv-python installed.')
 
 from mss import mss
 from PIL import Image
@@ -28,7 +33,7 @@ from robot.api import logger
 from robot.utils import get_link_path, abspath, timestr_to_secs, is_truthy
 from robot.libraries.BuiltIn import BuiltIn
 from .pygtk import _take_gtk_screenshot, _take_partial_gtk_screenshot, _take_gtk_screen_size, _grab_gtk_pb, _record_gtk
-from .utils import _norm_path, _compression_value_conversion, _pil_quality_conversion
+from .utils import _norm_path, _compression_value_conversion, _pil_quality_conversion, suppress_stderr
 
 _THREAD_POOL = ThreadPoolExecutor()
 
@@ -42,7 +47,7 @@ def run_in_background(f, executor=None):
 
 class Client:
 
-    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0):
+    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0, fps=24):
         self._screenshot_module = screenshot_module
         self._given_screenshot_dir = _norm_path(screenshot_directory)
         self._format = format
@@ -53,6 +58,7 @@ class Client:
         self.path = None
         self.embed = False
         self.embed_width = None
+        self.fps = fps
         self._stop_condition = threading.Event()
         self.futures = None
 
@@ -263,12 +269,13 @@ class Client:
         link = get_link_path(path, self._log_dir)
         logger.info("Screenshot saved to '<a href=\"%s\">%s</a>'." % (link, path), html=True)
 
-    def start_video_recording(self, name, embed, embed_width):
+    def start_video_recording(self, name, fps, embed, embed_width):
         self.name = name
+        self.fps = fps
         self.embed = embed
         self.embed_width = embed_width
         self.path = self._save_screenshot_path(basename=self.name, format='webm')
-        self.futures = self.capture_screen(self.path)
+        self.futures = self.capture_screen(self.path, self.fps)
 
     def stop_video_recording(self):
         self._stop_condition.set()
@@ -281,19 +288,20 @@ class Client:
         return self.path
 
     @run_in_background
-    def capture_screen(self, path):
+    def capture_screen(self, path, fps):
         if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
-            _record_gtk(path, stop=self._stop_condition)
+            _record_gtk(path, fps, stop=self._stop_condition)
         else:
-            self._record_mss(path)
+            self._record_mss(path, fps)
 
-    def _record_mss(self, path):
+    def _record_mss(self, path, fps):
         fourcc = cv2.VideoWriter_fourcc(*'VP08')
         with mss() as sct:
             sct_img = sct.grab(sct.monitors[1])
             width = int(sct_img.width)
             height = int(sct_img.height)
-        vid = cv2.VideoWriter('%s' % path, fourcc, 24, (width, height))
+        with suppress_stderr():
+            vid = cv2.VideoWriter('%s' % path, fourcc, int(fps), (width, height))
         while not self._stop_condition.isSet():
 
             with mss() as sct:
