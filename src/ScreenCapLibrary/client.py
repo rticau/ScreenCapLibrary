@@ -303,7 +303,6 @@ class Client:
         with suppress_stderr():
             vid = cv2.VideoWriter('%s' % path, fourcc, int(fps), (width, height))
         while not self._stop_condition.isSet():
-
             with mss() as sct:
                 sct_img = sct.grab(sct.monitors[1])
                 numpy_array = np.array(sct_img)
