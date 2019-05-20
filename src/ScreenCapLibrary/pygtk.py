@@ -164,7 +164,7 @@ def _record_gtk_py2(path, fps, stop):
     fourcc = cv2.VideoWriter_fourcc(*'VP08')
     width, height = window.get_size()
     with suppress_stderr():
-        vid = cv2.VideoWriter('%s' % path, fourcc, int(fps), (width, height))
+        vid = cv2.VideoWriter('%s' % path, fourcc, fps, (width, height))
     while not stop:
         pb = gdk.Pixbuf(gdk.COLORSPACE_RGB, False, 8, width, height)
         pb = pb.get_from_drawable(window, window.get_colormap(),
@@ -182,7 +182,7 @@ def _record_gtk_py3(path, fps, stop):
     width = window.get_width()
     height = window.get_height()
     with suppress_stderr():
-        vid = cv2.VideoWriter('%s' % path, fourcc, int(fps), (width, height))
+        vid = cv2.VideoWriter('%s' % path, fourcc, fps, (width, height))
     while stop:
         pb = Gdk.pixbuf_get_from_window(window, 0, 0, width, height)
         numpy_array = _convert_pixbuf_to_numpy(pb)
@@ -194,17 +194,11 @@ def _record_gtk_py3(path, fps, stop):
 
 def _convert_pixbuf_to_numpy(pixbuf):
     w, h, c, r = (pixbuf.get_width(), pixbuf.get_height(), pixbuf.get_n_channels(), pixbuf.get_rowstride())
-    assert pixbuf.get_bits_per_sample() == 8
-    if pixbuf.get_has_alpha():
-        assert c == 4
-    else:
-        assert c == 3
-    assert r >= w * c
     a = np.frombuffer(pixbuf.get_pixels(), dtype=np.uint8)
-    if a.shape[0] == w*c*h:
+    if a.shape[0] == w * c * h:
         return a.reshape((h, w, c))
     else:
-        b = np.zeros((h, w*c), 'uint8')
+        b = np.zeros((h, w * c), 'uint8')
         for j in range(h):
-            b[j, :] = a[r*j:r*j+w*c]
+            b[j, :] = a[r * j:r * j + w * c]
         return b.reshape((h, w, c))

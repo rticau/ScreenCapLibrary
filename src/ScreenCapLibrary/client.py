@@ -21,8 +21,7 @@ try:
     import cv2
     import numpy as np
 except ImportError:
-    raise ImportError('Importing cv2 failed. '
-                   'Make sure you have opencv-python installed.')
+    raise ImportError('Importing cv2 failed. Make sure you have opencv-python installed.')
 
 from mss import mss
 from PIL import Image
@@ -211,11 +210,14 @@ class Client:
         self.embed_width = embed_width
         self.futures = self.grab_frames(name, size_percentage=size_percentage)
 
-    def stop_gif_recording(self):
+    def _close_threads(self):
         if self.futures._exception:
             raise self.futures._exception
         _THREAD_POOL._threads.clear()
         _threads_queues.clear()
+
+    def stop_gif_recording(self):
+        self._close_threads()
         path = self._save_screenshot_path(basename=self.name, format='gif')
         self.frames[0].save(path, save_all=True, append_images=self.frames[1:],
                             optimize=True, loop=0)
@@ -265,7 +267,7 @@ class Client:
         link = get_link_path(path, self._log_dir)
         logger.info('<a href="%s"><img src="%s" width="%s"></a>' % (link, link, width), html=True)
 
-    def _embed_record(self, path, width):
+    def _embed_video(self, path, width):
         link = get_link_path(path, self._log_dir)
         logger.info('<a href="%s"><video width="%s" autoplay><source src="%s" type="video/webm"></video></a>' %
                     (link, width, link), html=True)
@@ -276,7 +278,10 @@ class Client:
 
     def start_video_recording(self, name, fps, embed, embed_width):
         self.name = name
-        self.fps = fps
+        try:
+            self.fps = int(fps)
+        except ValueError:
+            raise ValueError('The fps argument must be of type integer.')
         self.embed = embed
         self.embed_width = embed_width
         self.path = self._save_screenshot_path(basename=self.name, format='webm')
@@ -284,12 +289,9 @@ class Client:
 
     def stop_video_recording(self):
         self._stop_condition.set()
-        if self.futures._exception:
-            raise self.futures._exception
-        _THREAD_POOL._threads.clear()
-        _threads_queues.clear()
+        self._close_threads()
         if is_truthy(self.embed):
-            self._embed_record(self.path, self.embed_width)
+            self._embed_video(self.path, self.embed_width)
         return self.path
 
     @run_in_background
@@ -303,15 +305,15 @@ class Client:
         fourcc = cv2.VideoWriter_fourcc(*'VP08')
         with mss() as sct:
             sct_img = sct.grab(sct.monitors[1])
-            width = int(sct_img.width)
-            height = int(sct_img.height)
+        width = int(sct_img.width)
+        height = int(sct_img.height)
         with suppress_stderr():
-            vid = cv2.VideoWriter('%s' % path, fourcc, int(fps), (width, height))
+            vid = cv2.VideoWriter('%s' % path, fourcc, fps, (width, height))
         while not self._stop_condition.isSet():
             with mss() as sct:
                 sct_img = sct.grab(sct.monitors[1])
-                numpy_array = np.array(sct_img)
-                frame = cv2.cvtColor(numpy_array, cv2.COLOR_RGBA2RGB)
-                vid.write(frame)
+            numpy_array = np.array(sct_img)
+            frame = cv2.cvtColor(numpy_array, cv2.COLOR_RGBA2RGB)
+            vid.write(frame)
         vid.release()
         cv2.destroyAllWindows()
