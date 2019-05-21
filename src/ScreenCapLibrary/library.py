@@ -40,6 +40,10 @@ class ScreenCapLibrary:
 
     - [http://pygtk.org/ | PyGTK] is an alternative to ``mss`` for taking screenshots when using VNC.
 
+
+    For video recording, [https://github.com/skvark/opencv-python/blob/master/README.md | OpenCV-Python] is used and
+    the output file is in WebM format.
+
     = Where screenshots are saved =
 
     By default screenshots are saved into the same directory where the Robot
@@ -161,13 +165,13 @@ class ScreenCapLibrary:
         `Time format` section for more information. By default the delay is 0.
 
         Examples: (LOGDIR is determined automatically by the library)
-        | Take Screenshot |                  |            | # LOGDIR/screenshot_1.png (index automatically incremented) |
-        | Take Screenshot | mypic            |            | # LOGDIR/mypic_1.png (index automatically incremented) |
-        | Take Screenshot | ${TEMPDIR}/mypic |            | # /tmp/mypic_1.png (index automatically incremented) |
-        | Take Screenshot | pic.jpg          |            | # LOGDIR/pic.jpg (always uses this file) |
-        | Take Screenshot | images/login.jpg | 300px      | # Specify both name and width. |
-        | Take Screenshot | width=550px      |            | # Specify only width. |
-        | Take Screenshot | format=jpg       | quality=15 | # Specify both image format and quality |
+        | `Take Screenshot` |                  |            | # LOGDIR/screenshot_1.png (index automatically incremented) |
+        | `Take Screenshot` | mypic            |            | # LOGDIR/mypic_1.png (index automatically incremented) |
+        | `Take Screenshot` | ${TEMPDIR}/mypic |            | # /tmp/mypic_1.png (index automatically incremented) |
+        | `Take Screenshot` | pic.jpg          |            | # LOGDIR/pic.jpg (always uses this file) |
+        | `Take Screenshot` | images/login.jpg | 300px      | # Specify both name and width. |
+        | `Take Screenshot` | width=550px      |            | # Specify only width. |
+        | `Take Screenshot` | format=jpg       | quality=15 | # Specify both image format and quality |
 
         The path where the screenshot is saved is returned.
         """
@@ -176,7 +180,8 @@ class ScreenCapLibrary:
     def start_gif_recording(self, name="screenshot", size_percentage=0.5,
                             embed=True, embed_width='800px'):
         """
-        Takes a GIF with the specified ``name``.
+        Starts the recording of a GIF in the background with the specified ``name``.
+        The recording can be stopped by calling the `Stop Gif Recording` keyword.
 
         ``name`` specifies the name by which the screenshot will be saved.
 
@@ -190,10 +195,20 @@ class ScreenCapLibrary:
 
         ``embed_width`` specifies the size of the screenshot that is
         embedded in the log file.
+
+        Examples:
+        | `Start Gif Recording` |            |  # Starts the GIF recording in background |
+        | `Sleep`               | 10 seconds |  # Here should be the actions that will be recorded |
+        | `Stop Gif Recording`  |            |  # Will create the GIF containing the screen recording \
+        since `Start Gif Recording` was called. |
         """
         return self._client.start_gif_recording(name, size_percentage, embed, embed_width)
 
     def stop_gif_recording(self):
+        """
+        Stops the GIF recording and generates the file. If ``embed`` argument was set to ``True`` the
+        GIF will be displayed in the log file.
+        """
         self._client.stop_gif_recording()
 
     def take_partial_screenshot(self, name='screenshot', format=None, quality=None,
@@ -246,7 +261,8 @@ class ScreenCapLibrary:
         return self._client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time)
 
     def start_video_recording(self, name="recording", fps=8, embed=True, embed_width='800px'):
-        """Takes a video recording of the screen with the specified ``name``.
+        """Starts the recording of a video in the background with the specified ``name``.
+        The recording can be stopped by calling the `Stop Video Recording` keyword.
 
         ``name`` specifies the name by which the record will be saved.
 
@@ -258,8 +274,17 @@ class ScreenCapLibrary:
 
         ``embed_width`` specifies the size of the video record that is
         embedded in the log file.
+
+        Examples:
+        | `Start Video Recording` |            |  # Starts the video recording in background |
+        | `Sleep`                 | 10 seconds |  # Here should be the actions that will be recorded |
+        | `Stop Video Recording`  |            |  # Will create the video containing the screen recording \
+        since `Start Video Recording` was called. |
         """
         return self._client.start_video_recording(name, fps, embed, embed_width)
 
     def stop_video_recording(self):
+        """Stops the video recording and generates the file in WebM format. If ``embed`` argument
+        was set to ``True`` the video will be displayed in the log file.
+        """
         self._client.stop_video_recording()

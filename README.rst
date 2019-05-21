@@ -18,6 +18,7 @@ the same functionality, except that the screenshots are captured in PNG by defau
 
 ScreenCapLibrary has the following extra features:
     - Taking screenshots in PNG, JPG/JPEG, GIF and WebP formats
+    - Video capture in WebM format, embeddable in log files
     - Adjusting the compression/quality of the screenshots
     - Support for GIFs
     - Taking multiple screenshots in a given amount of time
@@ -25,9 +26,7 @@ ScreenCapLibrary has the following extra features:
 
 Features to be implemented in the future:
 
-    - Possibility to run keywords in background
-    - Configurable monitor screen grabbing
-    - Video capture support
+    - Configurable monitor screen grabbing for screenshots and recording
 
 Documentation
 -------------
@@ -45,9 +44,10 @@ The recommended installation method is using pip_::
 
     pip install --upgrade robotframework-screencaplibrary
 
-Running this command installs also the latest Robot Framework, mss_ and
-pillow_ versions. The minimum supported mss version is ``3.2.1`` and the
-minimum supported pillow version is ``5.2.0``.
+Running this command installs also the latest Robot Framework, mss_,
+pillow_ and opencv-python_ versions. The minimum supported mss version is
+``3.2.1`` and the minimum supported pillow version is ``5.2.0``.
+For video capture at least version ``4.0.0.21`` of opencv-python_ is required.
 The ``--upgrade`` option can be omitted when installing the library for the
 first time.
 
@@ -128,6 +128,7 @@ available:
 .. _PyPI: https://pypi.python.org/pypi/robotframework-screencaplibrary
 .. _mss: https://python-mss.readthedocs.io
 .. _pillow: https://pillow.readthedocs.io
+.. _opencv-python: https://opencv-python-tutroals.readthedocs.io
 .. _Screenshot: http://robotframework.org/robotframework/latest/libraries/Screenshot.html
 .. _Keyword Documentation: https://mihaiparvu.github.io/ScreenCapLibrary/ScreenCapLibrary.html
 .. _robotframework-users: http://groups.google.com/group/robotframework-users
