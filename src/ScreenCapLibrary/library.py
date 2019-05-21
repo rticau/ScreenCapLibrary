@@ -250,7 +250,7 @@ class ScreenCapLibrary:
 
         ``name`` specifies the name by which the record will be saved.
 
-        ``fps`` specifies frame rate at which the video is displayed.
+        ``fps`` specifies the frame rate at which the video is displayed.
         By default frame rate is 24.
 
         ``embed`` specifies if the record should be embedded in the log file
