@@ -17,6 +17,7 @@ ${GTK_PNG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_png.png
 ${GTK_JPEG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_jpeg.jpeg
 ${GTK_WEBP_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_webp.webp
 ${GIF_SCREENSHOT}  ${OUTPUTDIR}${/}screenshot_1.gif
+${VIDEO_FILE}  ${OUTPUTDIR}${/}recording_1.webm
 
 *** Test Cases ***
 Screenshot Is Taken
@@ -106,6 +107,21 @@ Take Gtk Gif
     Sleep  2
     ScreenCapLibraryGtk.Stop Gif Recording
     Screenshot Should Exist  ${GIF_SCREENSHOT}
+
+Video Capture
+    ScreenCapLibrary.Start Video Recording
+    Sleep  5
+    ScreenCapLibrary.Stop Video Recording
+    Screenshot Should Exist  ${VIDEO_FILE}
+    Sleep  10
+
+Video Capture Gtk
+    ScreenCapLibraryGtk.Start Video Recording
+    Sleep  5
+    ScreenCapLibraryGtk.Stop Video Recording
+    Screenshot Should Exist  ${VIDEO_FILE}
+    Sleep  10
+
 *** Keywords ***
 Take Screenshot And Verify
     [Arguments]  @{expected files}
