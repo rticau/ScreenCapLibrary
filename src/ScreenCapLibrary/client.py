@@ -46,7 +46,7 @@ def run_in_background(f, executor=None):
 
 class Client:
 
-    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0, fps=24):
+    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0, fps=8):
         self._screenshot_module = screenshot_module
         self._given_screenshot_dir = _norm_path(screenshot_directory)
         self._format = format

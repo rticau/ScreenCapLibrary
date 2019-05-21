@@ -83,7 +83,7 @@ class ScreenCapLibrary:
 
     ROBOT_LIBRARY_VERSION = __version__
 
-    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0, fps=24):
+    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0, fps=8):
         """
         ``screenshot_module`` specifies the module or tool to use when taking screenshots using this library.
         If no tool or module is specified, ``mss`` will be used by default. For running
@@ -173,8 +173,8 @@ class ScreenCapLibrary:
         """
         return self._client.take_screenshot(name, format, quality, width, delay)
 
-    def start_gif_recording(self, name="screenshot", size_percentage=0.25,
-                            embed=None, embed_width='800px'):
+    def start_gif_recording(self, name="screenshot", size_percentage=0.5,
+                            embed=True, embed_width='800px'):
         """
         Takes a GIF with the specified ``name``.
 
@@ -183,7 +183,7 @@ class ScreenCapLibrary:
         ``size_percentage`` is used to reduce the size of the GIFs a resize of the
         screencaptures. It will specify how much this reduction is with respect to
         screen resolution. By default this parameter is set to resize the images to
-        0.25 of the screen resolution.
+        0.5 of the screen resolution.
 
         ``embed`` specifies if the screenshot should be embedded in the log file
         or not. See `Boolean arguments` section for more details.
@@ -197,7 +197,7 @@ class ScreenCapLibrary:
         self._client.stop_gif_recording()
 
     def take_partial_screenshot(self, name='screenshot', format=None, quality=None,
-                                left=0, top=0, width=700, height=300, embed=False, embed_width='800px'):
+                                left=0, top=0, width=700, height=300, embed=True, embed_width='800px'):
         """
         Takes a partial screenshot in the specified format and dimensions at
         library import and embeds it into the log file (PNG by default).
@@ -245,13 +245,13 @@ class ScreenCapLibrary:
         """
         return self._client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time)
 
-    def start_video_recording(self, name="recording", fps=24, embed=None, embed_width='800px'):
+    def start_video_recording(self, name="recording", fps=8, embed=True, embed_width='800px'):
         """Takes a video recording of the screen with the specified ``name``.
 
         ``name`` specifies the name by which the record will be saved.
 
         ``fps`` specifies the frame rate at which the video is displayed.
-        By default frame rate is 24.
+        By default frame rate is 8.
 
         ``embed`` specifies if the record should be embedded in the log file
         or not. See `Boolean arguments` section for more details.
