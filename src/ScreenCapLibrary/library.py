@@ -201,6 +201,8 @@ class ScreenCapLibrary:
         | `Sleep`               | 10 seconds |  # Here should be the actions that will be recorded |
         | `Stop Gif Recording`  |            |  # Will create the GIF containing the screen recording \
         since `Start Gif Recording` was called. |
+
+        *Note:* Recommended GIF duration is 100 seconds or lower depending on system memory.
         """
         return self._client.start_gif_recording(name, size_percentage, embed, embed_width)
 
