@@ -282,6 +282,10 @@ class ScreenCapLibrary:
         | `Sleep`                 | 10 seconds |  # Here should be the actions that will be recorded |
         | `Stop Video Recording`  |            |  # Will create the video containing the screen recording \
         since `Start Video Recording` was called. |
+
+        *Note:* Be aware that during recording the number of the collected frames are dependent on the
+        performance of your system. Check different values for ``fps`` to find optimal results.(e.g.
+        for a 15 seconds recording the output might be a 2 second video with 30 fps).
         """
         return self._client.start_video_recording(name, fps, embed, embed_width)
 
