@@ -220,14 +220,14 @@ class Client:
         self._close_threads()
         path = self._save_screenshot_path(basename=self.name, format='gif')
         self.frames[0].save(path, save_all=True, append_images=self.frames[1:],
-                            optimize=True, loop=0)
+                            duration=125, optimize=True, loop=0)
         if is_truthy(self.embed):
             self._embed_screenshot(path, self.embed_width)
         self.frames = []
         return path
 
     @run_in_background
-    def grab_frames(self, name, format=None, quality=None, size_percentage=1, delay=0, shot_number=None):
+    def grab_frames(self, name, format=None, quality=None, size_percentage=0.5, delay=0, shot_number=None):
         if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
             self._grab_frames_gtk(size_percentage, delay, shot_number)
         else:
@@ -239,16 +239,17 @@ class Client:
 
     def _grab_frames_gtk(self, size_percentage, delay, shot_number):
         width, height = _take_gtk_screen_size()
-        width = int(width * size_percentage)
-        height = int(height * size_percentage)
+        w = int(width * size_percentage)
+        h = int(height * size_percentage)
         while True:
             pb = _grab_gtk_pb()
-            img = Image.frombuffer('RGB', (width, height), pb.get_pixels(), 'raw', 'RGB').resize((width, height))
+            img = Image.frombuffer('RGB', (width, height), pb.get_pixels(), 'raw', 'RGB').resize((w, h))
             self.frames.append(img)
             if delay:
                 time.sleep(timestr_to_secs(delay))
             if shot_number and len(self.frames) == int(shot_number):
                 break
+            time.sleep(0.125)
 
     def _grab_frames_mss(self, size_percentage, delay, shot_number):
         with mss() as sct:

@@ -165,12 +165,12 @@ def _record_gtk_py2(path, fps, stop):
     width, height = window.get_size()
     with suppress_stderr():
         vid = cv2.VideoWriter('%s' % path, fourcc, fps, (width, height))
-    while not stop:
+    while not stop.isSet():
         pb = gdk.Pixbuf(gdk.COLORSPACE_RGB, False, 8, width, height)
         pb = pb.get_from_drawable(window, window.get_colormap(),
-                                   0, 0, 0, 0, width, height)
+                                  0, 0, 0, 0, width, height)
         numpy_array = pb.get_pixels_array()
-        frame = cv2.cvtColor(numpy_array, cv2.COLOR_RGBA2RGB)
+        frame = cv2.cvtColor(numpy_array, cv2.COLOR_RGB2BGR)
         vid.write(frame)
     vid.release()
     cv2.destroyAllWindows()
@@ -183,7 +183,7 @@ def _record_gtk_py3(path, fps, stop):
     height = window.get_height()
     with suppress_stderr():
         vid = cv2.VideoWriter('%s' % path, fourcc, fps, (width, height))
-    while not stop:
+    while not stop.isSet():
         pb = Gdk.pixbuf_get_from_window(window, 0, 0, width, height)
         numpy_array = _convert_pixbuf_to_numpy(pb)
         frame = cv2.cvtColor(numpy_array,  cv2.COLOR_RGB2BGR)
