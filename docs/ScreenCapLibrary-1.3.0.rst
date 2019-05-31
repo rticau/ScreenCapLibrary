@@ -7,7 +7,7 @@ ScreenCapLibrary 1.3.0
 
 
 ScreenCapLibrary is a `Robot Framework`_ test library for taking screenshots on the machine where tests are run.
-ScreenCapLibrary 1.3.0 is a new release is a new release with WebM video capture support and background capturing.
+ScreenCapLibrary 1.3.0 is a new release with WebM video capture support and background capturing.
 All issues targeted for ScreenCapLibrary v1.3.0 can be found from
 the `issue tracker`_.
 
