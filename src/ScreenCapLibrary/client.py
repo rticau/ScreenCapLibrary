@@ -278,6 +278,7 @@ class Client:
         logger.info("Screenshot saved to '<a href=\"%s\">%s</a>'." % (link, path), html=True)
 
     def start_video_recording(self, name, fps, embed, embed_width):
+        self._stop_condition.clear()
         self.name = name
         try:
             self.fps = int(fps)
