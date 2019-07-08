@@ -63,6 +63,7 @@ Webp Screenshot Quality
     Compare Size  ${WEBP_CUSTOM_SCREENSHOT}  webp
 
 Screenshot Formats Gtk
+    [Tags]    gtk
     ScreenCapLibraryGtk.Take Screenshot  ${GTK_PNG_SCREENSHOT}  png
     Screenshot Should Exist  ${GTK_PNG_SCREENSHOT}
     ScreenCapLibraryGtk.Take Screenshot  ${GTK_JPEG_SCREENSHOT}  jpeg
@@ -84,6 +85,7 @@ Take Multiple Screenshots
     Screenshot Number In ${OUTPUTDIR} Should Be 4
 
 Take Multiple Gtk Screenshots
+    [Tags]    gtk
     ScreenCapLibraryGtk.Take Multiple Screenshots  format=png  screenshot_number=4  delay_time=1 second
     Sleep  10
     Screenshot Number In ${OUTPUTDIR} Should Be 4
@@ -93,6 +95,7 @@ Take Screenshot With Partial Dimensions
     Screenshot Should Exist  ${partial_screenshot}
 
 Take Partial Gtk Screenshot
+    [Tags]    gtk
     ${partial_screenshot}=  ScreenCapLibraryGtk.Take Partial Screenshot  left=50  height=300  width=700
     Screenshot Should Exist  ${partial_screenshot}
 
@@ -103,6 +106,7 @@ Take Gif
     Screenshot Should Exist  ${GIF_SCREENSHOT}
 
 Take Gtk Gif
+    [Tags]    gtk
     ScreenCapLibraryGtk.Start Gif Recording
     Sleep  2
     ScreenCapLibraryGtk.Stop Gif Recording
@@ -116,6 +120,7 @@ Video Capture
     Sleep  10
 
 Video Capture Gtk
+    [Tags]    gtk
     ScreenCapLibraryGtk.Start Video Recording
     Sleep  5
     ScreenCapLibraryGtk.Stop Video Recording
