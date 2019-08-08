@@ -26,6 +26,7 @@ except ImportError:
 from mss import mss
 from PIL import Image
 from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures._base import Future
 from concurrent.futures.thread import _threads_queues
 from functools import wraps
 from robot.api import logger
@@ -59,7 +60,7 @@ class Client:
         self.embed_width = None
         self.fps = fps
         self._stop_condition = threading.Event()
-        self.futures = None
+        self.futures: Future = None
 
     @property
     def _screenshot_dir(self):
@@ -215,6 +216,7 @@ class Client:
             raise self.futures._exception
         _THREAD_POOL._threads.clear()
         _threads_queues.clear()
+        self.futures.result()
 
     def stop_gif_recording(self):
         self._close_threads()
