@@ -14,7 +14,8 @@
 #  limitations under the License.
 
 from .version import VERSION
-from .client import Client
+from .client import Client, recording_list
+from .videoclient import VideoClient
 
 __version__ = VERSION
 
@@ -118,7 +119,7 @@ class ScreenCapLibrary:
         | Library   | Screenshot | quality=0                       |
 
         """
-        self._client = Client(
+        self.client = Client(
             screenshot_module=screenshot_module,
             screenshot_directory=screenshot_directory,
             format=format,
@@ -135,7 +136,7 @@ class ScreenCapLibrary:
 
         The directory can also be set in `importing`.
         """
-        return self._client.set_screenshot_directory(path)
+        return self.client.set_screenshot_directory(path)
 
     def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px', delay=0):
         """Takes a screenshot in the specified format at library import and
@@ -175,7 +176,7 @@ class ScreenCapLibrary:
 
         The path where the screenshot is saved is returned.
         """
-        return self._client.take_screenshot(name, format, quality, width, delay)
+        return self.client.take_screenshot(name, format, quality, width, delay)
 
     def start_gif_recording(self, name="screenshot", size_percentage=0.5,
                             embed=True, embed_width='800px'):
@@ -204,14 +205,14 @@ class ScreenCapLibrary:
 
         *Note:* Recommended GIF duration is 100 seconds or lower depending on system memory.
         """
-        return self._client.start_gif_recording(name, size_percentage, embed, embed_width)
+        return self.client.start_gif_recording(name, size_percentage, embed, embed_width)
 
     def stop_gif_recording(self):
         """
         Stops the GIF recording and generates the file. If ``embed`` argument was set to ``True`` the
         GIF will be displayed in the log file.
         """
-        self._client.stop_gif_recording()
+        self.client.stop_gif_recording()
 
     def take_partial_screenshot(self, name='screenshot', format=None, quality=None,
                                 left=0, top=0, width=700, height=300, embed=True, embed_width='800px'):
@@ -234,8 +235,8 @@ class ScreenCapLibrary:
 
         ``embed_width`` specifies the size of the screenshot that is embedded in the log file.
         """
-        return self._client.take_partial_screenshot(name, format, quality,
-                                                    left, top, width, height, embed, embed_width)
+        return self.client.take_partial_screenshot(name, format, quality,
+                                                   left, top, width, height, embed, embed_width)
 
     def take_screenshot_without_embedding(self, name="screenshot", format=None, quality=None, delay=0):
         """Takes a screenshot and links it from the log file.
@@ -243,7 +244,7 @@ class ScreenCapLibrary:
         screenshot is not embedded into the log file. The screenshot is linked
         so it is nevertheless easily available.
         """
-        return self._client.take_screenshot_without_embedding(name, format, quality, delay)
+        return self.client.take_screenshot_without_embedding(name, format, quality, delay)
 
     def take_multiple_screenshots(self, name="screenshot", format=None, quality=None,
                                   screenshot_number=2, delay_time=0):
@@ -260,7 +261,7 @@ class ScreenCapLibrary:
         screenshot. See `Time format` section for more information. By
         default the delay time is 0.
         """
-        return self._client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time)
+        return self.client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time)
 
     def start_video_recording(self, name="recording", fps=8, embed=True, embed_width='800px'):
         """Starts the recording of a video in the background with the specified ``name``.
@@ -287,10 +288,14 @@ class ScreenCapLibrary:
         performance of your system. Check different values for ``fps`` to find optimal results. (e.g.
         for a 15 seconds recording the output might be a 2 second video with 30 fps).
         """
-        return self._client.start_video_recording(name, fps, embed, embed_width)
+        video_client = VideoClient(self.client.screenshot_module, self.client.screenshot_dir)
+        recording_list.append(video_client)
+        video_client.start_video_recording(name, fps, embed, embed_width)
 
     def stop_video_recording(self):
         """Stops the video recording and generates the file in WebM format. If ``embed`` argument
         was set to ``True`` the video will be displayed in the log file.
         """
-        self._client.stop_video_recording()
+        for recording in recording_list:
+            recording.stop_video_recording()
+            recording_list.remove(recording)

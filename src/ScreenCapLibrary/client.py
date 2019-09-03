@@ -31,8 +31,8 @@ from functools import wraps
 from robot.api import logger
 from robot.utils import get_link_path, abspath, timestr_to_secs, is_truthy
 from robot.libraries.BuiltIn import BuiltIn
-from .pygtk import _take_gtk_screenshot, _take_partial_gtk_screenshot, _take_gtk_screen_size, _grab_gtk_pb, _record_gtk
-from .utils import _norm_path, _compression_value_conversion, _pil_quality_conversion, suppress_stderr
+from .pygtk import _take_gtk_screenshot, _take_partial_gtk_screenshot, _take_gtk_screen_size, _grab_gtk_pb
+from .utils import _norm_path, _compression_value_conversion, _pil_quality_conversion
 
 _THREAD_POOL = ThreadPoolExecutor()
 
@@ -44,10 +44,13 @@ def run_in_background(f, executor=None):
     return wrap
 
 
+recording_list = []
+
+
 class Client:
 
     def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0, fps=8):
-        self._screenshot_module = screenshot_module
+        self.screenshot_module = screenshot_module
         self._given_screenshot_dir = _norm_path(screenshot_directory)
         self._format = format
         self._quality = quality
@@ -62,7 +65,7 @@ class Client:
         self.futures = None
 
     @property
-    def _screenshot_dir(self):
+    def screenshot_dir(self):
         return self._given_screenshot_dir or self._log_dir
 
     @property
@@ -77,12 +80,12 @@ class Client:
         path = _norm_path(path)
         if not os.path.isdir(path):
             raise RuntimeError("Directory '%s' does not exist." % path)
-        old = self._screenshot_dir
+        old = self.screenshot_dir
         self._given_screenshot_dir = path
         return old
 
     def _get_screenshot_path(self, basename, format, directory):
-        directory = _norm_path(directory) if directory else self._screenshot_dir
+        directory = _norm_path(directory) if directory else self.screenshot_dir
         if basename.lower().endswith(('.jpg', '.jpeg', '.png', '.webp', '.webm')):
             return os.path.join(directory, basename)
         index = 0
@@ -101,7 +104,7 @@ class Client:
         return path
 
     def _save_screenshot_path(self, basename, format):
-        path = self._get_screenshot_path(basename, format, self._screenshot_dir)
+        path = self._get_screenshot_path(basename, format, self.screenshot_dir)
         return self._validate_screenshot_path(path)
 
     def take_screenshot(self, name, format, quality, width='800px', delay=0):
@@ -115,7 +118,7 @@ class Client:
     def _take_screenshot_client(self, name, format, quality):
         format = (format or self._format).lower()
         quality = quality or self._quality
-        if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
+        if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
             return self._take_screenshot_client_gtk(name, format, quality)
         else:
             return self._take_screenshot_client_mss(name, format, quality)
@@ -170,7 +173,7 @@ class Client:
         format = (format or self._format).lower()
         quality = quality or self._quality
 
-        if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
+        if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
             format = 'jpeg' if format == 'jpg' else format
             if format == 'png':
                 quality = _compression_value_conversion(quality)
@@ -228,7 +231,7 @@ class Client:
 
     @run_in_background
     def grab_frames(self, name, format=None, quality=None, size_percentage=0.5, delay=0, shot_number=None):
-        if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
+        if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
             self._grab_frames_gtk(size_percentage, delay, shot_number)
         else:
             self._grab_frames_mss(size_percentage, delay, shot_number)
@@ -268,54 +271,8 @@ class Client:
         link = get_link_path(path, self._log_dir)
         logger.info('<a href="%s"><img src="%s" width="%s"></a>' % (link, link, width), html=True)
 
-    def _embed_video(self, path, width):
-        link = get_link_path(path, self._log_dir)
-        logger.info('<a href="%s"><video width="%s" autoplay><source src="%s" type="video/webm"></video></a>' %
-                    (link, width, link), html=True)
-
     def _link_screenshot(self, path):
         link = get_link_path(path, self._log_dir)
         logger.info("Screenshot saved to '<a href=\"%s\">%s</a>'." % (link, path), html=True)
 
-    def start_video_recording(self, name, fps, embed, embed_width):
-        self._stop_condition.clear()
-        self.name = name
-        try:
-            self.fps = int(fps)
-        except ValueError:
-            raise ValueError('The fps argument must be of type integer.')
-        self.embed = embed
-        self.embed_width = embed_width
-        self.path = self._save_screenshot_path(basename=self.name, format='webm')
-        self.futures = self.capture_screen(self.path, self.fps)
 
-    def stop_video_recording(self):
-        self._stop_condition.set()
-        self._close_threads()
-        if is_truthy(self.embed):
-            self._embed_video(self.path, self.embed_width)
-        return self.path
-
-    @run_in_background
-    def capture_screen(self, path, fps):
-        if self._screenshot_module and self._screenshot_module.lower() == 'pygtk':
-            _record_gtk(path, fps, stop=self._stop_condition)
-        else:
-            self._record_mss(path, fps)
-
-    def _record_mss(self, path, fps):
-        fourcc = cv2.VideoWriter_fourcc(*'VP08')
-        with mss() as sct:
-            sct_img = sct.grab(sct.monitors[1])
-        width = int(sct_img.width)
-        height = int(sct_img.height)
-        with suppress_stderr():
-            vid = cv2.VideoWriter('%s' % path, fourcc, fps, (width, height))
-        while not self._stop_condition.isSet():
-            with mss() as sct:
-                sct_img = sct.grab(sct.monitors[1])
-            numpy_array = np.array(sct_img)
-            frame = cv2.cvtColor(numpy_array, cv2.COLOR_RGBA2RGB)
-            vid.write(frame)
-        vid.release()
-        cv2.destroyAllWindows()
