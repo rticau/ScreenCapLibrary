@@ -263,9 +263,12 @@ class ScreenCapLibrary:
         """
         return self.client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time)
 
-    def start_video_recording(self, name="recording", fps=8, embed=True, embed_width='800px'):
+    def start_video_recording(self, alias=None, name="recording", fps=8, embed=True, embed_width='800px'):
         """Starts the recording of a video in the background with the specified ``name``.
         The recording can be stopped by calling the `Stop Video Recording` keyword.
+
+        ``alias`` specifies the name by which the recording should be
+        close when it has fulfilled its job.
 
         ``name`` specifies the name by which the record will be saved.
 
@@ -290,12 +293,26 @@ class ScreenCapLibrary:
         """
         video_client = VideoClient(self.client.screenshot_module, self.client.screenshot_dir)
         recording_list.append(video_client)
-        video_client.start_video_recording(name, fps, embed, embed_width)
+        video_client.start_video_recording(alias, name, fps, embed, embed_width)
 
-    def stop_video_recording(self):
-        """Stops the video recording and generates the file in WebM format. If ``embed`` argument
-        was set to ``True`` the video will be displayed in the log file.
+    def stop_all_video_recordings(self):
+        """Stops all the video recordings and generates the files in WebM format. If ``embed`` argument
+        was set to ``True`` the videos will be displayed in the log file.
         """
         for recording in recording_list:
-            recording.stop_video_recording()
+            recording.stop_video_recording(None)
             recording_list.remove(recording)
+
+    def stop_video_recording(self, alias=None):
+        """Stops the video recording correspondent to ``alias`` and generates the file in WebM format. If no
+        ``alias`` is specified the last opened recording will be closed. If ``embed`` argument was set to
+        ``True`` the video will be displayed in the log file.
+        """
+        if alias:
+            for recording in recording_list:
+                if recording.alias == alias:
+                    recording.stop_video_recording(alias)
+                    recording_list.remove(recording)
+        else:
+            recording_list[-1].stop_video_recording(None)
+            recording_list.pop()

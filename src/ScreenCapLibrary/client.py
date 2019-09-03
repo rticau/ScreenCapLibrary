@@ -14,6 +14,7 @@
 #  limitations under the License.
 
 import os
+import sys
 import time
 import threading
 
@@ -213,14 +214,21 @@ class Client:
         self.embed_width = embed_width
         self.futures = self.grab_frames(name, size_percentage=size_percentage)
 
-    def _close_threads(self):
+    def _close_threads(self, alias):
         if self.futures._exception:
             raise self.futures._exception
-        _THREAD_POOL._threads.clear()
+        thread_list = list(_THREAD_POOL._threads)
+        for list_element in thread_list:
+            if sys.version_info[0] < 3:
+                if list_element.name.rsplit('_', 1)[0] == alias:
+                    _THREAD_POOL._threads.remove(list_element)
+            else:
+                if list_element._name.rsplit('_', 1)[0] == alias:
+                    _THREAD_POOL._threads.remove(list_element)
         _threads_queues.clear()
 
     def stop_gif_recording(self):
-        self._close_threads()
+        self._close_threads(None)
         path = self._save_screenshot_path(basename=self.name, format='gif')
         self.frames[0].save(path, save_all=True, append_images=self.frames[1:],
                             duration=125, optimize=True, loop=0)

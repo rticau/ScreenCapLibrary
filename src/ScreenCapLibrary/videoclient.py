@@ -1,6 +1,7 @@
+import sys
 import threading
 
-from .client import Client, run_in_background
+from .client import Client, run_in_background, _THREAD_POOL
 from .pygtk import _record_gtk
 from .utils import _norm_path, suppress_stderr
 from mss import mss
@@ -21,8 +22,16 @@ class VideoClient(Client):
         self.screenshot_module = screenshot_module
         self._given_screenshot_dir = _norm_path(screenshot_directory)
         self._stop_condition = threading.Event()
+        self.alias = None
+        self.thread_name = None
 
-    def start_video_recording(self, name, fps, embed, embed_width):
+    def _get_thread_index(self, thread_element):
+        if sys.version_info[0] < 3:
+            return (thread_element.name.rsplit(_THREAD_POOL._thread_name_prefix, 1)[1]).replace('_', '',)
+        else:
+            return (thread_element._name.rsplit(_THREAD_POOL._thread_name_prefix, 1)[1]).replace('_', '',)
+
+    def start_video_recording(self, alias, name, fps, embed, embed_width):
         self._stop_condition.clear()
         self.name = name
         try:
@@ -32,11 +41,27 @@ class VideoClient(Client):
         self.embed = embed
         self.embed_width = embed_width
         self.path = self._save_screenshot_path(basename=self.name, format='webm')
+        old_prefix = _THREAD_POOL._thread_name_prefix
+        if alias:
+            _THREAD_POOL._thread_name_prefix = alias
         self.futures = self.capture_screen(self.path, self.fps)
+        if alias:
+            _THREAD_POOL._thread_name_prefix = old_prefix
+        else:
+            thread_list = list(_THREAD_POOL._threads)
+            last_thread_index = self._get_thread_index(thread_list[0])
+            for element in thread_list:
+                element_index = self._get_thread_index(element)
+                if int(element_index) >= int(last_thread_index):
+                    last_thread_index = element_index
+            self.thread_name = _THREAD_POOL._thread_name_prefix + '_' + last_thread_index
 
-    def stop_video_recording(self):
+    def stop_video_recording(self, alias):
         self._stop_condition.set()
-        self._close_threads()
+        if alias:
+            self._close_threads(alias)
+        else:
+            self._close_threads(self.thread_name)
         if is_truthy(self.embed):
             self._embed_video(self.path, self.embed_width)
         return self.path

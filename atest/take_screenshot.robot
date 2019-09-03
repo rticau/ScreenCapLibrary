@@ -17,7 +17,9 @@ ${GTK_PNG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_png.png
 ${GTK_JPEG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_jpeg.jpeg
 ${GTK_WEBP_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_webp.webp
 ${GIF_SCREENSHOT}  ${OUTPUTDIR}${/}screenshot_1.gif
-${VIDEO_FILE}  ${OUTPUTDIR}${/}recording_1.webm
+${FIRST_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_1.webm
+${SECOND_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_2.webm
+${THIRD_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_3.webm
 
 *** Test Cases ***
 Screenshot Is Taken
@@ -116,7 +118,7 @@ Video Capture
     ScreenCapLibrary.Start Video Recording
     Sleep  5
     ScreenCapLibrary.Stop Video Recording
-    Screenshot Should Exist  ${VIDEO_FILE}
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
     Sleep  10
 
 Video Capture Gtk
@@ -124,7 +126,70 @@ Video Capture Gtk
     ScreenCapLibraryGtk.Start Video Recording
     Sleep  5
     ScreenCapLibraryGtk.Stop Video Recording
-    Screenshot Should Exist  ${VIDEO_FILE}
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Sleep  10
+
+Nested Video Captures
+    [Tags]  aaa
+    ScreenCapLibrary.Start Video Recording  1
+    Sleep  5
+    ScreenCapLibrary.Start Video Recording  2
+    Sleep  5
+    ScreenCapLibrary.Stop Video Recording  2
+    Sleep  5
+    ScreenCapLibrary.Stop Video Recording  1
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Sleep  10
+
+Consecutive Video Captures
+    ScreenCapLibrary.Start Video Recording   1
+    Sleep  5
+    ScreenCapLibrary.Stop Video Recording    1
+    Sleep  5
+    ScreenCapLibrary.Start Video Recording   2
+    Sleep  5
+    ScreenCapLibrary.Stop Video Recording    2
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+    Sleep  10
+
+Nested Video Captures Gtk
+    [Tags]  gtk
+    ScreenCapLibraryGtk.Start Video Recording   1
+    Sleep  5
+    ScreenCapLibraryGtk.Start Video Recording  2
+    Sleep  5
+    ScreenCapLibraryGtk.Stop Video Recording   2
+    Sleep  5
+    ScreenCapLibraryGtk.Stop Video Recording   1
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+    Sleep  10
+
+Consecutive Video Captures Gtk
+    [Tags]  gtk
+    ScreenCapLibraryGtk.Start Video Recording   1
+    Sleep  5
+    ScreenCapLibraryGtk.Stop Video Recording    1
+    Sleep  5
+    ScreenCapLibraryGtk.Start Video Recording   2
+    Sleep  5
+    ScreenCapLibraryGtk.Stop Video Recording    2
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+    Sleep  10
+
+Nested Videos Without Alias
+    ScreenCapLibrary.Start Video Recording
+    Sleep  5
+    ScreenCapLibrary.Start Video Recording
+    Sleep  5
+    ScreenCapLibrary.Stop Video Recording
+    Sleep  5
+    ScreenCapLibrary.Stop Video Recording
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
     Sleep  10
 
 *** Keywords ***
