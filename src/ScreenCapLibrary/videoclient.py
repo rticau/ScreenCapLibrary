@@ -32,7 +32,7 @@ class VideoClient(Client):
             return (thread_element._name.rsplit(_THREAD_POOL._thread_name_prefix, 1)[1]).replace('_', '',)
 
     def start_video_recording(self, alias, name, fps, embed, embed_width):
-        self._stop_condition.clear()
+        self.alias = alias
         self.name = name
         try:
             self.fps = int(fps)

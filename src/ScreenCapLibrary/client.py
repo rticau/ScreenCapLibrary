@@ -220,10 +220,10 @@ class Client:
         thread_list = list(_THREAD_POOL._threads)
         for list_element in thread_list:
             if sys.version_info[0] < 3:
-                if list_element.name.rsplit('_', 1)[0] == alias:
+                if alias == list_element.name.rsplit('_', 1)[0] or alias == list_element.name:
                     _THREAD_POOL._threads.remove(list_element)
             else:
-                if list_element._name.rsplit('_', 1)[0] == alias:
+                if alias == list_element._name.rsplit('_', 1)[0] or alias == list_element._name:
                     _THREAD_POOL._threads.remove(list_element)
         _threads_queues.clear()
 

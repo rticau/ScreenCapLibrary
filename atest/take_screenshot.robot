@@ -180,6 +180,14 @@ Consecutive Video Captures Gtk
     Screenshot Should Exist  ${SECOND_VIDEO_FILE}
     Sleep  10
 
+Close All Recordings
+    ScreenCapLibrary.Start Video Recording
+    Sleep  5
+    ScreenCapLibrary.Start Video Recording
+    Sleep  5
+    ScreenCapLibrary.Stop All Video Recordings
+    Sleep  10
+
 Nested Videos Without Alias
     ScreenCapLibrary.Start Video Recording
     Sleep  5
