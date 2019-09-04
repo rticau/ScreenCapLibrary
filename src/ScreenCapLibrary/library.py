@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 from .version import VERSION
-from .client import Client, recording_list
+from .client import Client, recording_list, _THREAD_POOL, close_all_threads
 from .videoclient import VideoClient
 
 __version__ = VERSION
@@ -300,8 +300,10 @@ class ScreenCapLibrary:
         was set to ``True`` the videos will be displayed in the log file.
         """
         for recording in recording_list:
-            recording.stop_video_recording(None)
+            recording._stop_condition.set()
+        for recording in recording_list:
             recording_list.remove(recording)
+        close_all_threads()
 
     def stop_video_recording(self, alias=None):
         """Stops the video recording correspondent to ``alias`` and generates the file in WebM format. If no

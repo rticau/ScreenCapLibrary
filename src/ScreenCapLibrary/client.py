@@ -38,6 +38,11 @@ from .utils import _norm_path, _compression_value_conversion, _pil_quality_conve
 _THREAD_POOL = ThreadPoolExecutor()
 
 
+def close_all_threads():
+    for thread_item in list(_THREAD_POOL._threads):
+        _THREAD_POOL._threads.remove(thread_item)
+
+
 def run_in_background(f, executor=None):
     @wraps(f)
     def wrap(*args, **kwargs):
