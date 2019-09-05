@@ -182,6 +182,28 @@ Close All Recordings Without Alias
     Screenshot Should Exist  ${SECOND_VIDEO_FILE}
     Sleep  10
 
+Close All Recordings Gtk
+    [Tags]  gtk
+    ScreenCapLibraryGtk.Start Video Recording  1
+    Sleep  5
+    ScreenCapLibraryGtk.Start Video Recording  2
+    Sleep  5
+    ScreenCapLibraryGtk.Stop All Video Recordings
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+    Sleep  10
+
+Close All Recordings Without Alias Gtk
+    [Tags]  gtk
+    ScreenCapLibraryGtk.Start Video Recording
+    Sleep  5
+    ScreenCapLibraryGtk.Start Video Recording
+    Sleep  5
+    ScreenCapLibraryGtk.Stop All Video Recordings
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+    Sleep  10
+
 Nested Videos Without Alias
     ScreenCapLibrary.Start Video Recording
     Sleep  5
@@ -190,6 +212,19 @@ Nested Videos Without Alias
     ScreenCapLibrary.Stop Video Recording
     Sleep  5
     ScreenCapLibrary.Stop Video Recording
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+    Sleep  10
+
+Nested Videos Without Alias Gtk
+    [Tags]  gtk
+    ScreenCapLibraryGtk.Start Video Recording
+    Sleep  5
+    ScreenCapLibraryGtk.Start Video Recording
+    Sleep  5
+    ScreenCapLibraryGtk.Stop Video Recording
+    Sleep  5
+    ScreenCapLibraryGtk.Stop Video Recording
     Screenshot Should Exist  ${FIRST_VIDEO_FILE}
     Screenshot Should Exist  ${SECOND_VIDEO_FILE}
     Sleep  10

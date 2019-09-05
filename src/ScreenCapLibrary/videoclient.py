@@ -1,4 +1,5 @@
 import sys
+import time
 import threading
 
 from .client import Client, run_in_background, _THREAD_POOL
@@ -47,6 +48,11 @@ class VideoClient(Client):
         self.futures = self.capture_screen(self.path, self.fps)
         if alias:
             _THREAD_POOL._thread_name_prefix = old_prefix
+
+    def stop_video_recording(self, alias):
+        self._stop_condition.set()
+        if alias:
+            self._close_threads(alias, True)
         else:
             thread_list = list(_THREAD_POOL._threads)
             last_thread_index = self._get_thread_index(thread_list[0])
@@ -55,13 +61,7 @@ class VideoClient(Client):
                 if int(element_index) >= int(last_thread_index):
                     last_thread_index = element_index
             self.thread_name = _THREAD_POOL._thread_name_prefix + '_' + last_thread_index
-
-    def stop_video_recording(self, alias):
-        self._stop_condition.set()
-        if alias:
-            self._close_threads(alias)
-        else:
-            self._close_threads(self.thread_name)
+            self._close_threads(self.thread_name, False)
         if is_truthy(self.embed):
             self._embed_video(self.path, self.embed_width)
         return self.path

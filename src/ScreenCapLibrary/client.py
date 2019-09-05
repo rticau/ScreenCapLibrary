@@ -219,17 +219,27 @@ class Client:
         self.embed_width = embed_width
         self.futures = self.grab_frames(name, size_percentage=size_percentage)
 
-    def _close_threads(self, alias):
+    def _close_threads(self, alias, is_alias):
         if self.futures._exception:
             raise self.futures._exception
         thread_list = list(_THREAD_POOL._threads)
         for list_element in thread_list:
             if sys.version_info[0] < 3:
-                if alias == list_element.name.rsplit('_', 1)[0] or alias == list_element.name:
-                    _THREAD_POOL._threads.remove(list_element)
+                if is_alias:
+                    if alias == list_element.name:
+                        _THREAD_POOL._threads.remove(list_element)
+                else:
+                    if alias == list_element.name.rsplit('_', 1)[0]:
+                        _THREAD_POOL._threads.remove(list_element)
+                        break
             else:
-                if alias == list_element._name.rsplit('_', 1)[0] or alias == list_element._name:
-                    _THREAD_POOL._threads.remove(list_element)
+                if is_alias:
+                    if alias == list_element._name:
+                        _THREAD_POOL._threads.remove(list_element)
+                        break
+                else:
+                    if alias == list_element._name.rsplit('_', 1)[0]:
+                        _THREAD_POOL._threads.remove(list_element)
         _threads_queues.clear()
 
     def stop_gif_recording(self):
