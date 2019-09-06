@@ -38,11 +38,6 @@ from .utils import _norm_path, _compression_value_conversion, _pil_quality_conve
 _THREAD_POOL = ThreadPoolExecutor()
 
 
-def close_all_threads():
-    for thread_item in list(_THREAD_POOL._threads):
-        _THREAD_POOL._threads.remove(thread_item)
-
-
 def run_in_background(f, executor=None):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -219,31 +214,22 @@ class Client:
         self.embed_width = embed_width
         self.futures = self.grab_frames(name, size_percentage=size_percentage)
 
-    def _close_threads(self, alias, is_alias):
-        if self.futures._exception:
-            raise self.futures._exception
-        thread_list = list(_THREAD_POOL._threads)
-        for list_element in thread_list:
-            if sys.version_info[0] < 3:
-                if is_alias:
-                    if alias == list_element.name:
-                        _THREAD_POOL._threads.remove(list_element)
-                else:
-                    if alias == list_element.name.rsplit('_', 1)[0]:
-                        _THREAD_POOL._threads.remove(list_element)
-                        break
-            else:
-                if is_alias:
-                    if alias == list_element._name:
-                        _THREAD_POOL._threads.remove(list_element)
-                        break
-                else:
-                    if alias == list_element._name.rsplit('_', 1)[0]:
-                        _THREAD_POOL._threads.remove(list_element)
+    def _close_thread(self, alias):
+        ordered_thread_list = sorted(_THREAD_POOL._threads, key=lambda x: x.name)
+        if alias:
+            for thread in ordered_thread_list:
+                if alias == self._get_thread_prefix(thread):
+                    _THREAD_POOL._threads.remove(thread)
+        else:
+            if len(_THREAD_POOL._threads) > 0:
+                _THREAD_POOL._threads.pop()
         _threads_queues.clear()
+        if self.futures._exception:
+            del recording_list[:]
+            raise self.futures._exception
 
     def stop_gif_recording(self):
-        self._close_threads(None)
+        self._close_thread(None)
         path = self._save_screenshot_path(basename=self.name, format='gif')
         self.frames[0].save(path, save_all=True, append_images=self.frames[1:],
                             duration=125, optimize=True, loop=0)
@@ -298,4 +284,6 @@ class Client:
         link = get_link_path(path, self._log_dir)
         logger.info("Screenshot saved to '<a href=\"%s\">%s</a>'." % (link, path), html=True)
 
-
+    @staticmethod
+    def _get_thread_prefix(thread):
+        return thread.name.rsplit('_', 1)[0]

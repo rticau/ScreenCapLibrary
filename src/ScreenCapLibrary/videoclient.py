@@ -24,13 +24,6 @@ class VideoClient(Client):
         self._given_screenshot_dir = _norm_path(screenshot_directory)
         self._stop_condition = threading.Event()
         self.alias = None
-        self.thread_name = None
-
-    def _get_thread_index(self, thread_element):
-        if sys.version_info[0] < 3:
-            return (thread_element.name.rsplit(_THREAD_POOL._thread_name_prefix, 1)[1]).replace('_', '',)
-        else:
-            return (thread_element._name.rsplit(_THREAD_POOL._thread_name_prefix, 1)[1]).replace('_', '',)
 
     def start_video_recording(self, alias, name, fps, embed, embed_width):
         self.alias = alias
@@ -51,17 +44,7 @@ class VideoClient(Client):
 
     def stop_video_recording(self, alias):
         self._stop_condition.set()
-        if alias:
-            self._close_threads(alias, True)
-        else:
-            thread_list = list(_THREAD_POOL._threads)
-            last_thread_index = self._get_thread_index(thread_list[0])
-            for element in thread_list:
-                element_index = self._get_thread_index(element)
-                if int(element_index) >= int(last_thread_index):
-                    last_thread_index = element_index
-            self.thread_name = _THREAD_POOL._thread_name_prefix + '_' + last_thread_index
-            self._close_threads(self.thread_name, False)
+        self._close_thread(alias)
         if is_truthy(self.embed):
             self._embed_video(self.path, self.embed_width)
         return self.path
