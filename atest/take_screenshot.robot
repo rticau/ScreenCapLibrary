@@ -81,16 +81,16 @@ Take Screenshot With Delay
     ${actual_time}=  DateTime.Subtract Date From Date  ${end_date}  ${start_date}
     Should Be True  ${actual_time} > 10
 
-Take Multiple Screenshots
-    ScreenCapLibrary.Take Multiple Screenshots  screenshot_number=4  delay_time=1 second
-    Sleep  10
-    Screenshot Number In ${OUTPUTDIR} Should Be 4
-
-Take Multiple Gtk Screenshots
-    [Tags]    gtk
-    ScreenCapLibraryGtk.Take Multiple Screenshots  format=png  screenshot_number=4  delay_time=1 second
-    Sleep  10
-    Screenshot Number In ${OUTPUTDIR} Should Be 4
+#Take Multiple Screenshots
+#    ScreenCapLibrary.Take Multiple Screenshots  screenshot_number=4  delay_time=1 second
+#
+#    Screenshot Number In ${OUTPUTDIR} Should Be 4
+#
+#Take Multiple Gtk Screenshots
+#    [Tags]    gtk
+#    ScreenCapLibraryGtk.Take Multiple Screenshots  format=png  screenshot_number=4  delay_time=1 second
+#
+#    Screenshot Number In ${OUTPUTDIR} Should Be 4
 
 Take Screenshot With Partial Dimensions
     ${partial_screenshot}=  ScreenCapLibrary.Take Partial Screenshot  left=50  height=300  width=700
@@ -119,7 +119,6 @@ Video Capture
     Sleep  5
     ScreenCapLibrary.Stop Video Recording
     Screenshot Should Exist  ${FIRST_VIDEO_FILE}
-    Sleep  10
 
 Video Capture Gtk
     [Tags]    gtk
@@ -127,7 +126,6 @@ Video Capture Gtk
     Sleep  5
     ScreenCapLibraryGtk.Stop Video Recording
     Screenshot Should Exist  ${FIRST_VIDEO_FILE}
-    Sleep  10
 
 Nested And Consecutive Video Captures
     ScreenCapLibrary.Start Video Recording  1
@@ -143,7 +141,6 @@ Nested And Consecutive Video Captures
     Screenshot Should Exist  ${SECOND_VIDEO_FILE}
     Screenshot Should Exist  ${FIRST_VIDEO_FILE}
     Screenshot Should Exist  ${THIRD_VIDEO_FILE}
-    Sleep  10
 
 Nested And Consecutive Video Captures Gtk
     [Tags]  gtk
@@ -160,7 +157,6 @@ Nested And Consecutive Video Captures Gtk
     Screenshot Should Exist  ${FIRST_VIDEO_FILE}
     Screenshot Should Exist  ${SECOND_VIDEO_FILE}
     Screenshot Should Exist  ${THIRD_VIDEO_FILE}
-    Sleep  10
 
 Close All Recordings
     ScreenCapLibrary.Start Video Recording  1
@@ -170,7 +166,6 @@ Close All Recordings
     ScreenCapLibrary.Stop All Video Recordings
     Screenshot Should Exist  ${FIRST_VIDEO_FILE}
     Screenshot Should Exist  ${SECOND_VIDEO_FILE}
-    Sleep  10
 
 Close All Recordings Without Alias
     ScreenCapLibrary.Start Video Recording
@@ -180,7 +175,6 @@ Close All Recordings Without Alias
     ScreenCapLibrary.Stop All Video Recordings
     Screenshot Should Exist  ${FIRST_VIDEO_FILE}
     Screenshot Should Exist  ${SECOND_VIDEO_FILE}
-    Sleep  10
 
 Close All Recordings Gtk
     [Tags]  gtk
@@ -191,7 +185,6 @@ Close All Recordings Gtk
     ScreenCapLibraryGtk.Stop All Video Recordings
     Screenshot Should Exist  ${FIRST_VIDEO_FILE}
     Screenshot Should Exist  ${SECOND_VIDEO_FILE}
-    Sleep  10
 
 Close All Recordings Without Alias Gtk
     [Tags]  gtk
@@ -202,7 +195,6 @@ Close All Recordings Without Alias Gtk
     ScreenCapLibraryGtk.Stop All Video Recordings
     Screenshot Should Exist  ${FIRST_VIDEO_FILE}
     Screenshot Should Exist  ${SECOND_VIDEO_FILE}
-    Sleep  10
 
 Nested Videos Without Alias
     ScreenCapLibrary.Start Video Recording
@@ -214,7 +206,6 @@ Nested Videos Without Alias
     ScreenCapLibrary.Stop Video Recording
     Screenshot Should Exist  ${FIRST_VIDEO_FILE}
     Screenshot Should Exist  ${SECOND_VIDEO_FILE}
-    Sleep  10
 
 Nested Videos Without Alias Gtk
     [Tags]  gtk
@@ -227,7 +218,6 @@ Nested Videos Without Alias Gtk
     ScreenCapLibraryGtk.Stop Video Recording
     Screenshot Should Exist  ${FIRST_VIDEO_FILE}
     Screenshot Should Exist  ${SECOND_VIDEO_FILE}
-    Sleep  10
 
 *** Keywords ***
 Take Screenshot And Verify

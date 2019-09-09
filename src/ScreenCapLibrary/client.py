@@ -14,7 +14,6 @@
 #  limitations under the License.
 
 import os
-import sys
 import time
 import threading
 
@@ -163,7 +162,8 @@ class Client:
         elif format == 'jpeg':
             quality = _pil_quality_conversion(quality)
         delay_time = timestr_to_secs(delay_time)
-        self.grab_frames(name, format, quality, delay=delay_time, shot_number=int(screenshot_number))
+        # TODO - needs reimplementing
+        # self.grab_frames(name, format, quality, delay=delay_time, shot_number=int(screenshot_number))
 
     def take_partial_screenshot(self, name, format, quality,
                                 left, top, width, height, embed, embed_width):
@@ -212,7 +212,7 @@ class Client:
         self.name = name
         self.embed = embed
         self.embed_width = embed_width
-        self.futures = self.grab_frames(name, size_percentage=size_percentage)
+        self.futures = self.grab_frames(name, size_percentage=size_percentage, stop=self._stop_condition)
 
     def _close_thread(self, alias):
         ordered_thread_list = sorted(_THREAD_POOL._threads, key=lambda x: x.name)
@@ -226,34 +226,36 @@ class Client:
         _threads_queues.clear()
         if self.futures._exception:
             del recording_list[:]
+            _THREAD_POOL._threads.clear()
             raise self.futures._exception
 
     def stop_gif_recording(self):
+        self._stop_condition.set()
+        time.sleep(1)  # wait for background thread to finish work
         self._close_thread(None)
         path = self._save_screenshot_path(basename=self.name, format='gif')
-        self.frames[0].save(path, save_all=True, append_images=self.frames[1:],
-                            duration=125, optimize=True, loop=0)
+        self.frames[0].save(path, save_all=True, append_images=self.frames[1:], optimize=True, loop=0)
         if is_truthy(self.embed):
             self._embed_screenshot(path, self.embed_width)
         self.frames = []
         return path
 
     @run_in_background
-    def grab_frames(self, name, format=None, quality=None, size_percentage=0.5, delay=0, shot_number=None):
+    def grab_frames(self, name, format=None, quality=None, size_percentage=0.5, delay=0, shot_number=None, stop=None):
         if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
-            self._grab_frames_gtk(size_percentage, delay, shot_number)
+            self._grab_frames_gtk(size_percentage, delay, shot_number, stop)
         else:
-            self._grab_frames_mss(size_percentage, delay, shot_number)
+            self._grab_frames_mss(size_percentage, delay, shot_number, stop)
         if shot_number:
             for img in self.frames:
                 path = self._save_screenshot_path(basename=name, format=format)
                 img.save(path, format=format, quality=quality, compress_level=quality)
 
-    def _grab_frames_gtk(self, size_percentage, delay, shot_number):
+    def _grab_frames_gtk(self, size_percentage, delay, shot_number, stop):
         width, height = _take_gtk_screen_size()
         w = int(width * size_percentage)
         h = int(height * size_percentage)
-        while True:
+        while not stop.isSet():
             pb = _grab_gtk_pb()
             img = Image.frombuffer('RGB', (width, height), pb.get_pixels(), 'raw', 'RGB').resize((w, h))
             self.frames.append(img)
@@ -261,13 +263,12 @@ class Client:
                 time.sleep(timestr_to_secs(delay))
             if shot_number and len(self.frames) == int(shot_number):
                 break
-            time.sleep(0.125)
 
-    def _grab_frames_mss(self, size_percentage, delay, shot_number):
+    def _grab_frames_mss(self, size_percentage, delay, shot_number, stop):
         with mss() as sct:
             width = int(sct.grab(sct.monitors[0]).size.width * size_percentage)
             height = int(sct.grab(sct.monitors[0]).size.height * size_percentage)
-            while True:
+            while not stop.isSet():
                 sct_img = sct.grab(sct.monitors[0])
                 img = Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX').resize((width, height))
                 self.frames.append(img)

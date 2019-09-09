@@ -1,4 +1,3 @@
-import sys
 import time
 import threading
 
@@ -44,6 +43,7 @@ class VideoClient(Client):
 
     def stop_video_recording(self, alias):
         self._stop_condition.set()
+        time.sleep(1)  # wait for thread to finish work
         self._close_thread(alias)
         if is_truthy(self.embed):
             self._embed_video(self.path, self.embed_width)
