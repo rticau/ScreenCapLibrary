@@ -13,6 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import sys
 import os
 import time
 import threading
@@ -25,8 +26,6 @@ except ImportError:
 
 from mss import mss
 from PIL import Image
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures.thread import _threads_queues
 from functools import wraps
 from robot.api import logger
 from robot.utils import get_link_path, abspath, timestr_to_secs, is_truthy
@@ -34,17 +33,19 @@ from robot.libraries.BuiltIn import BuiltIn
 from .pygtk import _take_gtk_screenshot, _take_partial_gtk_screenshot, _take_gtk_screen_size, _grab_gtk_pb
 from .utils import _norm_path, _compression_value_conversion, _pil_quality_conversion
 
-_THREAD_POOL = ThreadPoolExecutor()
+if sys.version_info[0] < 3:
+    from concurrent.futures import ThreadPoolExecutor
+else:
+    from futures3.thread import ThreadPoolExecutor
+
+_THREAD_POOL = ThreadPoolExecutor(max_workers=1)
 
 
-def run_in_background(f, executor=None):
+def run_in_background(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        return (executor or _THREAD_POOL).submit(f, *args, **kwargs)
+        return _THREAD_POOL.submit(f, *args, **kwargs)
     return wrap
-
-
-recording_list = []
 
 
 class Client:
@@ -153,7 +154,7 @@ class Client:
             raise RuntimeError("Invalid screenshot format.")
 
     def take_multiple_screenshots(self, name, format, quality, screenshot_number, delay_time):
-        self.frames = []
+        del self.frames[:]
         quality = quality or self._quality
         format = (format or self._format).lower()
         format = 'jpeg' if format == 'jpg' else format
@@ -214,30 +215,13 @@ class Client:
         self.embed_width = embed_width
         self.futures = self.grab_frames(name, size_percentage=size_percentage, stop=self._stop_condition)
 
-    def _close_thread(self, alias):
-        ordered_thread_list = sorted(_THREAD_POOL._threads, key=lambda x: x.name)
-        if alias:
-            for thread in ordered_thread_list:
-                if alias == self._get_thread_prefix(thread):
-                    _THREAD_POOL._threads.remove(thread)
-        else:
-            if len(_THREAD_POOL._threads) > 0:
-                _THREAD_POOL._threads.pop()
-        _threads_queues.clear()
-        if self.futures._exception:
-            del recording_list[:]
-            _THREAD_POOL._threads.clear()
-            raise self.futures._exception
-
     def stop_gif_recording(self):
-        self._stop_condition.set()
-        time.sleep(1)  # wait for background thread to finish work
-        self._close_thread(None)
+        self._stop_thread()
         path = self._save_screenshot_path(basename=self.name, format='gif')
-        self.frames[0].save(path, save_all=True, append_images=self.frames[1:], optimize=True, loop=0)
+        self.frames[0].save(path, save_all=True, append_images=self.frames[1:], duration=125, optimize=True, loop=0)
         if is_truthy(self.embed):
             self._embed_screenshot(path, self.embed_width)
-        self.frames = []
+        del self.frames[:]
         return path
 
     @run_in_background
@@ -263,6 +247,7 @@ class Client:
                 time.sleep(timestr_to_secs(delay))
             if shot_number and len(self.frames) == int(shot_number):
                 break
+            time.sleep(0.125)
 
     def _grab_frames_mss(self, size_percentage, delay, shot_number, stop):
         with mss() as sct:
@@ -276,6 +261,14 @@ class Client:
                     time.sleep(timestr_to_secs(delay))
                 if shot_number and len(self.frames) == int(shot_number):
                     break
+                time.sleep(0.125)
+
+    def _stop_thread(self):
+        self._stop_condition.set()
+        while self.futures._state is 'RUNNING':
+            time.sleep(1)  # wait for background thread to finish work
+        if self.futures._exception:
+            raise self.futures._exception
 
     def _embed_screenshot(self, path, width):
         link = get_link_path(path, self._log_dir)
@@ -284,7 +277,3 @@ class Client:
     def _link_screenshot(self, path):
         link = get_link_path(path, self._log_dir)
         logger.info("Screenshot saved to '<a href=\"%s\">%s</a>'." % (link, path), html=True)
-
-    @staticmethod
-    def _get_thread_prefix(thread):
-        return thread.name.rsplit('_', 1)[0]

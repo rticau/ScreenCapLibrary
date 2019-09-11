@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 from .version import VERSION
-from .client import Client, recording_list
+from .client import Client
 from .videoclient import VideoClient
 
 __version__ = VERSION
@@ -87,6 +87,8 @@ class ScreenCapLibrary:
     """
 
     ROBOT_LIBRARY_VERSION = __version__
+
+    started_recordings = []
 
     def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0, fps=8):
         """
@@ -292,17 +294,16 @@ class ScreenCapLibrary:
         for a 15 seconds recording the output might be a 2 second video with 30 fps).
         """
         video_client = VideoClient(self.client.screenshot_module, self.client.screenshot_dir)
-        recording_list.append(video_client)
+        self.started_recordings.append(video_client)
         video_client.start_video_recording(alias, name, fps, embed, embed_width)
 
     def stop_all_video_recordings(self):
         """Stops all the video recordings and generates the files in WebM format. If ``embed`` argument
         was set to ``True`` the videos will be displayed in the log file.
         """
-        for recording in recording_list:
-            alias = recording.alias
-            recording.stop_video_recording(alias)
-        del recording_list[:]
+        for recording in self.started_recordings:
+            recording.stop_video_recording()
+        del self.started_recordings[:]
 
     def stop_video_recording(self, alias=None):
         """Stops the video recording correspondent to ``alias`` and generates the file in WebM format. If no
@@ -310,9 +311,15 @@ class ScreenCapLibrary:
         ``True`` the video will be displayed in the log file.
         """
         if alias:
-            for recording in recording_list:
-                if recording.alias == alias:
-                    recording.stop_video_recording(alias)
-                    recording_list.remove(recording)
+            aliases = [x.alias for x in self.started_recordings]
+            try:
+                for recording in self.started_recordings:
+                    if recording.alias in aliases:
+                        self.started_recordings.remove(recording)
+                        recording.stop_video_recording()
+            except RuntimeError as error:
+                del self.started_recordings[:]
+                raise error
+
         else:
-            recording_list.pop().stop_video_recording(None)
+            self.started_recordings.pop().stop_video_recording()

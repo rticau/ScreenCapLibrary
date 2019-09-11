@@ -1,7 +1,7 @@
 import time
 import threading
 
-from .client import Client, run_in_background, _THREAD_POOL
+from .client import Client, run_in_background
 from .pygtk import _record_gtk
 from .utils import _norm_path, suppress_stderr
 from mss import mss
@@ -34,17 +34,10 @@ class VideoClient(Client):
         self.embed = embed
         self.embed_width = embed_width
         self.path = self._save_screenshot_path(basename=self.name, format='webm')
-        old_prefix = _THREAD_POOL._thread_name_prefix
-        if alias:
-            _THREAD_POOL._thread_name_prefix = alias
         self.futures = self.capture_screen(self.path, self.fps)
-        if alias:
-            _THREAD_POOL._thread_name_prefix = old_prefix
 
-    def stop_video_recording(self, alias):
-        self._stop_condition.set()
-        time.sleep(1)  # wait for thread to finish work
-        self._close_thread(alias)
+    def stop_video_recording(self):
+        self._stop_thread()
         if is_truthy(self.embed):
             self._embed_video(self.path, self.embed_width)
         return self.path
