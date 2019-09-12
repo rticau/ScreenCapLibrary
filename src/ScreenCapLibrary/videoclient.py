@@ -24,7 +24,7 @@ class VideoClient(Client):
         self._stop_condition = threading.Event()
         self.alias = None
 
-    def start_video_recording(self, alias, name, fps, embed, embed_width):
+    def start_video_recording(self, alias, name, fps, size_percentage, embed, embed_width):
         self.alias = alias
         self.name = name
         try:
@@ -34,7 +34,7 @@ class VideoClient(Client):
         self.embed = embed
         self.embed_width = embed_width
         self.path = self._save_screenshot_path(basename=self.name, format='webm')
-        self.futures = self.capture_screen(self.path, self.fps)
+        self.futures = self.capture_screen(self.path, self.fps, size_percentage=size_percentage)
         self.clear_thread_queues()
 
     def stop_video_recording(self):
@@ -44,25 +44,27 @@ class VideoClient(Client):
         return self.path
 
     @run_in_background
-    def capture_screen(self, path, fps):
+    def capture_screen(self, path, fps, size_percentage):
         if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
-            _record_gtk(path, fps, stop=self._stop_condition)
+            _record_gtk(path, fps, size_percentage, stop=self._stop_condition)
         else:
-            self._record_mss(path, fps)
+            self._record_mss(path, fps, size_percentage)
 
-    def _record_mss(self, path, fps):
+    def _record_mss(self, path, fps, size_percentage):
         fourcc = cv2.VideoWriter_fourcc(*'VP08')
         with mss() as sct:
-            sct_img = sct.grab(sct.monitors[1])
-        width = int(sct_img.width)
-        height = int(sct_img.height)
+            if not sct.grab(sct.monitors[1]):
+                raise Exception('Monitor not available.')
+            width = int(sct.grab(sct.monitors[1]).width * size_percentage)
+            height = int(sct.grab(sct.monitors[1]).height * size_percentage)
         with suppress_stderr():
             vid = cv2.VideoWriter('%s' % path, fourcc, fps, (width, height))
         while not self._stop_condition.isSet():
             with mss() as sct:
                 sct_img = sct.grab(sct.monitors[1])
             numpy_array = np.array(sct_img)
-            frame = cv2.cvtColor(numpy_array, cv2.COLOR_RGBA2RGB)
+            resized_array = cv2.resize(numpy_array, dsize=(width, height))
+            frame = cv2.cvtColor(resized_array, cv2.COLOR_RGBA2RGB)
             vid.write(frame)
         vid.release()
         cv2.destroyAllWindows()

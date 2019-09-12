@@ -229,6 +229,34 @@ Close Not Started Video Recording
     Run Keyword And Expect Error  No video recordings are started!  ScreenCapLibrary.Stop Video Recording
     Run Keyword And Expect Error  No video recordings are started!  ScreenCapLibrary.Stop All Video Recordings
 
+Video Capture With Size Percentage
+    ScreenCapLibrary.Start Video Recording  size_percentage=1
+    Sleep  5
+    ScreenCapLibrary.Stop Video Recording
+    ScreenCapLibrary.Start Video Recording   size_percentage=0.1
+    Sleep  5
+    ScreenCapLibrary.Stop Video Recording
+    ${high_quality_size}=  Get File Size  ${FIRST_VIDEO_FILE}
+    ${low_quality_size}=  Get File Size  ${SECOND_VIDEO_FILE}
+    Should ${high_quality_size} Be Greater Than ${low_quality_size}
+
+Video Capture With Size Percentage Gtk
+    ScreenCapLibraryGtk.Start Video Recording  size_percentage=1
+    Sleep  5
+    ScreenCapLibraryGtk.Stop Video Recording
+    ScreenCapLibraryGtk.Start Video Recording   size_percentage=0.1
+    Sleep  5
+    ScreenCapLibraryGtk.Stop Video Recording
+    ${high_quality_size}=  Get File Size  ${FIRST_VIDEO_FILE}
+    ${low_quality_size}=  Get File Size  ${SECOND_VIDEO_FILE}
+    Should ${high_quality_size} Be Greater Than ${low_quality_size}
+
+Size Percentage Inferior Limits
+    Run Keyword And Expect Error  Size percentage should take values > than 0 and <= to 1.  Size Percentage Check  0
+
+Size Percentage Superior Limits
+    Run Keyword And Expect Error  Size percentage should take values > than 0 and <= to 1.  Size Percentage Check  2
+
 *** Keywords ***
 Take Screenshot And Verify
     [Arguments]  @{expected files}
@@ -242,6 +270,15 @@ Compare Size
     ${high_quality_size}=  Get File Size  ${screenshot_name}
     ScreenCapLibrary.Take Screenshot    ${screenshot_name}  ${screenshot_format}  quality=0
     ${low_quality_size}=  Get File Size  ${screenshot_name}
+    Should ${high_quality_size} Be Greater Than ${low_quality_size}
+
+Should ${high_quality_size} Be Greater Than ${low_quality_size}
     ${decrease}=  Evaluate  ${high_quality_size} - ${low_quality_size}
     ${percentage_size_decrease}=  Evaluate  float(${decrease}) / float(${high_quality_size}) * 100
     Should Be True  ${percentage_size_decrease} > 50
+
+Size Percentage Check
+    [Arguments]  ${size_percentage}
+    ScreenCapLibraryGtk.Start Video Recording  size_percentage=${size_percentage}
+        Sleep  5
+    ScreenCapLibraryGtk.Stop Video Recording
