@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 from .version import VERSION
-from .client import Client, recording_list
+from .client import Client
 from .videoclient import VideoClient
 
 __version__ = VERSION
@@ -87,6 +87,8 @@ class ScreenCapLibrary:
     """
 
     ROBOT_LIBRARY_VERSION = __version__
+
+    started_recordings = []
 
     def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0, fps=8):
         """
@@ -263,9 +265,11 @@ class ScreenCapLibrary:
         """
         return self.client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time)
 
-    def start_video_recording(self, name="recording", fps=8, embed=True, embed_width='800px'):
+    def start_video_recording(self, alias=None, name="recording", fps=8, embed=True, embed_width='800px'):
         """Starts the recording of a video in the background with the specified ``name``.
         The recording can be stopped by calling the `Stop Video Recording` keyword.
+
+        ``alias`` helps identify the recording, if you want to close a specific one.
 
         ``name`` specifies the name by which the record will be saved.
 
@@ -289,13 +293,37 @@ class ScreenCapLibrary:
         for a 15 seconds recording the output might be a 2 second video with 30 fps).
         """
         video_client = VideoClient(self.client.screenshot_module, self.client.screenshot_dir)
-        recording_list.append(video_client)
-        video_client.start_video_recording(name, fps, embed, embed_width)
+        self.started_recordings.append(video_client)
+        video_client.start_video_recording(alias, name, fps, embed, embed_width)
 
-    def stop_video_recording(self):
-        """Stops the video recording and generates the file in WebM format. If ``embed`` argument
-        was set to ``True`` the video will be displayed in the log file.
+    def stop_all_video_recordings(self):
+        """Stops all the video recordings and generates the files in WebM format. If ``embed`` argument
+        was set to ``True`` the videos will be displayed in the log file.
         """
-        for recording in recording_list:
+        if len(self.started_recordings) == 0:
+            raise Exception('No video recordings are started!')
+        for recording in self.started_recordings:
             recording.stop_video_recording()
-            recording_list.remove(recording)
+        del self.started_recordings[:]
+
+    def stop_video_recording(self, alias=None):
+        """Stops the video recording corresponding to the given ``alias`` and generates the file in WebM format. If no
+        ``alias`` is specified, the last opened recording will be closed. If ``embed`` argument was set to
+        ``True`` the video will be displayed in the log file.
+        """
+        if len(self.started_recordings) == 0:
+            raise Exception('No video recordings are started!')
+        try:
+            if alias:
+                aliases = [x.alias for x in self.started_recordings]
+                if alias not in aliases:
+                    raise Exception('No video recording with alias `%s` found!' % alias)
+                for recording in self.started_recordings:
+                    if recording.alias == alias:
+                        self.started_recordings.remove(recording)
+                        recording.stop_video_recording()
+            else:
+                self.started_recordings.pop().stop_video_recording()
+        except RuntimeError as error:
+            del self.started_recordings[:]
+            raise error

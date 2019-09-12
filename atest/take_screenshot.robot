@@ -17,7 +17,9 @@ ${GTK_PNG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_png.png
 ${GTK_JPEG_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_jpeg.jpeg
 ${GTK_WEBP_SCREENSHOT}  ${OUTPUTDIR}${/}pygtk_webp.webp
 ${GIF_SCREENSHOT}  ${OUTPUTDIR}${/}screenshot_1.gif
-${VIDEO_FILE}  ${OUTPUTDIR}${/}recording_1.webm
+${FIRST_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_1.webm
+${SECOND_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_2.webm
+${THIRD_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_3.webm
 
 *** Test Cases ***
 Screenshot Is Taken
@@ -116,16 +118,116 @@ Video Capture
     ScreenCapLibrary.Start Video Recording
     Sleep  5
     ScreenCapLibrary.Stop Video Recording
-    Screenshot Should Exist  ${VIDEO_FILE}
-    Sleep  10
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
 
 Video Capture Gtk
     [Tags]    gtk
     ScreenCapLibraryGtk.Start Video Recording
     Sleep  5
     ScreenCapLibraryGtk.Stop Video Recording
-    Screenshot Should Exist  ${VIDEO_FILE}
-    Sleep  10
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+
+Nested And Consecutive Video Captures
+    ScreenCapLibrary.Start Video Recording  1
+    Sleep  5
+    ScreenCapLibrary.Start Video Recording  2
+    Sleep  5
+    ScreenCapLibrary.Stop Video Recording  2
+    Sleep  5
+    ScreenCapLibrary.Stop Video Recording  1
+    ScreenCapLibrary.Start Video Recording   3
+    Sleep  5
+    ScreenCapLibrary.Stop Video Recording    3
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Screenshot Should Exist  ${THIRD_VIDEO_FILE}
+
+Nested And Consecutive Video Captures Gtk
+    [Tags]  gtk
+    ScreenCapLibraryGtk.Start Video Recording   1
+    Sleep  5
+    ScreenCapLibraryGtk.Start Video Recording  2
+    Sleep  5
+    ScreenCapLibraryGtk.Stop Video Recording   2
+    Sleep  5
+    ScreenCapLibraryGtk.Stop Video Recording   1
+    ScreenCapLibraryGtk.Start Video Recording   3
+    Sleep  5
+    ScreenCapLibraryGtk.Stop Video Recording    3
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+    Screenshot Should Exist  ${THIRD_VIDEO_FILE}
+
+Close All Recordings
+    ScreenCapLibrary.Start Video Recording  1
+    Sleep  5
+    ScreenCapLibrary.Start Video Recording  2
+    Sleep  5
+    ScreenCapLibrary.Stop All Video Recordings
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+
+Close All Recordings Without Alias
+    ScreenCapLibrary.Start Video Recording
+    Sleep  5
+    ScreenCapLibrary.Start Video Recording
+    Sleep  5
+    ScreenCapLibrary.Stop All Video Recordings
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+
+Close All Recordings Gtk
+    [Tags]  gtk
+    ScreenCapLibraryGtk.Start Video Recording  1
+    Sleep  5
+    ScreenCapLibraryGtk.Start Video Recording  2
+    Sleep  5
+    ScreenCapLibraryGtk.Stop All Video Recordings
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+
+Close All Recordings Without Alias Gtk
+    [Tags]  gtk
+    ScreenCapLibraryGtk.Start Video Recording
+    Sleep  5
+    ScreenCapLibraryGtk.Start Video Recording
+    Sleep  5
+    ScreenCapLibraryGtk.Stop All Video Recordings
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+
+Nested Videos Without Alias
+    ScreenCapLibrary.Start Video Recording
+    Sleep  5
+    ScreenCapLibrary.Start Video Recording
+    Sleep  5
+    ScreenCapLibrary.Stop Video Recording
+    Sleep  5
+    ScreenCapLibrary.Stop Video Recording
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+
+Nested Videos Without Alias Gtk
+    [Tags]  gtk
+    ScreenCapLibraryGtk.Start Video Recording
+    Sleep  5
+    ScreenCapLibraryGtk.Start Video Recording
+    Sleep  5
+    ScreenCapLibraryGtk.Stop Video Recording
+    Sleep  5
+    ScreenCapLibraryGtk.Stop Video Recording
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+
+Close Video Recording With Non-Existent Alias
+    ScreenCapLibrary.Start Video Recording   1
+    Sleep  5
+    Run Keyword And Expect Error  No video recording with alias `2` found!  ScreenCapLibrary.Stop Video Recording  2
+    ScreenCapLibrary.Stop Video Recording   1
+
+Close Not Started Video Recording
+    Run Keyword And Expect Error  No video recordings are started!  ScreenCapLibrary.Stop Video Recording
+    Run Keyword And Expect Error  No video recordings are started!  ScreenCapLibrary.Stop All Video Recordings
 
 *** Keywords ***
 Take Screenshot And Verify

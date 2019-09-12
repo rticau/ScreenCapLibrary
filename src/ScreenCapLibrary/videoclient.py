@@ -1,3 +1,4 @@
+import time
 import threading
 
 from .client import Client, run_in_background
@@ -21,9 +22,10 @@ class VideoClient(Client):
         self.screenshot_module = screenshot_module
         self._given_screenshot_dir = _norm_path(screenshot_directory)
         self._stop_condition = threading.Event()
+        self.alias = None
 
-    def start_video_recording(self, name, fps, embed, embed_width):
-        self._stop_condition.clear()
+    def start_video_recording(self, alias, name, fps, embed, embed_width):
+        self.alias = alias
         self.name = name
         try:
             self.fps = int(fps)
@@ -33,10 +35,10 @@ class VideoClient(Client):
         self.embed_width = embed_width
         self.path = self._save_screenshot_path(basename=self.name, format='webm')
         self.futures = self.capture_screen(self.path, self.fps)
+        self.clear_thread_queues()
 
     def stop_video_recording(self):
-        self._stop_condition.set()
-        self._close_threads()
+        self._stop_thread()
         if is_truthy(self.embed):
             self._embed_video(self.path, self.embed_width)
         return self.path

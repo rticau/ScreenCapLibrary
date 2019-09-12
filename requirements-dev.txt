@@ -1,4 +1,6 @@
 futures; python_version == '2.7'
+futures3; python_version == '3.6'
+futures3; python_version == '3.7'
 mss
 robotframework
 robotstatuschecker
