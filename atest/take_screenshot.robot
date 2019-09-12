@@ -255,7 +255,7 @@ Size Percentage Inferior Limits
     Run Keyword And Expect Error  Size percentage should take values > than 0 and <= to 1.  Size Percentage Check  0
 
 Size Percentage Superior Limits
-    Run Keyword And Expect Error  Size percentage should take values > than 0 and <= to 1.  Size Percentage Check  2
+    Run Keyword And Expect Error  Size percentage should take values > than 0 and <= to 1.  Size Percentage Check  1.1
 
 *** Keywords ***
 Take Screenshot And Verify
