@@ -35,8 +35,10 @@ from .utils import _norm_path, _compression_value_conversion, _pil_quality_conve
 
 if sys.version_info[0] < 3:
     from concurrent.futures import ThreadPoolExecutor
+    from concurrent.futures.thread import _threads_queues
 else:
     from futures3.thread import ThreadPoolExecutor
+    from futures3.thread import _threads_queues
 
 _THREAD_POOL = ThreadPoolExecutor(max_workers=1)
 
@@ -64,6 +66,7 @@ class Client:
         self.fps = fps
         self._stop_condition = threading.Event()
         self.futures = None
+        self.gif_frame_time = 125
 
     @property
     def screenshot_dir(self):
@@ -214,11 +217,13 @@ class Client:
         self.embed = embed
         self.embed_width = embed_width
         self.futures = self.grab_frames(name, size_percentage=size_percentage, stop=self._stop_condition)
+        self.clear_thread_queues()
 
     def stop_gif_recording(self):
         self._stop_thread()
         path = self._save_screenshot_path(basename=self.name, format='gif')
-        self.frames[0].save(path, save_all=True, append_images=self.frames[1:], duration=125, optimize=True, loop=0)
+        self.frames[0].save(path, save_all=True, append_images=self.frames[1:],
+                            duration=self.gif_frame_time, optimize=True, loop=0)
         if is_truthy(self.embed):
             self._embed_screenshot(path, self.embed_width)
         del self.frames[:]
@@ -247,7 +252,7 @@ class Client:
                 time.sleep(timestr_to_secs(delay))
             if shot_number and len(self.frames) == int(shot_number):
                 break
-            time.sleep(0.125)
+            time.sleep(self.gif_frame_time / 1000)
 
     def _grab_frames_mss(self, size_percentage, delay, shot_number, stop):
         with mss() as sct:
@@ -261,7 +266,7 @@ class Client:
                     time.sleep(timestr_to_secs(delay))
                 if shot_number and len(self.frames) == int(shot_number):
                     break
-                time.sleep(0.125)
+                time.sleep(self.gif_frame_time / 1000)
 
     def _stop_thread(self):
         self._stop_condition.set()
@@ -269,6 +274,10 @@ class Client:
             time.sleep(1)  # wait for background thread to finish work
         if self.futures._exception:
             raise self.futures._exception
+
+    @staticmethod
+    def clear_thread_queues():
+        _threads_queues.clear()
 
     def _embed_screenshot(self, path, width):
         link = get_link_path(path, self._log_dir)

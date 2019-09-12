@@ -14,7 +14,7 @@ with open(join(CURDIR, 'README.rst')) as f:
 if sys.version_info[0] < 3:
     REQUIREMENTS.append('futures >= 3.2.0')
 if sys.version_info[0] > 3:
-    REQUIREMENTS.append('futures >= 1.0.0')
+    REQUIREMENTS.append('futures3 >= 1.0.0')
 CLASSIFIERS = '''
 Development Status :: 5 - Production/Stable
 License :: OSI Approved :: Apache Software License

@@ -219,6 +219,16 @@ Nested Videos Without Alias Gtk
     Screenshot Should Exist  ${FIRST_VIDEO_FILE}
     Screenshot Should Exist  ${SECOND_VIDEO_FILE}
 
+Close Video Recording With Non-Existent Alias
+    ScreenCapLibrary.Start Video Recording   1
+    Sleep  5
+    Run Keyword And Expect Error  No video recording with alias `2` found!  ScreenCapLibrary.Stop Video Recording  2
+    ScreenCapLibrary.Stop Video Recording   1
+
+Close Not Started Video Recording
+    Run Keyword And Expect Error  No video recordings are started!  ScreenCapLibrary.Stop Video Recording
+    Run Keyword And Expect Error  No video recordings are started!  ScreenCapLibrary.Stop All Video Recordings
+
 *** Keywords ***
 Take Screenshot And Verify
     [Arguments]  @{expected files}

@@ -269,8 +269,7 @@ class ScreenCapLibrary:
         """Starts the recording of a video in the background with the specified ``name``.
         The recording can be stopped by calling the `Stop Video Recording` keyword.
 
-        ``alias`` specifies the name by which the recording should be
-        close when it has fulfilled its job.
+        ``alias`` helps identify the recording, if you want to close a specific one.
 
         ``name`` specifies the name by which the record will be saved.
 
@@ -301,25 +300,30 @@ class ScreenCapLibrary:
         """Stops all the video recordings and generates the files in WebM format. If ``embed`` argument
         was set to ``True`` the videos will be displayed in the log file.
         """
+        if len(self.started_recordings) == 0:
+            raise Exception('No video recordings are started!')
         for recording in self.started_recordings:
             recording.stop_video_recording()
         del self.started_recordings[:]
 
     def stop_video_recording(self, alias=None):
-        """Stops the video recording correspondent to ``alias`` and generates the file in WebM format. If no
-        ``alias`` is specified the last opened recording will be closed. If ``embed`` argument was set to
+        """Stops the video recording corresponding to the given ``alias`` and generates the file in WebM format. If no
+        ``alias`` is specified, the last opened recording will be closed. If ``embed`` argument was set to
         ``True`` the video will be displayed in the log file.
         """
-        if alias:
-            aliases = [x.alias for x in self.started_recordings]
-            try:
+        if len(self.started_recordings) == 0:
+            raise Exception('No video recordings are started!')
+        try:
+            if alias:
+                aliases = [x.alias for x in self.started_recordings]
+                if alias not in aliases:
+                    raise Exception('No video recording with alias `%s` found!' % alias)
                 for recording in self.started_recordings:
-                    if recording.alias in aliases:
+                    if recording.alias == alias:
                         self.started_recordings.remove(recording)
                         recording.stop_video_recording()
-            except RuntimeError as error:
-                del self.started_recordings[:]
-                raise error
-
-        else:
-            self.started_recordings.pop().stop_video_recording()
+            else:
+                self.started_recordings.pop().stop_video_recording()
+        except RuntimeError as error:
+            del self.started_recordings[:]
+            raise error

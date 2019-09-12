@@ -35,6 +35,7 @@ class VideoClient(Client):
         self.embed_width = embed_width
         self.path = self._save_screenshot_path(basename=self.name, format='webm')
         self.futures = self.capture_screen(self.path, self.fps)
+        self.clear_thread_queues()
 
     def stop_video_recording(self):
         self._stop_thread()
