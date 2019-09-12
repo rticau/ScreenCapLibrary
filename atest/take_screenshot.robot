@@ -81,16 +81,16 @@ Take Screenshot With Delay
     ${actual_time}=  DateTime.Subtract Date From Date  ${end_date}  ${start_date}
     Should Be True  ${actual_time} > 10
 
-#Take Multiple Screenshots
-#    ScreenCapLibrary.Take Multiple Screenshots  screenshot_number=4  delay_time=1 second
-#
-#    Screenshot Number In ${OUTPUTDIR} Should Be 4
-#
-#Take Multiple Gtk Screenshots
-#    [Tags]    gtk
-#    ScreenCapLibraryGtk.Take Multiple Screenshots  format=png  screenshot_number=4  delay_time=1 second
-#
-#    Screenshot Number In ${OUTPUTDIR} Should Be 4
+Take Multiple Screenshots
+    ScreenCapLibrary.Take Multiple Screenshots  screenshot_number=4  delay_time=1 second
+
+    Screenshot Number In ${OUTPUTDIR} Should Be 4
+
+Take Multiple Gtk Screenshots
+    [Tags]    gtk
+    ScreenCapLibraryGtk.Take Multiple Screenshots  format=png  screenshot_number=4  delay_time=1 second
+
+    Screenshot Number In ${OUTPUTDIR} Should Be 4
 
 Take Screenshot With Partial Dimensions
     ${partial_screenshot}=  ScreenCapLibrary.Take Partial Screenshot  left=50  height=300  width=700

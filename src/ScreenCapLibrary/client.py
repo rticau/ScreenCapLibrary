@@ -163,8 +163,7 @@ class Client:
         elif format == 'jpeg':
             quality = _pil_quality_conversion(quality)
         delay_time = timestr_to_secs(delay_time)
-        # TODO - needs reimplementing
-        # self.grab_frames(name, format, quality, delay=delay_time, shot_number=int(screenshot_number))
+        self.grab_frames(name, format, quality, delay=delay_time, shot_number=int(screenshot_number))
 
     def take_partial_screenshot(self, name, format, quality,
                                 left, top, width, height, embed, embed_width):
