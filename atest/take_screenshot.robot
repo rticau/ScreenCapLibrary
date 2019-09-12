@@ -83,13 +83,13 @@ Take Screenshot With Delay
 
 Take Multiple Screenshots
     ScreenCapLibrary.Take Multiple Screenshots  screenshot_number=4  delay_time=1 second
-
+    Sleep  10
     Screenshot Number In ${OUTPUTDIR} Should Be 4
 
 Take Multiple Gtk Screenshots
     [Tags]    gtk
     ScreenCapLibraryGtk.Take Multiple Screenshots  format=png  screenshot_number=4  delay_time=1 second
-
+    Sleep  10
     Screenshot Number In ${OUTPUTDIR} Should Be 4
 
 Take Screenshot With Partial Dimensions
