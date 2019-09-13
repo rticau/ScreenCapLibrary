@@ -28,7 +28,7 @@ except ImportError:
     Gdk = None
 
 try:
-    from gi.repository import require_version
+    from gi import require_version
     require_version('Gdk', '3.0')
     from gi.repository import GdkPixbuf
 except ImportError:
