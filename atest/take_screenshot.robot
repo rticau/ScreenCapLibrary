@@ -20,6 +20,8 @@ ${GIF_SCREENSHOT}  ${OUTPUTDIR}${/}screenshot_1.gif
 ${FIRST_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_1.webm
 ${SECOND_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_2.webm
 ${THIRD_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_3.webm
+${VIDEO_PERCENT}  30
+${SCREENSHOT_PERCENT}  50
 
 *** Test Cases ***
 Screenshot Is Taken
@@ -238,7 +240,7 @@ Video Capture With Size Percentage
     ScreenCapLibrary.Stop Video Recording
     ${high_quality_size}=  Get File Size  ${FIRST_VIDEO_FILE}
     ${low_quality_size}=  Get File Size  ${SECOND_VIDEO_FILE}
-    Should ${high_quality_size} Be Greater Than ${low_quality_size}
+    Should ${high_quality_size} Be Greater Than ${low_quality_size} By ${VIDEO_PERCENT}
 
 Video Capture With Size Percentage Gtk
     ScreenCapLibraryGtk.Start Video Recording  size_percentage=1
@@ -249,7 +251,7 @@ Video Capture With Size Percentage Gtk
     ScreenCapLibraryGtk.Stop Video Recording
     ${high_quality_size}=  Get File Size  ${FIRST_VIDEO_FILE}
     ${low_quality_size}=  Get File Size  ${SECOND_VIDEO_FILE}
-    Should ${high_quality_size} Be Greater Than ${low_quality_size}
+    Should ${high_quality_size} Be Greater Than ${low_quality_size} By ${VIDEO_PERCENT}
 
 Size Percentage Inferior Limits
     Run Keyword And Expect Error  Size percentage should take values > than 0 and <= to 1.  Size Percentage Check  0
@@ -270,12 +272,12 @@ Compare Size
     ${high_quality_size}=  Get File Size  ${screenshot_name}
     ScreenCapLibrary.Take Screenshot    ${screenshot_name}  ${screenshot_format}  quality=0
     ${low_quality_size}=  Get File Size  ${screenshot_name}
-    Should ${high_quality_size} Be Greater Than ${low_quality_size}
+    Should ${high_quality_size} Be Greater Than ${low_quality_size} By ${SCREENSHOT_PERCENT}
 
-Should ${high_quality_size} Be Greater Than ${low_quality_size}
+Should ${high_quality_size} Be Greater Than ${low_quality_size} By ${percent}
     ${decrease}=  Evaluate  ${high_quality_size} - ${low_quality_size}
     ${percentage_size_decrease}=  Evaluate  float(${decrease}) / float(${high_quality_size}) * 100
-    Should Be True  ${percentage_size_decrease} > 50
+    Should Be True  ${percentage_size_decrease} > ${percent}
 
 Size Percentage Check
     [Arguments]  ${size_percentage}

@@ -63,7 +63,7 @@ class VideoClient(Client):
             with mss() as sct:
                 sct_img = sct.grab(sct.monitors[1])
             numpy_array = np.array(sct_img)
-            resized_array = cv2.resize(numpy_array, dsize=(width, height))
+            resized_array = cv2.resize(numpy_array, dsize=(width, height), interpolation=cv2.INTER_AREA)
             frame = cv2.cvtColor(resized_array, cv2.COLOR_RGBA2RGB)
             vid.write(frame)
         vid.release()
