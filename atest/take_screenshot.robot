@@ -20,7 +20,7 @@ ${GIF_SCREENSHOT}  ${OUTPUTDIR}${/}screenshot_1.gif
 ${FIRST_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_1.webm
 ${SECOND_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_2.webm
 ${THIRD_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_3.webm
-${VIDEO_PERCENT}  30
+${VIDEO_PERCENT}  25
 ${SCREENSHOT_PERCENT}  50
 
 *** Test Cases ***
