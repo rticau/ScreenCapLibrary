@@ -265,7 +265,7 @@ class ScreenCapLibrary:
         """
         return self.client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time)
 
-    def start_video_recording(self, alias=None, name="recording", fps=8, embed=True, embed_width='800px'):
+    def start_video_recording(self, alias=None, name="recording", fps=8, size_percentage=1, embed=True, embed_width='800px'):
         """Starts the recording of a video in the background with the specified ``name``.
         The recording can be stopped by calling the `Stop Video Recording` keyword.
 
@@ -275,6 +275,10 @@ class ScreenCapLibrary:
 
         ``fps`` specifies the frame rate at which the video is displayed.
         By default frame rate is 8.
+
+        ``size_percentage`` is used to reduce the size of the screen recordings. It will specify
+        how much this reduction is with respect to screen resolution. By default this parameter
+        is set to full screen resolution i.e. 1.
 
         ``embed`` specifies if the record should be embedded in the log file
         or not. See `Boolean arguments` section for more details.
@@ -292,9 +296,11 @@ class ScreenCapLibrary:
         performance of your system. Check different values for ``fps`` to find optimal results. (e.g.
         for a 15 seconds recording the output might be a 2 second video with 30 fps).
         """
+        if size_percentage <= 0 or size_percentage > 1:
+            raise Exception('Size percentage should take values > than 0 and <= to 1.')
         video_client = VideoClient(self.client.screenshot_module, self.client.screenshot_dir)
         self.started_recordings.append(video_client)
-        video_client.start_video_recording(alias, name, fps, embed, embed_width)
+        video_client.start_video_recording(alias, name, fps, size_percentage, embed, embed_width)
 
     def stop_all_video_recordings(self):
         """Stops all the video recordings and generates the files in WebM format. If ``embed`` argument
