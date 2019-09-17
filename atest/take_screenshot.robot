@@ -240,6 +240,16 @@ Close Not Started Video Recording
     Run Keyword And Expect Error  No video recordings are started!  ScreenCapLibrary.Stop Video Recording
     Run Keyword And Expect Error  No video recordings are started!  ScreenCapLibrary.Stop All Video Recordings
 
+Close All Recordings With Same Alias
+    ScreenCapLibrary.Start Video Recording  1
+    Sleep  5
+    ScreenCapLibrary.Start Video Recording  1
+    Sleep  5
+    ${paths}=  ScreenCapLibrary.Stop Video Recording  1
+    Videos Should Exist  ${OUTPUTDIR}  @{paths}
+    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+
 *** Keywords ***
 Take Screenshot And Verify
     [Arguments]  @{expected files}
