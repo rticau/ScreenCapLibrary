@@ -254,6 +254,7 @@ Video Capture With Size Percentage
     Should ${high_quality_size} Be Greater Than ${low_quality_size} By ${VIDEO_PERCENT}
 
 Video Capture With Size Percentage Gtk
+    [Tags]    gtk
     ScreenCapLibraryGtk.Start Video Recording  size_percentage=1
     Sleep  5
     ScreenCapLibraryGtk.Stop Video Recording
