@@ -21,9 +21,8 @@ License :: OSI Approved :: Apache Software License
 Operating System :: OS Independent
 Programming Language :: Python
 Programming Language :: Python :: 2.7
-Programming Language :: Python :: 3.4
-Programming Language :: Python :: 3.5
 Programming Language :: Python :: 3.6
+Programming Language :: Python :: 3.7
 Topic :: Software Development :: Testing
 Framework :: Robot Framework
 Framework :: Robot Framework :: Library
@@ -34,9 +33,9 @@ setup(
     version=VERSION,
     description='Robot Framework test library for taking screenshots',
     long_description=DESCRIPTION,
-    author='Robot Framework Developers',
-    author_email='robotframework@gmail.com',
-    url='https://github.com/robotframework/ScreenCapLibrary',
+    author=u'Mihai Pârvu',
+    author_email='mihai-catalin.parvu@nokia.com',
+    url='https://github.com/mihaiparvu/ScreenCapLibrary',
     license='Apache License 2.0',
     keywords='robotframework testing testautomation screenshot screencap',
     platforms='any',
