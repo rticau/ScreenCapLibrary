@@ -299,31 +299,45 @@ class ScreenCapLibrary:
     def stop_all_video_recordings(self):
         """Stops all the video recordings and generates the files in WebM format. If ``embed`` argument
         was set to ``True`` the videos will be displayed in the log file.
+
+        The paths where the videos are saved is returned.
         """
+        paths = []
         if len(self.started_recordings) == 0:
             raise Exception('No video recordings are started!')
         for recording in self.started_recordings:
             recording.stop_video_recording()
+            paths.append(recording.path)
         del self.started_recordings[:]
+        return paths
 
     def stop_video_recording(self, alias=None):
         """Stops the video recording corresponding to the given ``alias`` and generates the file in WebM format. If no
         ``alias`` is specified, the last opened recording will be closed. If ``embed`` argument was set to
         ``True`` the video will be displayed in the log file.
+
+        The path/paths where the video is saved is returned.
         """
         if len(self.started_recordings) == 0:
             raise Exception('No video recordings are started!')
         try:
             if alias:
                 aliases = [x.alias for x in self.started_recordings]
+                paths = []
                 if alias not in aliases:
                     raise Exception('No video recording with alias `%s` found!' % alias)
-                for recording in self.started_recordings:
+                copy_list = self.started_recordings.copy()
+                for recording in copy_list:
                     if recording.alias == alias:
                         self.started_recordings.remove(recording)
                         recording.stop_video_recording()
+                        paths.append(recording.path)
+                if len(paths) > 1:
+                    return paths
+                else:
+                    return paths[0]
             else:
-                self.started_recordings.pop().stop_video_recording()
+                return self.started_recordings.pop().stop_video_recording()
         except RuntimeError as error:
             del self.started_recordings[:]
             raise error
