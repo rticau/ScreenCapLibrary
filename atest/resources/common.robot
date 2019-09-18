@@ -40,3 +40,11 @@ Videos Should Exist
     [Arguments]  ${directory}  @{expected_video_files}
      @{actual_webm_files}=  List Directory  ${directory}  *.webm  absolute
      List Should Contain Sub List  ${expected_video_files}  ${actual_webm_files}
+
+Video Should Exist
+    [Arguments]  ${path}
+    [Documentation]  Checks that screenshot file exists and is newer than
+    ...  timestamp set in test setup.
+    File Should Exist  ${path}
+    ${filetime} =  Get Modified Time  ${path}
+    Should Be True  '${filetime}' >= '${START TIME}'

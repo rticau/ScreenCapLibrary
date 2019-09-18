@@ -306,7 +306,7 @@ class ScreenCapLibrary:
         """Stops all the video recordings and generates the files in WebM format. If ``embed`` argument
         was set to ``True`` the videos will be displayed in the log file.
 
-        The paths where the videos are saved is returned.
+        The paths where the videos are saved are returned.
         """
         paths = []
         if len(self.started_recordings) == 0:
@@ -319,10 +319,11 @@ class ScreenCapLibrary:
 
     def stop_video_recording(self, alias=None):
         """Stops the video recording corresponding to the given ``alias`` and generates the file in WebM format. If no
-        ``alias`` is specified, the last opened recording will be closed. If ``embed`` argument was set to
+        ``alias`` is specified, the last opened recording will be closed. If there are more recordings with the same
+        alias all of them will be closed. If ``embed`` argument was set to
         ``True`` the video will be displayed in the log file.
 
-        The path/paths where the video is saved is returned.
+        The path where the video is saved is returned.
         """
         if len(self.started_recordings) == 0:
             raise Exception('No video recordings are started!')
@@ -338,10 +339,7 @@ class ScreenCapLibrary:
                         self.started_recordings.remove(recording)
                         recording.stop_video_recording()
                         paths.append(recording.path)
-                if len(paths) > 1:
-                    return paths
-                else:
-                    return paths[0]
+                return paths if len(paths) > 1 else paths[0]
             else:
                 return self.started_recordings.pop().stop_video_recording()
         except RuntimeError as error:
