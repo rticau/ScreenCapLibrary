@@ -43,7 +43,7 @@ Videos Should Exist
 
 Video Should Exist
     [Arguments]  ${path}
-    [Documentation]  Checks that screenshot file exists and is newer than
+    [Documentation]  Checks that video file exists and is newer than
     ...  timestamp set in test setup.
     File Should Exist  ${path}
     ${filetime} =  Get Modified Time  ${path}
