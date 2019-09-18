@@ -333,7 +333,7 @@ class ScreenCapLibrary:
                 paths = []
                 if alias not in aliases:
                     raise Exception('No video recording with alias `%s` found!' % alias)
-                copy_list = self.started_recordings.copy()
+                copy_list = self.started_recordings[:]
                 for recording in copy_list:
                     if recording.alias == alias:
                         self.started_recordings.remove(recording)
