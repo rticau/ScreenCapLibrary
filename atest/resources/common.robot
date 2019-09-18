@@ -35,3 +35,16 @@ Screenshot Number In ${directory} Should Be ${expected}
 Cleanup Files
     Remove Files  ${OUTPUT_DIR}/*.jp*g  ${OUTPUT_DIR}/*.png  ${OUTPUT_DIR}/*.gif  ${OUTPUT_DIR}/*.webp
     Remove Files  ${OUTPUT_DIR}/*.webm
+
+Videos Should Exist
+    [Arguments]  ${directory}  @{expected_video_files}
+     @{actual_webm_files}=  List Directory  ${directory}  *.webm  absolute
+     List Should Contain Sub List  ${expected_video_files}  ${actual_webm_files}
+
+Video Should Exist
+    [Arguments]  ${path}
+    [Documentation]  Checks that video file exists and is newer than
+    ...  timestamp set in test setup.
+    File Should Exist  ${path}
+    ${filetime} =  Get Modified Time  ${path}
+    Should Be True  '${filetime}' >= '${START TIME}'

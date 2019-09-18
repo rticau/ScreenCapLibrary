@@ -119,30 +119,33 @@ Take Gtk Gif
 Video Capture
     ScreenCapLibrary.Start Video Recording
     Sleep  5
-    ScreenCapLibrary.Stop Video Recording
-    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    ${path}=  ScreenCapLibrary.Stop Video Recording
+    Video Should Exist  ${FIRST_VIDEO_FILE}
+    Should Be Equal  ${path}  ${FIRST_VIDEO_FILE}
 
 Video Capture Gtk
     [Tags]    gtk
     ScreenCapLibraryGtk.Start Video Recording
     Sleep  5
-    ScreenCapLibraryGtk.Stop Video Recording
-    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
+    ${path}=  ScreenCapLibraryGtk.Stop Video Recording
+    Video Should Exist  ${FIRST_VIDEO_FILE}
+    Should Be Equal  ${path}  ${FIRST_VIDEO_FILE}
 
 Nested And Consecutive Video Captures
     ScreenCapLibrary.Start Video Recording  1
     Sleep  5
     ScreenCapLibrary.Start Video Recording  2
     Sleep  5
-    ScreenCapLibrary.Stop Video Recording  2
+    ${second_video_path}=  ScreenCapLibrary.Stop Video Recording  2
     Sleep  5
-    ScreenCapLibrary.Stop Video Recording  1
+    ${first_video_path}=  ScreenCapLibrary.Stop Video Recording  1
     ScreenCapLibrary.Start Video Recording   3
     Sleep  5
-    ScreenCapLibrary.Stop Video Recording    3
-    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
-    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
-    Screenshot Should Exist  ${THIRD_VIDEO_FILE}
+    ${third_video_path}=  ScreenCapLibrary.Stop Video Recording    3
+    Video Should Exist  ${SECOND_VIDEO_FILE}
+    Video Should Exist  ${FIRST_VIDEO_FILE}
+    Video Should Exist  ${THIRD_VIDEO_FILE}
+    Videos Should Exist  ${OUTPUTDIR}  ${first_video_path}  ${second_video_path}  ${third_video_path}
 
 Nested And Consecutive Video Captures Gtk
     [Tags]  gtk
@@ -150,33 +153,37 @@ Nested And Consecutive Video Captures Gtk
     Sleep  5
     ScreenCapLibraryGtk.Start Video Recording  2
     Sleep  5
-    ScreenCapLibraryGtk.Stop Video Recording   2
+    ${first_video_path}=  ScreenCapLibraryGtk.Stop Video Recording   2
     Sleep  5
-    ScreenCapLibraryGtk.Stop Video Recording   1
+    ${second_video_path}=  ScreenCapLibraryGtk.Stop Video Recording   1
     ScreenCapLibraryGtk.Start Video Recording   3
     Sleep  5
-    ScreenCapLibraryGtk.Stop Video Recording    3
-    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
-    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
-    Screenshot Should Exist  ${THIRD_VIDEO_FILE}
+    ${third_video_path}=  ScreenCapLibraryGtk.Stop Video Recording    3
+    Video Should Exist  ${FIRST_VIDEO_FILE}
+    Video Should Exist  ${SECOND_VIDEO_FILE}
+    Video Should Exist  ${THIRD_VIDEO_FILE}
+    Videos Should Exist  ${OUTPUTDIR}  ${first_video_path}  ${second_video_path}  ${third_video_path}
 
 Close All Recordings
     ScreenCapLibrary.Start Video Recording  1
     Sleep  5
     ScreenCapLibrary.Start Video Recording  2
     Sleep  5
-    ScreenCapLibrary.Stop All Video Recordings
-    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
-    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+    @{paths}=  ScreenCapLibrary.Stop All Video Recordings
+    Sleep  5
+    Video Should Exist  ${FIRST_VIDEO_FILE}
+    Video Should Exist  ${SECOND_VIDEO_FILE}
+    Videos Should Exist  ${OUTPUTDIR}  @{paths}
 
 Close All Recordings Without Alias
     ScreenCapLibrary.Start Video Recording
     Sleep  5
     ScreenCapLibrary.Start Video Recording
     Sleep  5
-    ScreenCapLibrary.Stop All Video Recordings
-    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
-    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+    @{paths}=  ScreenCapLibrary.Stop All Video Recordings
+    Video Should Exist  ${FIRST_VIDEO_FILE}
+    Video Should Exist  ${SECOND_VIDEO_FILE}
+    Videos Should Exist  ${OUTPUTDIR}  @{paths}
 
 Close All Recordings Gtk
     [Tags]  gtk
@@ -184,9 +191,10 @@ Close All Recordings Gtk
     Sleep  5
     ScreenCapLibraryGtk.Start Video Recording  2
     Sleep  5
-    ScreenCapLibraryGtk.Stop All Video Recordings
-    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
-    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+    @{paths}=  ScreenCapLibraryGtk.Stop All Video Recordings
+    Video Should Exist  ${FIRST_VIDEO_FILE}
+    Video Should Exist  ${SECOND_VIDEO_FILE}
+    Videos Should Exist  ${OUTPUTDIR}  @{paths}
 
 Close All Recordings Without Alias Gtk
     [Tags]  gtk
@@ -194,20 +202,22 @@ Close All Recordings Without Alias Gtk
     Sleep  5
     ScreenCapLibraryGtk.Start Video Recording
     Sleep  5
-    ScreenCapLibraryGtk.Stop All Video Recordings
-    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
-    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+    @{paths}=  ScreenCapLibraryGtk.Stop All Video Recordings
+    Video Should Exist  ${FIRST_VIDEO_FILE}
+    Video Should Exist  ${SECOND_VIDEO_FILE}
+    Videos Should Exist  ${OUTPUTDIR}  @{paths}
 
 Nested Videos Without Alias
     ScreenCapLibrary.Start Video Recording
     Sleep  5
     ScreenCapLibrary.Start Video Recording
     Sleep  5
-    ScreenCapLibrary.Stop Video Recording
+    ${first_video_path}=  ScreenCapLibrary.Stop Video Recording
     Sleep  5
-    ScreenCapLibrary.Stop Video Recording
-    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
-    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+    ${second_video_path}=  ScreenCapLibrary.Stop Video Recording
+    Video Should Exist  ${FIRST_VIDEO_FILE}
+    Video Should Exist  ${SECOND_VIDEO_FILE}
+    Videos Should Exist  ${OUTPUTDIR}  ${first_video_path}  ${second_video_path}
 
 Nested Videos Without Alias Gtk
     [Tags]  gtk
@@ -215,11 +225,12 @@ Nested Videos Without Alias Gtk
     Sleep  5
     ScreenCapLibraryGtk.Start Video Recording
     Sleep  5
-    ScreenCapLibraryGtk.Stop Video Recording
+    ${second_video_path}=  ScreenCapLibraryGtk.Stop Video Recording
     Sleep  5
-    ScreenCapLibraryGtk.Stop Video Recording
-    Screenshot Should Exist  ${FIRST_VIDEO_FILE}
-    Screenshot Should Exist  ${SECOND_VIDEO_FILE}
+    ${first_video_path}=  ScreenCapLibraryGtk.Stop Video Recording
+    Video Should Exist  ${FIRST_VIDEO_FILE}
+    Video Should Exist  ${SECOND_VIDEO_FILE}
+    Videos Should Exist  ${OUTPUTDIR}  ${first_video_path}  ${second_video_path}
 
 Close Video Recording With Non-Existent Alias
     ScreenCapLibrary.Start Video Recording   1
@@ -259,6 +270,16 @@ Size Percentage Inferior Limits
 
 Size Percentage Superior Limits
     Run Keyword And Expect Error  Size percentage should take values > than 0 and <= to 1.  Size Percentage Check  1.1
+
+Close All Recordings With Same Alias
+    ScreenCapLibrary.Start Video Recording  1
+    Sleep  5
+    ScreenCapLibrary.Start Video Recording  1
+    Sleep  5
+    ${paths}=  ScreenCapLibrary.Stop Video Recording  1
+    Videos Should Exist  ${OUTPUTDIR}  @{paths}
+    Video Should Exist  ${FIRST_VIDEO_FILE}
+    Video Should Exist  ${SECOND_VIDEO_FILE}
 
 *** Keywords ***
 Take Screenshot And Verify
