@@ -114,7 +114,7 @@ Take Gtk Gif
     [Tags]    gtk
     ScreenCapLibraryGtk.Start Gif Recording
     Sleep  2
-    ${path}  ScreenCapLibraryGtk.Stop Gif Recording
+    ${path}=  ScreenCapLibraryGtk.Stop Gif Recording
     Screenshot Should Exist  ${GIF_SCREENSHOT}
     Should Be Equal  ${path}  ${GIF_SCREENSHOT}
 

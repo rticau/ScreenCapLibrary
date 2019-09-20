@@ -24,7 +24,7 @@ class GifClient(Client):
         self.name = name
         self.embed = embed
         self.embed_width = embed_width
-        self.futures = self.grab_frames(name, size_percentage=size_percentage, stop=self._stop_condition)
+        self.futures = self.grab_frames(size_percentage, self._stop_condition)
         self.clear_thread_queues()
 
     def stop_gif_recording(self):
@@ -38,40 +38,32 @@ class GifClient(Client):
         return path
 
     @run_in_background
-    def grab_frames(self, name, format=None, quality=None, size_percentage=0.5, delay=0, shot_number=None, stop=None):
+    def grab_frames(self, size_percentage, stop):
         if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
-            self._grab_frames_gtk(size_percentage, delay, shot_number, stop)
+            self._grab_frames_gtk(size_percentage, stop)
         else:
-            self._grab_frames_mss(size_percentage, delay, shot_number, stop)
-        if shot_number:
-            for img in self.frames:
-                path = self._save_screenshot_path(basename=name, format=format)
-                img.save(path, format=format, quality=quality, compress_level=quality)
+            self._grab_frames_mss(size_percentage, stop)
 
-    def _grab_frames_gtk(self, size_percentage, delay, shot_number, stop):
+    def _grab_frames_gtk(self, size_percentage, stop):
         width, height = _take_gtk_screen_size()
         w = int(width * size_percentage)
         h = int(height * size_percentage)
         while not stop.isSet():
             pb = _grab_gtk_pb()
-            img = Image.frombuffer('RGB', (width, height), pb.get_pixels(), 'raw', 'RGB').resize((w, h))
+            img = Image.frombuffer('RGB', (width, height), pb.get_pixels(), 'raw', 'RGB')
+            if size_percentage != 1:
+                img.resize((w, h))
             self.frames.append(img)
-            if delay:
-                time.sleep(timestr_to_secs(delay))
-            if shot_number and len(self.frames) == int(shot_number):
-                break
             time.sleep(self.gif_frame_time / 1000)
 
-    def _grab_frames_mss(self, size_percentage, delay, shot_number, stop):
+    def _grab_frames_mss(self, size_percentage, stop):
         with mss() as sct:
             width = int(sct.grab(sct.monitors[0]).width * size_percentage)
             height = int(sct.grab(sct.monitors[0]).height * size_percentage)
             while not stop.isSet():
                 sct_img = sct.grab(sct.monitors[0])
-                img = Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX').resize((width, height))
+                img = Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX')
+                if size_percentage != 1:
+                    img.resize((width, height))
                 self.frames.append(img)
-                if delay:
-                    time.sleep(timestr_to_secs(delay))
-                if shot_number and len(self.frames) == int(shot_number):
-                    break
                 time.sleep(self.gif_frame_time / 1000)
