@@ -174,7 +174,8 @@ def _record_gtk_py2(path, fps, size_percentage, stop):
         pb = pb.get_from_drawable(window, window.get_colormap(),
                                   0, 0, 0, 0, width, height)
         numpy_array = pb.get_pixels_array()
-        resized_array = cv2.resize(numpy_array, dsize=(resized_width, resized_height), interpolation=cv2.INTER_AREA)
+        resized_array = cv2.resize(numpy_array, dsize=(resized_width, resized_height), interpolation=cv2.INTER_AREA) \
+            if size_percentage != 1 else numpy_array
         frame = cv2.cvtColor(resized_array, cv2.COLOR_RGB2BGR)
         vid.write(frame)
     vid.release()
@@ -195,7 +196,8 @@ def _record_gtk_py3(path, fps, size_percentage, stop):
     while not stop.isSet():
         pb = Gdk.pixbuf_get_from_window(window, 0, 0, width, height)
         numpy_array = _convert_pixbuf_to_numpy(pb)
-        resized_array = cv2.resize(numpy_array, dsize=(resized_width, resized_height), interpolation=cv2.INTER_AREA)
+        resized_array = cv2.resize(numpy_array, dsize=(resized_width, resized_height), interpolation=cv2.INTER_AREA) \
+            if size_percentage != 1 else numpy_array
         frame = cv2.cvtColor(resized_array,  cv2.COLOR_RGB2BGR)
         vid.write(frame)
     vid.release()

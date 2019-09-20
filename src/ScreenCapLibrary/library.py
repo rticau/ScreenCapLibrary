@@ -16,6 +16,7 @@
 from .version import VERSION
 from .client import Client
 from .videoclient import VideoClient
+from .gifclient import GifClient
 
 __version__ = VERSION
 
@@ -89,8 +90,9 @@ class ScreenCapLibrary:
     ROBOT_LIBRARY_VERSION = __version__
 
     started_recordings = []
+    started_gifs = []
 
-    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0, fps=8):
+    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0):
         """
         ``screenshot_module`` specifies the module or tool to use when taking screenshots using this library.
         If no tool or module is specified, ``mss`` will be used by default. For running
@@ -126,8 +128,7 @@ class ScreenCapLibrary:
             screenshot_directory=screenshot_directory,
             format=format,
             quality=quality,
-            delay=delay,
-            fps=fps
+            delay=delay
         )
 
     def set_screenshot_directory(self, path):
@@ -207,14 +208,24 @@ class ScreenCapLibrary:
 
         *Note:* Recommended GIF duration is 100 seconds or lower depending on system memory.
         """
-        return self.client.start_gif_recording(name, size_percentage, embed, embed_width)
+        if len(self.started_gifs) > 0:
+            raise Exception('A gif recording is already in progress!')
+        gif_client = GifClient(self.client.screenshot_module, self.client.screenshot_dir)
+        self.started_gifs.append(gif_client)
+        gif_client.start_gif_recording(name, size_percentage, embed, embed_width)
 
     def stop_gif_recording(self):
         """
         Stops the GIF recording and generates the file. If ``embed`` argument was set to ``True`` the
         GIF will be displayed in the log file.
         """
-        self.client.stop_gif_recording()
+        if len(self.started_gifs) == 0:
+            raise Exception('No gif recordings are started!')
+        try:
+            return self.started_gifs.pop().stop_gif_recording()
+        except RuntimeError as error:
+            del self.started_gifs[:]
+            raise error
 
     def take_partial_screenshot(self, name='screenshot', format=None, quality=None,
                                 left=0, top=0, width=700, height=300, embed=True, embed_width='800px'):
@@ -298,9 +309,9 @@ class ScreenCapLibrary:
         """
         if size_percentage <= 0 or size_percentage > 1:
             raise Exception('Size percentage should take values > than 0 and <= to 1.')
-        video_client = VideoClient(self.client.screenshot_module, self.client.screenshot_dir)
+        video_client = VideoClient(self.client.screenshot_module, self.client.screenshot_dir, fps)
         self.started_recordings.append(video_client)
-        video_client.start_video_recording(alias, name, fps, size_percentage, embed, embed_width)
+        video_client.start_video_recording(alias, name, size_percentage, embed, embed_width)
 
     def stop_all_video_recordings(self):
         """Stops all the video recordings and generates the files in WebM format. If ``embed`` argument

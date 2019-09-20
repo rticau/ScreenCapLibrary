@@ -1,4 +1,3 @@
-import time
 import threading
 
 from .client import Client, run_in_background
@@ -17,20 +16,20 @@ except ImportError:
 
 class VideoClient(Client):
 
-    def __init__(self, screenshot_module, screenshot_directory):
+    def __init__(self, screenshot_module, screenshot_directory, fps):
         Client.__init__(self)
         self.screenshot_module = screenshot_module
         self._given_screenshot_dir = _norm_path(screenshot_directory)
         self._stop_condition = threading.Event()
         self.alias = None
-
-    def start_video_recording(self, alias, name, fps, size_percentage, embed, embed_width):
-        self.alias = alias
-        self.name = name
         try:
             self.fps = int(fps)
         except ValueError:
             raise ValueError('The fps argument must be of type integer.')
+
+    def start_video_recording(self, alias, name, size_percentage, embed, embed_width):
+        self.alias = alias
+        self.name = name
         self.embed = embed
         self.embed_width = embed_width
         self.path = self._save_screenshot_path(basename=self.name, format='webm')
@@ -63,7 +62,8 @@ class VideoClient(Client):
             with mss() as sct:
                 sct_img = sct.grab(sct.monitors[1])
             numpy_array = np.array(sct_img)
-            resized_array = cv2.resize(numpy_array, dsize=(width, height), interpolation=cv2.INTER_AREA)
+            resized_array = cv2.resize(numpy_array, dsize=(width, height), interpolation=cv2.INTER_AREA) \
+                if size_percentage != 1 else numpy_array
             frame = cv2.cvtColor(resized_array, cv2.COLOR_RGBA2RGB)
             vid.write(frame)
         vid.release()
