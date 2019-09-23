@@ -14,6 +14,8 @@
 #  limitations under the License.
 
 import os
+import sys
+from contextlib import contextmanager
 
 
 def _norm_path(path):
@@ -52,21 +54,19 @@ def _pil_quality_conversion(value):
         raise RuntimeError("The image quality argument must be of type integer.")
 
 
-class suppress_stderr(object):
+@contextmanager
+def suppress_stderr(to=os.devnull):
+    fd = sys.__stderr__.fileno()
 
-    def __init__(self):
-        # Open a null file
-        self.null_fd = os.open(os.devnull, os.O_RDWR)
-        # Save the actual stderr (2) file descriptor.
-        self.save_fd = os.dup(2)
+    def _redirect_stderr(to):
+        sys.__stderr__.close()  # + implicit flush()
+        os.dup2(to.fileno(), fd)  # fd writes to 'to' file
+        sys.__stderr__ = os.fdopen(fd, 'w')  # Python writes to fd
 
-    def __enter__(self):
-        # Assign the null pointer to stderr.
-        os.dup2(self.null_fd, 2)
-
-    def __exit__(self, *_):
-        # Re-assign the real stderr back to (2)
-        os.dup2(self.save_fd, 2)
-        # Close all file descriptors
-        os.close(self.null_fd)
-        os.close(self.save_fd)
+    with os.fdopen(os.dup(fd), 'w') as old_stderr:
+        with open(to, 'w') as file:
+            _redirect_stderr(to=file)
+        try:
+            yield  # allow code to be run with the redirected stderr
+        finally:
+            _redirect_stderr(to=old_stderr)  # restore stderr.
