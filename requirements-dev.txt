@@ -1,5 +1,5 @@
 futures; python_version == '2.7'
-mss
+mss==4.0.3
 robotframework
 robotstatuschecker
 pillow
