@@ -276,7 +276,7 @@ class ScreenCapLibrary:
         """
         return self.client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time)
 
-    def start_video_recording(self, alias=None, name="recording", fps=8, size_percentage=1, embed=True, embed_width='800px'):
+    def start_video_recording(self, alias=None, name="recording", fps=None, size_percentage=1, embed=True, embed_width='800px'):
         """Starts the recording of a video in the background with the specified ``name``.
         The recording can be stopped by calling the `Stop Video Recording` keyword.
 

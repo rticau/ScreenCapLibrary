@@ -13,8 +13,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import cv2
+import os
+import time
 import numpy as np
 from .utils import suppress_stderr
+from robot.api import logger
 try:
     from gtk import gdk
 except ImportError:
@@ -165,21 +168,26 @@ def _record_gtk_py2(path, fps, size_percentage, stop):
         raise Exception('Monitor not available.')
     fourcc = cv2.VideoWriter_fourcc(*'VP08')
     width, height = window.get_size()
-    resized_width = int(width * size_percentage)
-    resized_height = int(height * size_percentage)
     with suppress_stderr():
-        vid = cv2.VideoWriter('%s' % path, fourcc, fps, (resized_width, resized_height))
+        if not fps:
+            fps = benchmark_recording_performance_gtk(width, height, size_percentage)
+        vid = cv2.VideoWriter('%s' % path, fourcc, fps, (int(width * size_percentage), int(height * size_percentage)))
     while not stop.isSet():
-        pb = gdk.Pixbuf(gdk.COLORSPACE_RGB, False, 8, width, height)
-        pb = pb.get_from_drawable(window, window.get_colormap(),
-                                  0, 0, 0, 0, width, height)
-        numpy_array = pb.get_pixels_array()
-        resized_array = cv2.resize(numpy_array, dsize=(resized_width, resized_height), interpolation=cv2.INTER_AREA) \
-            if size_percentage != 1 else numpy_array
-        frame = cv2.cvtColor(resized_array, cv2.COLOR_RGB2BGR)
-        vid.write(frame)
+        record_gtk2(window, vid, width, height, size_percentage)
     vid.release()
     cv2.destroyAllWindows()
+
+
+def record_gtk2(window, vid, width, height, size_percentage):
+    pb = gdk.Pixbuf(gdk.COLORSPACE_RGB, False, 8, width, height)
+    pb = pb.get_from_drawable(window, window.get_colormap(),
+                              0, 0, 0, 0, width, height)
+    numpy_array = pb.get_pixels_array()
+    resized_array = cv2.resize(numpy_array, dsize=(int(width * size_percentage), int(height * size_percentage)),
+                               interpolation=cv2.INTER_AREA) \
+        if size_percentage != 1 else numpy_array
+    frame = cv2.cvtColor(resized_array, cv2.COLOR_RGB2BGR)
+    vid.write(frame)
 
 
 def _record_gtk_py3(path, fps, size_percentage, stop):
@@ -189,19 +197,24 @@ def _record_gtk_py3(path, fps, size_percentage, stop):
     fourcc = cv2.VideoWriter_fourcc(*'VP08')
     width = window.get_width()
     height = window.get_height()
-    resized_width = int(width * size_percentage)
-    resized_height = int(height * size_percentage)
     with suppress_stderr():
-        vid = cv2.VideoWriter('%s' % path, fourcc, fps, (resized_width, resized_height))
+        if not fps:
+            fps = benchmark_recording_performance_gtk(width, height, size_percentage)
+        vid = cv2.VideoWriter('%s' % path, fourcc, fps, (int(width * size_percentage), int(height * size_percentage)))
     while not stop.isSet():
-        pb = Gdk.pixbuf_get_from_window(window, 0, 0, width, height)
-        numpy_array = _convert_pixbuf_to_numpy(pb)
-        resized_array = cv2.resize(numpy_array, dsize=(resized_width, resized_height), interpolation=cv2.INTER_AREA) \
-            if size_percentage != 1 else numpy_array
-        frame = cv2.cvtColor(resized_array,  cv2.COLOR_RGB2BGR)
-        vid.write(frame)
+        record_gtk3(window, vid, width, height, size_percentage)
     vid.release()
     cv2.destroyAllWindows()
+
+
+def record_gtk3(window, vid, width, height, size_percentage):
+    pb = Gdk.pixbuf_get_from_window(window, 0, 0, width, height)
+    numpy_array = _convert_pixbuf_to_numpy(pb)
+    resized_array = cv2.resize(numpy_array, dsize=(int(width * size_percentage), int(height * size_percentage)),
+                               interpolation=cv2.INTER_AREA) \
+        if size_percentage != 1 else numpy_array
+    frame = cv2.cvtColor(resized_array, cv2.COLOR_RGB2BGR)
+    vid.write(frame)
 
 
 def _convert_pixbuf_to_numpy(pixbuf):
@@ -214,3 +227,27 @@ def _convert_pixbuf_to_numpy(pixbuf):
         for j in range(h):
             b[j, :] = a[r * j:r * j + w * c]
         return b.reshape((h, w, c))
+
+
+def benchmark_recording_performance_gtk(width, height, size_percentage):
+    fps = 0
+    last_time = time.time()
+    fourcc = cv2.VideoWriter_fourcc(*'VP08')
+    vid = cv2.VideoWriter('benchmark_%s.webm' % last_time, fourcc, 24,
+                          (int(width * size_percentage), int(height * size_percentage)))
+
+    while time.time() - last_time < 2:
+        fps += 1
+        if Gdk:
+            window = Gdk.get_default_root_window()
+            record_gtk3(window, vid, width, height, size_percentage)
+        else:
+            window = gdk.get_default_root_window()
+            record_gtk2(window, vid, width, height, size_percentage)
+
+    vid.release()
+    cv2.destroyAllWindows()
+    if os.path.exists("benchmark_%s.webm" % last_time):
+        os.remove('benchmark_%s.webm' % last_time)
+    logger.info('Automatically setting a fps of %s' % str(fps / 2))
+    return fps / 2
