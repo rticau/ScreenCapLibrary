@@ -98,9 +98,11 @@ class VideoClient(Client):
         fps = 0
         last_time = time.time()
         fourcc = cv2.VideoWriter_fourcc(*'VP08')
+        # record a dummy video to compute optimal fps
         vid = cv2.VideoWriter('benchmark_%s.webm' % last_time, fourcc, 24, (int(width * size_percentage),
                               int(height * size_percentage)))
 
+        # count the number of frames captured in 2 seconds
         while time.time() - last_time < 2:
             fps += 1
             self.record(vid, width, height, size_percentage)
@@ -108,6 +110,6 @@ class VideoClient(Client):
         vid.release()
         cv2.destroyAllWindows()
         if os.path.exists("benchmark_%s.webm" % last_time):
-            os.remove('benchmark_%s.webm' % last_time)
+            os.remove('benchmark_%s.webm' % last_time)  # delete the dummy file
         logger.info('Automatically setting a fps of %s' % str(fps / 2))
-        return fps / 2
+        return fps / 2  # return the number of frames per second

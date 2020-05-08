@@ -284,8 +284,8 @@ class ScreenCapLibrary:
 
         ``name`` specifies the name by which the record will be saved.
 
-        ``fps`` specifies the frame rate at which the video is displayed.
-        By default frame rate is 8.
+        ``fps`` specifies the frame rate at which the video is displayed. If is set to ``None`` it will be
+        automatically computed based on the performance of the system.
 
         ``size_percentage`` is used to reduce the size of the screen recordings. It will specify
         how much this reduction is with respect to screen resolution. By default this parameter

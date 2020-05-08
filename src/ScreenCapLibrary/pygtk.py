@@ -18,6 +18,7 @@ import time
 import numpy as np
 from .utils import suppress_stderr
 from robot.api import logger
+
 try:
     from gtk import gdk
 except ImportError:
@@ -25,6 +26,7 @@ except ImportError:
 
 try:
     from gi import require_version
+
     require_version('Gdk', '3.0')
     from gi.repository import Gdk
 except ImportError:
@@ -32,6 +34,7 @@ except ImportError:
 
 try:
     from gi import require_version
+
     require_version('Gdk', '3.0')
     from gi.repository import GdkPixbuf
 except ImportError:
@@ -233,9 +236,10 @@ def benchmark_recording_performance_gtk(width, height, size_percentage):
     fps = 0
     last_time = time.time()
     fourcc = cv2.VideoWriter_fourcc(*'VP08')
+    # record a dummy video to compute optimal fps
     vid = cv2.VideoWriter('benchmark_%s.webm' % last_time, fourcc, 24,
                           (int(width * size_percentage), int(height * size_percentage)))
-
+    # count the number of frames captured in 2 seconds
     while time.time() - last_time < 2:
         fps += 1
         if Gdk:
@@ -248,6 +252,6 @@ def benchmark_recording_performance_gtk(width, height, size_percentage):
     vid.release()
     cv2.destroyAllWindows()
     if os.path.exists("benchmark_%s.webm" % last_time):
-        os.remove('benchmark_%s.webm' % last_time)
+        os.remove('benchmark_%s.webm' % last_time)  # delete the dummy file
     logger.info('Automatically setting a fps of %s' % str(fps / 2))
-    return fps / 2
+    return fps / 2  # return the number of frames per second
