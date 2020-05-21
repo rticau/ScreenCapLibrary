@@ -235,8 +235,7 @@ class Client:
 
     def _stop_thread(self):
         self._stop_condition.set()
-        while self.futures._state is 'RUNNING':
-            time.sleep(1)  # wait for background thread to finish work
+        self.futures.result()
         if self.futures._exception:
             raise self.futures._exception
 
