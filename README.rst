@@ -45,7 +45,7 @@ The recommended installation method is using pip_::
     pip install --upgrade robotframework-screencaplibrary
 
 Running this command installs also the latest Robot Framework, mss_,
-pillow_ and opencv-python_ versions. The minimum supported mss version is
+pillow_, opencv-python_ and imageio_ versions. The minimum supported mss version is
 ``3.2.1`` and the minimum supported pillow version is ``5.2.0``.
 For video capture at least version ``4.0.0.21`` of opencv-python_ is required.
 The ``--upgrade`` option can be omitted when installing the library for the
@@ -131,6 +131,7 @@ available:
 .. _mss: https://python-mss.readthedocs.io
 .. _pillow: https://pillow.readthedocs.io
 .. _opencv-python: https://opencv-python-tutroals.readthedocs.io
+.. _imageio:: https://imageio.github.io/
 .. _Screenshot: http://robotframework.org/robotframework/latest/libraries/Screenshot.html
 .. _Keyword Documentation: https://mihaiparvu.github.io/ScreenCapLibrary/ScreenCapLibrary.html
 .. _robotframework-users: http://groups.google.com/group/robotframework-users

@@ -214,3 +214,7 @@ def _convert_pixbuf_to_numpy(pixbuf):
         for j in range(h):
             b[j, :] = a[r * j:r * j + w * c]
         return b.reshape((h, w, c))
+
+
+def is_gdk():
+    return Gdk
