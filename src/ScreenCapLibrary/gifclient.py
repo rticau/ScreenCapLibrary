@@ -58,7 +58,7 @@ class GifClient(Client):
                     numpy_array = pb.get_pixels_array()
                 resized_array = cv2.resize(numpy_array, dsize=(w, h), interpolation=cv2.INTER_AREA) \
                     if size_percentage != 1 else numpy_array
-                frame = cv2.cvtColor(resized_array, cv2.COLOR_RGB2BGR)
+                frame = cv2.cvtColor(resized_array, cv2.COLOR_RGBA2RGB)
                 writer.append_data(frame)
 
     def _grab_frames_mss(self, size_percentage, stop):
