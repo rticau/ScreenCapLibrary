@@ -1,7 +1,9 @@
+import os
 import threading
+import time
 
 from .client import Client, run_in_background
-from .pygtk import _record_gtk
+from .pygtk import _record_gtk, benchmark_recording_performance_gtk, _take_gtk_screen_size
 from .utils import _norm_path, suppress_stderr
 from mss import mss
 from robot.utils import get_link_path, is_truthy
@@ -23,7 +25,18 @@ class VideoClient(Client):
         self._stop_condition = threading.Event()
         self.alias = None
         try:
-            self.fps = int(fps)
+            if not fps:
+                with suppress_stderr():
+                    if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
+                        width, height = _take_gtk_screen_size()
+                        self.fps = benchmark_recording_performance_gtk(width, height, 1)
+                    else:
+                        with mss() as sct:
+                            width = int(sct.grab(sct.monitors[1]).width)
+                            height = int(sct.grab(sct.monitors[1]).height)
+                            self.fps = self.benchmark_recording_performance(width, height, 1)
+            else:
+                self.fps = int(fps)
         except ValueError:
             raise ValueError('The fps argument must be of type integer.')
 
@@ -54,22 +67,49 @@ class VideoClient(Client):
         with mss() as sct:
             if not sct.grab(sct.monitors[1]):
                 raise Exception('Monitor not available.')
-            width = int(sct.grab(sct.monitors[1]).width * size_percentage)
-            height = int(sct.grab(sct.monitors[1]).height * size_percentage)
+            width = sct.grab(sct.monitors[1]).width
+            height = sct.grab(sct.monitors[1]).height
         with suppress_stderr():
-            vid = cv2.VideoWriter('%s' % path, fourcc, fps, (width, height))
+            if not fps:
+                fps = self.benchmark_recording_performance(width, height, size_percentage)
+            vid = cv2.VideoWriter('%s' % path, fourcc, fps,
+                                  (int(width * size_percentage), int(height * size_percentage)))
         while not self._stop_condition.isSet():
-            with mss() as sct:
-                sct_img = sct.grab(sct.monitors[1])
-            numpy_array = np.array(sct_img)
-            resized_array = cv2.resize(numpy_array, dsize=(width, height), interpolation=cv2.INTER_AREA) \
-                if size_percentage != 1 else numpy_array
-            frame = cv2.cvtColor(resized_array, cv2.COLOR_RGBA2RGB)
-            vid.write(frame)
+            self.record(vid, width, height, size_percentage)
         vid.release()
         cv2.destroyAllWindows()
+
+    @staticmethod
+    def record(vid, width, height, size_percentage):
+        with mss() as sct:
+            sct_img = sct.grab(sct.monitors[1])
+        numpy_array = np.array(sct_img)
+        resized_array = cv2.resize(numpy_array, dsize=(int(width * size_percentage), int(height * size_percentage)),
+                                   interpolation=cv2.INTER_AREA) if size_percentage != 1 else numpy_array
+        frame = cv2.cvtColor(resized_array, cv2.COLOR_RGBA2RGB)
+        vid.write(frame)
 
     def _embed_video(self, path, width):
         link = get_link_path(path, self._log_dir)
         logger.info('<a href="%s"><video width="%s" autoplay><source src="%s" type="video/webm"></video></a>' %
                     (link, width, link), html=True)
+
+    def benchmark_recording_performance(self, width, height, size_percentage):
+        fps = 0
+        last_time = time.time()
+        fourcc = cv2.VideoWriter_fourcc(*'VP08')
+        # record a dummy video to compute optimal fps
+        vid = cv2.VideoWriter('benchmark_%s.webm' % last_time, fourcc, 24, (int(width * size_percentage),
+                              int(height * size_percentage)))
+
+        # count the number of frames captured in 2 seconds
+        while time.time() - last_time < 2:
+            fps += 1
+            self.record(vid, width, height, size_percentage)
+
+        vid.release()
+        cv2.destroyAllWindows()
+        if os.path.exists("benchmark_%s.webm" % last_time):
+            os.remove('benchmark_%s.webm' % last_time)  # delete the dummy file
+        logger.info('Automatically setting a fps of %s' % str(fps / 2))
+        return fps / 2  # return the number of frames per second

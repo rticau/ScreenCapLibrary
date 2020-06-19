@@ -276,7 +276,7 @@ class ScreenCapLibrary:
         """
         return self.client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time)
 
-    def start_video_recording(self, alias=None, name="recording", fps=8, size_percentage=1, embed=True, embed_width='800px'):
+    def start_video_recording(self, alias=None, name="recording", fps=None, size_percentage=1, embed=True, embed_width='800px'):
         """Starts the recording of a video in the background with the specified ``name``.
         The recording can be stopped by calling the `Stop Video Recording` keyword.
 
@@ -284,8 +284,8 @@ class ScreenCapLibrary:
 
         ``name`` specifies the name by which the record will be saved.
 
-        ``fps`` specifies the frame rate at which the video is displayed.
-        By default frame rate is 8.
+        ``fps`` specifies the frame rate at which the video is displayed. If is set to ``None`` it will be
+        automatically computed based on the performance of the system.
 
         ``size_percentage`` is used to reduce the size of the screen recordings. It will specify
         how much this reduction is with respect to screen resolution. By default this parameter
