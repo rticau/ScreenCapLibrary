@@ -131,7 +131,7 @@ available:
 .. _mss: https://python-mss.readthedocs.io
 .. _pillow: https://pillow.readthedocs.io
 .. _opencv-python: https://opencv-python-tutroals.readthedocs.io
-.. _imageio:: https://imageio.github.io/
+.. _imageio: https://imageio.github.io/
 .. _Screenshot: http://robotframework.org/robotframework/latest/libraries/Screenshot.html
 .. _Keyword Documentation: https://mihaiparvu.github.io/ScreenCapLibrary/ScreenCapLibrary.html
 .. _robotframework-users: http://groups.google.com/group/robotframework-users
