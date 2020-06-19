@@ -7,7 +7,7 @@ from .utils import _norm_path
 
 from mss import mss
 from PIL import Image
-from robot.utils import is_truthy, timestr_to_secs
+from robot.utils import is_truthy
 
 
 class GifClient(Client):
@@ -20,11 +20,11 @@ class GifClient(Client):
         self.gif_frame_time = 125
 
     def start_gif_recording(self, name, size_percentage,
-                            embed, embed_width):
+                            embed, embed_width, monitor):
         self.name = name
         self.embed = embed
         self.embed_width = embed_width
-        self.futures = self.grab_frames(size_percentage, self._stop_condition)
+        self.futures = self.grab_frames(size_percentage, self._stop_condition, monitor)
         self.clear_thread_queues()
 
     def stop_gif_recording(self):
@@ -38,11 +38,11 @@ class GifClient(Client):
         return path
 
     @run_in_background
-    def grab_frames(self, size_percentage, stop):
+    def grab_frames(self, size_percentage, stop, monitor):
         if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
             self._grab_frames_gtk(size_percentage, stop)
         else:
-            self._grab_frames_mss(size_percentage, stop)
+            self._grab_frames_mss(size_percentage, stop, monitor)
 
     def _grab_frames_gtk(self, size_percentage, stop):
         width, height = _take_gtk_screen_size()
@@ -56,12 +56,13 @@ class GifClient(Client):
             self.frames.append(img)
             time.sleep(self.gif_frame_time / 1000)
 
-    def _grab_frames_mss(self, size_percentage, stop):
+    def _grab_frames_mss(self, size_percentage, stop, monitor):
         with mss() as sct:
-            width = int(sct.grab(sct.monitors[0]).width * size_percentage)
-            height = int(sct.grab(sct.monitors[0]).height * size_percentage)
+            mon = sct.monitors[int(monitor)]
+            width = int(sct.grab(mon).width * size_percentage)
+            height = int(sct.grab(mon).height * size_percentage)
             while not stop.isSet():
-                sct_img = sct.grab(sct.monitors[0])
+                sct_img = sct.grab(mon)
                 img = Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX')
                 if size_percentage != 1:
                     img.resize((width, height))

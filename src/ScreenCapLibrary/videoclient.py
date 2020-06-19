@@ -27,13 +27,13 @@ class VideoClient(Client):
         except ValueError:
             raise ValueError('The fps argument must be of type integer.')
 
-    def start_video_recording(self, alias, name, size_percentage, embed, embed_width):
+    def start_video_recording(self, alias, name, size_percentage, embed, embed_width, monitor):
         self.alias = alias
         self.name = name
         self.embed = embed
         self.embed_width = embed_width
         self.path = self._save_screenshot_path(basename=self.name, format='webm')
-        self.futures = self.capture_screen(self.path, self.fps, size_percentage=size_percentage)
+        self.futures = self.capture_screen(self.path, self.fps, size_percentage=size_percentage, monitor=monitor)
         self.clear_thread_queues()
 
     def stop_video_recording(self):
@@ -43,24 +43,25 @@ class VideoClient(Client):
         return self.path
 
     @run_in_background
-    def capture_screen(self, path, fps, size_percentage):
+    def capture_screen(self, path, fps, size_percentage, monitor):
         if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
             _record_gtk(path, fps, size_percentage, stop=self._stop_condition)
         else:
-            self._record_mss(path, fps, size_percentage)
+            self._record_mss(path, fps, size_percentage, monitor)
 
-    def _record_mss(self, path, fps, size_percentage):
+    def _record_mss(self, path, fps, size_percentage, monitor):
         fourcc = cv2.VideoWriter_fourcc(*'VP08')
         with mss() as sct:
-            if not sct.grab(sct.monitors[1]):
+            mon = sct.monitors[int(monitor)]
+            if not sct.grab(mon):
                 raise Exception('Monitor not available.')
-            width = int(sct.grab(sct.monitors[1]).width * size_percentage)
-            height = int(sct.grab(sct.monitors[1]).height * size_percentage)
+            width = int(sct.grab(mon).width * size_percentage)
+            height = int(sct.grab(mon).height * size_percentage)
         with suppress_stderr():
             vid = cv2.VideoWriter('%s' % path, fourcc, fps, (width, height))
         while not self._stop_condition.isSet():
             with mss() as sct:
-                sct_img = sct.grab(sct.monitors[1])
+                sct_img = sct.grab(sct.monitors[int(monitor)])
             numpy_array = np.array(sct_img)
             resized_array = cv2.resize(numpy_array, dsize=(width, height), interpolation=cv2.INTER_AREA) \
                 if size_percentage != 1 else numpy_array
