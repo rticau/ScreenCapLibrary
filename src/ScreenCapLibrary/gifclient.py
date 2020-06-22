@@ -6,6 +6,7 @@ from .pygtk import _take_gtk_screen_size, _grab_gtk_pb, _convert_pixbuf_to_numpy
 from .utils import _norm_path
 
 from mss import mss
+from PIL import Image, ImageSequence
 from robot.utils import is_truthy
 
 try:
@@ -22,12 +23,14 @@ class GifClient(Client):
         self.screenshot_module = screenshot_module
         self._given_screenshot_dir = _norm_path(screenshot_directory)
         self._stop_condition = threading.Event()
+        self.optimize = None
 
     def start_gif_recording(self, name, size_percentage,
-                            embed, embed_width):
+                            embed, embed_width, optimize):
         self.name = name
         self.embed = embed
         self.embed_width = embed_width
+        self.optimize = optimize
         self.path = self._save_screenshot_path(basename=self.name, format='gif')
         self.futures = self.grab_frames(size_percentage, self._stop_condition)
         self.clear_thread_queues()
@@ -36,6 +39,12 @@ class GifClient(Client):
         self._stop_thread()
         if is_truthy(self.embed):
             self._embed_screenshot(self.path, self.embed_width)
+        if is_truthy(self.optimize):
+            frames = []
+            for frame in ImageSequence.Iterator(Image.open(self.path)):
+                frame = frame.copy()
+                frames.append(frame)
+            frames[0].save(self.path, save_all=True, append_images=frames[1:], optimize=True)
         return self.path
 
     @run_in_background
