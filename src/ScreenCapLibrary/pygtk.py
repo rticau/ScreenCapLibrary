@@ -57,25 +57,36 @@ def _grab_screenshot_gtk_py2():
     return pb
 
 
-def _grab_screenshot_gtk_py3():
+def _grab_screenshot_gtk_py3(monitor):
     window = Gdk.get_default_root_window()
+    screen = window.get_screen()
     if not window:
         raise RuntimeError('Taking screenshot failed.')
-    width = window.get_width()
-    height = window.get_height()
-    pb = Gdk.pixbuf_get_from_window(window, 0, 0, width, height)
+    if monitor == -1:
+        x = 0
+        y = 0
+        width = window.get_width()
+        height = window.get_height()
+    else:
+        monitors = []
+        nmons = screen.get_n_monitors()
+        for m in range(nmons):
+            mg = screen.get_monitor_geometry(m)
+            monitors.append(mg)
+        x, y, width, height = monitors[monitor]
+    pb = Gdk.pixbuf_get_from_window(window, x, y, width, height)
     if not pb:
         raise RuntimeError('Taking screenshot failed.')
     return pb
 
 
-def _grab_gtk_pb():
+def _grab_gtk_pb(monitor):
     if not gdk and not Gdk:
         raise RuntimeError('PyGTK not installed/supported on this platform.')
     if gdk:
         return _grab_screenshot_gtk_py2()
     elif Gdk:
-        return _grab_screenshot_gtk_py3()
+        return _grab_screenshot_gtk_py3(monitor)
 
 
 def _take_gtk_screenshot(path, format, quality):

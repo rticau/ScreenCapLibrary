@@ -40,16 +40,16 @@ class GifClient(Client):
     @run_in_background
     def grab_frames(self, size_percentage, stop, monitor):
         if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
-            self._grab_frames_gtk(size_percentage, stop)
+            self._grab_frames_gtk(size_percentage, stop, monitor)
         else:
             self._grab_frames_mss(size_percentage, stop, monitor)
 
-    def _grab_frames_gtk(self, size_percentage, stop):
+    def _grab_frames_gtk(self, size_percentage, stop, monitor):
         width, height = _take_gtk_screen_size()
         w = int(width * size_percentage)
         h = int(height * size_percentage)
         while not stop.isSet():
-            pb = _grab_gtk_pb()
+            pb = _grab_gtk_pb(monitor)
             img = Image.frombuffer('RGB', (width, height), pb.get_pixels(), 'raw', 'RGB')
             if size_percentage != 1:
                 img.resize((w, h))
