@@ -29,7 +29,7 @@ class VideoClient(Client):
                 with suppress_stderr():
                     if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
                         width, height = _take_gtk_screen_size(monitor=1)
-                        self.fps = benchmark_recording_performance_gtk(width, height, 1)
+                        self.fps = benchmark_recording_performance_gtk(width, height, 1, monitor=1)
                     else:
                         with mss() as sct:
                             width = int(sct.grab(sct.monitors[1]).width)
@@ -68,11 +68,11 @@ class VideoClient(Client):
             mon = sct.monitors[monitor]
             if not sct.grab(mon):
                 raise Exception('Monitor not available.')
-            width = sct.grab(sct.monitors[monitor]).width
-            height = sct.grab(sct.monitors[monitor]).height
+            width = sct.grab(mon).width
+            height = sct.grab(mon).height
         with suppress_stderr():
             if not fps:
-                fps = self.benchmark_recording_performance(width, height, size_percentage)
+                fps = self.benchmark_recording_performance(width, height, size_percentage, monitor)
             vid = cv2.VideoWriter('%s' % path, fourcc, fps,
                                   (int(width * size_percentage), int(height * size_percentage)))
         while not self._stop_condition.isSet():
