@@ -50,6 +50,8 @@ def _grab_screenshot_gtk_py2(monitor):
         raise RuntimeError('Taking screenshot failed.')
     width, height = window.get_size()
     pb = gdk.Pixbuf(gdk.COLORSPACE_RGB, False, 8, width, height)
+    if not pb:
+        raise RuntimeError('Taking screenshot failed.')
     if monitor == 0:
         pb = pb.get_from_drawable(window, window.get_colormap(),
                                   0, 0, 0, 0, width, height)
@@ -58,8 +60,6 @@ def _grab_screenshot_gtk_py2(monitor):
         pb = pb.get_from_drawable(window, window.get_colormap(),
                                   monitors[monitor - 1].x, monitors[monitor - 1].y, 0, 0,
                                   monitors[monitor - 1].width, monitors[monitor - 1].height)
-    if not pb:
-        raise RuntimeError('Taking screenshot failed.')
     return pb
 
 
@@ -91,9 +91,9 @@ def _take_gtk_screenshot(path, format, quality, monitor):
     if not gdk and not Gdk:
         raise RuntimeError('PyGTK not installed/supported on this platform.')
     if gdk:
-        return _take_gtk_screenshot_py2(path, format, quality, monitor)
+        return _take_gtk_screenshot_py2(path, format, quality, int(monitor))
     elif Gdk:
-        return _take_gtk_screenshot_py3(path, format, quality, monitor)
+        return _take_gtk_screenshot_py3(path, format, quality, int(monitor))
 
 
 def _take_gtk_screenshot_py2(path, format, quality, monitor):
@@ -186,7 +186,10 @@ def _record_gtk_py2(path, fps, size_percentage, stop, monitor):
     if not window:
         raise Exception('Monitor not available.')
     fourcc = cv2.VideoWriter_fourcc(*'VP08')
-    width, height = window.get_size()
+    if monitor == 0:
+        width, height = window.get_size()
+    else:
+        width, height = _take_gtk_screen_size(monitor)
     resized_width = int(width * size_percentage)
     resized_height = int(height * size_percentage)
     with suppress_stderr():
@@ -207,8 +210,11 @@ def _record_gtk_py3(path, fps, size_percentage, stop, monitor):
     if not window:
         raise Exception('Monitor not available.')
     fourcc = cv2.VideoWriter_fourcc(*'VP08')
-    width = window.get_width()
-    height = window.get_height()
+    if monitor == 0:
+        width = window.get_width()
+        height = window.get_height()
+    else:
+        width, height = _take_gtk_screen_size(monitor)
     resized_width = int(width * size_percentage)
     resized_height = int(height * size_percentage)
     with suppress_stderr():
