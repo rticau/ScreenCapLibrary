@@ -168,6 +168,8 @@ class ScreenCapLibrary:
         ``delay`` specifies the waiting time before taking a screenshot. See
         `Time format` section for more information. By default the delay is 0.
 
+        ``monitor`` selects which monitor you want to capture. Use value 0 to capture all.
+
         Examples: (LOGDIR is determined automatically by the library)
         | `Take Screenshot` |                  |            | # LOGDIR/screenshot_1.png (index automatically incremented) |
         | `Take Screenshot` | mypic            |            | # LOGDIR/mypic_1.png (index automatically incremented) |
@@ -199,6 +201,8 @@ class ScreenCapLibrary:
 
         ``embed_width`` specifies the size of the screenshot that is
         embedded in the log file.
+
+        ``monitor`` selects which monitor you want to capture. Use value 0 to capture all.
 
         Examples:
         | `Start Gif Recording` |            |  # Starts the GIF recording in background |
@@ -247,6 +251,8 @@ class ScreenCapLibrary:
         `Boolean arguments` section for more details.
 
         ``embed_width`` specifies the size of the screenshot that is embedded in the log file.
+
+        ``monitor`` selects which monitor you want to capture. Use value 0 to capture all.
         """
         return self.client.take_partial_screenshot(name, format, quality,
                                                    left, top, width, height, embed, embed_width, monitor)
@@ -296,6 +302,8 @@ class ScreenCapLibrary:
 
         ``embed_width`` specifies the size of the video record that is
         embedded in the log file.
+
+        ``monitor`` selects which monitor you want to capture. Use value 0 to capture all.
 
         Examples:
         | `Start Video Recording` |            |  # Starts the video recording in background |
