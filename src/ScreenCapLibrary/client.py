@@ -116,21 +116,21 @@ class Client:
         format = (format or self._format).lower()
         quality = quality or self._quality
         if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
-            return self._take_screenshot_client_gtk(name, format, quality)
+            return self._take_screenshot_client_gtk(name, format, quality, monitor)
         else:
             return self._take_screenshot_client_mss(name, format, quality, monitor)
 
-    def _take_screenshot_client_gtk(self, name, format, quality):
+    def _take_screenshot_client_gtk(self, name, format, quality, monitor):
         format = 'jpeg' if format == 'jpg' else format
         if format == 'png':
             quality = _compression_value_conversion(quality)
         path = self._save_screenshot_path(name, format)
         if format == 'webp':
-            png_img = _take_gtk_screenshot(path, 'png', _compression_value_conversion(100))
+            png_img = _take_gtk_screenshot(path, 'png', _compression_value_conversion(100), monitor)
             im = Image.open(png_img)
             im.save(path, format, quality=quality)
             return path
-        return _take_gtk_screenshot(path, format, quality)
+        return _take_gtk_screenshot(path, format, quality, monitor)
 
     def _take_screenshot_client_mss(self, name, format, quality, monitor):
         if format in ['jpg', 'jpeg', 'webp']:
@@ -165,7 +165,7 @@ class Client:
     @run_in_background
     def _take_multiple_screenshots(self, name, format, quality, delay, shot_number, monitor):
         if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
-            self._take_multiple_screenshots_gtk(delay, shot_number)
+            self._take_multiple_screenshots_gtk(delay, shot_number, monitor)
         else:
             self._take_multiple_screenshots_mss(delay, shot_number, monitor)
         for img in self.frames:
@@ -182,11 +182,11 @@ class Client:
                 time.sleep(timestr_to_secs(delay))
                 taken += 1
 
-    def _take_multiple_screenshots_gtk(self, delay, shot_number):
+    def _take_multiple_screenshots_gtk(self, delay, shot_number, monitor):
         taken = 0
-        width, height = _take_gtk_screen_size()
+        width, height = _take_gtk_screen_size(monitor)
         while taken < shot_number:
-            pb = _grab_gtk_pb()
+            pb = _grab_gtk_pb(monitor)
             img = Image.frombuffer('RGB', (width, height), pb.get_pixels(), 'raw', 'RGB')
             self.frames.append(img)
             time.sleep(timestr_to_secs(delay))
@@ -206,7 +206,7 @@ class Client:
             if format == 'png':
                 quality = _compression_value_conversion(quality)
             path = self._save_screenshot_path(name, format)
-            path = _take_partial_gtk_screenshot(path, format, quality, left, top, width, height)
+            path = _take_partial_gtk_screenshot(path, format, quality, left, top, width, height, monitor)
         else:
             try:
                 original_image = self.take_screenshot(name, format, quality, width, 0, monitor)

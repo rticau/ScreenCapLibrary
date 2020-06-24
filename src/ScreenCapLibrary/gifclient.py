@@ -45,7 +45,7 @@ class GifClient(Client):
             self._grab_frames_mss(size_percentage, stop, monitor)
 
     def _grab_frames_gtk(self, size_percentage, stop, monitor):
-        width, height = _take_gtk_screen_size()
+        width, height = _take_gtk_screen_size(monitor)
         w = int(width * size_percentage)
         h = int(height * size_percentage)
         while not stop.isSet():

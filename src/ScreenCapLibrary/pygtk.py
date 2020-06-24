@@ -44,7 +44,7 @@ def _gtk_quality(format, quality):
     return quality_setting
 
 
-def _grab_screenshot_gtk_py2():
+def _grab_screenshot_gtk_py2(monitor):
     window = gdk.get_default_root_window()
     if not window:
         raise RuntimeError('Taking screenshot failed.')
@@ -59,22 +59,12 @@ def _grab_screenshot_gtk_py2():
 
 def _grab_screenshot_gtk_py3(monitor):
     window = Gdk.get_default_root_window()
-    screen = window.get_screen()
     if not window:
         raise RuntimeError('Taking screenshot failed.')
     if monitor == 0:
-        x = 0
-        y = 0
-        width = window.get_width()
-        height = window.get_height()
-        pb = Gdk.pixbuf_get_from_window(window, x, y, width, height)
+        pb = Gdk.pixbuf_get_from_window(window, 0, 0, window.get_width(), window.get_height())
     else:
-        monitors = []
-        monitor = int(monitor) - 1
-        nmons = screen.get_n_monitors()
-        for m in range(nmons):
-            mg = screen.get_monitor_geometry(m)
-            monitors.append(mg)
+        monitors = _get_monitors(window)
         pb = Gdk.pixbuf_get_from_window(window, monitors[monitor].x, monitors[monitor].y, monitors[monitor].width, monitors[monitor].height)
     if not pb:
         raise RuntimeError('Taking screenshot failed.')
@@ -85,29 +75,29 @@ def _grab_gtk_pb(monitor):
     if not gdk and not Gdk:
         raise RuntimeError('PyGTK not installed/supported on this platform.')
     if gdk:
-        return _grab_screenshot_gtk_py2()
+        return _grab_screenshot_gtk_py2(monitor)
     elif Gdk:
         return _grab_screenshot_gtk_py3(monitor)
 
 
-def _take_gtk_screenshot(path, format, quality):
+def _take_gtk_screenshot(path, format, quality, monitor):
     if not gdk and not Gdk:
         raise RuntimeError('PyGTK not installed/supported on this platform.')
     if gdk:
-        return _take_gtk_screenshot_py2(path, format, quality)
+        return _take_gtk_screenshot_py2(path, format, quality, monitor)
     elif Gdk:
-        return _take_gtk_screenshot_py3(path, format, quality)
+        return _take_gtk_screenshot_py3(path, format, quality, monitor)
 
 
-def _take_gtk_screenshot_py2(path, format, quality):
-    pb = _grab_screenshot_gtk_py2()
+def _take_gtk_screenshot_py2(path, format, quality, monitor):
+    pb = _grab_screenshot_gtk_py2(monitor)
     quality_setting = _gtk_quality(format, quality)
     pb.save(path, format, quality_setting)
     return path
 
 
-def _take_gtk_screenshot_py3(path, format, quality):
-    pb = _grab_screenshot_gtk_py3()
+def _take_gtk_screenshot_py3(path, format, quality, monitor):
+    pb = _grab_screenshot_gtk_py3(monitor)
     quality_setting = _gtk_quality(format, quality)
     pb.savev(path, format, [list(quality_setting.keys())[0]], [list(quality_setting.values())[0]])
     return path
@@ -126,32 +116,34 @@ def _take_gtk_screen_size(monitor):
         window = Gdk.get_default_root_window()
         if not window:
             raise RuntimeError('Taking screenshot failed.')
-        if monitor == -1:
-            width = window.get_width()
-            height = window.get_height()
+        if monitor == 0:
+            return window.get_width(), window.get_height()
         else:
-            monitors = []
-            screen = window.get_screen()
-            nmons = screen.get_n_monitors()
-            for m in range(nmons):
-                mg = screen.get_monitor_geometry(m)
-                monitors.append(mg)
-            width = monitors[int(monitor) - 1].width
-            height = monitors[int(monitor) - 1].height
-        return width, height
+            monitors = _get_monitors(window)
+            return monitors[int(monitor) - 1].width, monitors[int(monitor) - 1].height
 
 
-def _take_partial_gtk_screenshot(path, format, quality, left, top, width, height):
+def _get_monitors(window):
+    monitors = []
+    screen = window.get_screen()
+    nmons = screen.get_n_monitors()
+    for m in range(nmons):
+        mg = screen.get_monitor_geometry(m)
+        monitors.append(mg)
+    return monitors
+
+
+def _take_partial_gtk_screenshot(path, format, quality, left, top, width, height, monitor):
     if not gdk and not Gdk:
         raise RuntimeError('PyGTK not installed/supported on this platform.')
     if gdk:
-        return _take_partial_gtk_screenshot_py2(path, format, quality, left, top, width, height)
+        return _take_partial_gtk_screenshot_py2(path, format, quality, left, top, width, height, monitor)
     elif Gdk:
-        return _take_partial_gtk_screenshot_py3(path, format, quality, left, top, width, height)
+        return _take_partial_gtk_screenshot_py3(path, format, quality, left, top, width, height, monitor)
 
 
-def _take_partial_gtk_screenshot_py2(path, format, quality, left, top, width, height):
-    source_pb = _grab_screenshot_gtk_py2()
+def _take_partial_gtk_screenshot_py2(path, format, quality, left, top, width, height, monitor):
+    source_pb = _grab_screenshot_gtk_py2(monitor)
     quality_setting = _gtk_quality(format, quality)
     cropped_pb = source_pb.subpixbuf(left, top, width, height)
     if not cropped_pb:
@@ -160,11 +152,9 @@ def _take_partial_gtk_screenshot_py2(path, format, quality, left, top, width, he
     return path
 
 
-def _take_partial_gtk_screenshot_py3(path, format, quality, left, top, width, height):
-    window = Gdk.get_default_root_window()
-    if not window:
-        raise RuntimeError('Taking screenshot failed.')
-    cropped_pb = Gdk.pixbuf_get_from_window(window, left, top, width, height)
+def _take_partial_gtk_screenshot_py3(path, format, quality, left, top, width, height, monitor):
+    source_pb = _grab_screenshot_gtk_py3(monitor)
+    cropped_pb = source_pb.new_subpixbuf(left, top, width, height)
     if not cropped_pb:
         raise RuntimeError('Taking screenshot failed.')
     quality_setting = _gtk_quality(format, quality)
@@ -172,16 +162,16 @@ def _take_partial_gtk_screenshot_py3(path, format, quality, left, top, width, he
     return path
 
 
-def _record_gtk(path, fps, size_percentage, stop):
+def _record_gtk(path, fps, size_percentage, stop, monitor):
     if not gdk and not Gdk:
         raise RuntimeError('PyGTK not installed/supported on this platform.')
     if gdk:
-        return _record_gtk_py2(path, fps, size_percentage, stop)
+        return _record_gtk_py2(path, fps, size_percentage, stop, monitor)
     elif Gdk:
-        return _record_gtk_py3(path, fps, size_percentage, stop)
+        return _record_gtk_py3(path, fps, size_percentage, stop, monitor)
 
 
-def _record_gtk_py2(path, fps, size_percentage, stop):
+def _record_gtk_py2(path, fps, size_percentage, stop, monitor):
     window = gdk.get_default_root_window()
     if not window:
         raise Exception('Monitor not available.')
@@ -192,9 +182,7 @@ def _record_gtk_py2(path, fps, size_percentage, stop):
     with suppress_stderr():
         vid = cv2.VideoWriter('%s' % path, fourcc, fps, (resized_width, resized_height))
     while not stop.isSet():
-        pb = gdk.Pixbuf(gdk.COLORSPACE_RGB, False, 8, width, height)
-        pb = pb.get_from_drawable(window, window.get_colormap(),
-                                  0, 0, 0, 0, width, height)
+        pb = _grab_screenshot_gtk_py2(monitor)
         numpy_array = pb.get_pixels_array()
         resized_array = cv2.resize(numpy_array, dsize=(resized_width, resized_height), interpolation=cv2.INTER_AREA) \
             if size_percentage != 1 else numpy_array
@@ -204,7 +192,7 @@ def _record_gtk_py2(path, fps, size_percentage, stop):
     cv2.destroyAllWindows()
 
 
-def _record_gtk_py3(path, fps, size_percentage, stop):
+def _record_gtk_py3(path, fps, size_percentage, stop, monitor):
     window = Gdk.get_default_root_window()
     if not window:
         raise Exception('Monitor not available.')
@@ -216,7 +204,7 @@ def _record_gtk_py3(path, fps, size_percentage, stop):
     with suppress_stderr():
         vid = cv2.VideoWriter('%s' % path, fourcc, fps, (resized_width, resized_height))
     while not stop.isSet():
-        pb = Gdk.pixbuf_get_from_window(window, 0, 0, width, height)
+        pb = _grab_screenshot_gtk_py3(monitor)
         numpy_array = _convert_pixbuf_to_numpy(pb)
         resized_array = cv2.resize(numpy_array, dsize=(resized_width, resized_height), interpolation=cv2.INTER_AREA) \
             if size_percentage != 1 else numpy_array

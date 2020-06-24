@@ -45,7 +45,7 @@ class VideoClient(Client):
     @run_in_background
     def capture_screen(self, path, fps, size_percentage, monitor):
         if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
-            _record_gtk(path, fps, size_percentage, stop=self._stop_condition)
+            _record_gtk(path, fps, size_percentage, self._stop_condition, monitor)
         else:
             self._record_mss(path, fps, size_percentage, monitor)
 
