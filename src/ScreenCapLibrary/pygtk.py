@@ -230,7 +230,7 @@ def _record_gtk_py3(path, fps, size_percentage, stop, monitor):
 
     with suppress_stderr():
         if not fps:
-            fps = benchmark_recording_performance_gtk(width, height, size_percentage)
+            fps = benchmark_recording_performance_gtk(width, height, size_percentage, monitor)
         vid = cv2.VideoWriter('%s' % path, fourcc, fps, (int(width * size_percentage), int(height * size_percentage)))
     while not stop.isSet():
         record_gtk3(vid, width, height, size_percentage, monitor)
