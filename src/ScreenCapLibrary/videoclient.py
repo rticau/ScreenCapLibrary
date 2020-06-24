@@ -33,7 +33,7 @@ class VideoClient(Client):
         self.embed = embed
         self.embed_width = embed_width
         self.path = self._save_screenshot_path(basename=self.name, format='webm')
-        self.futures = self.capture_screen(self.path, self.fps, size_percentage=size_percentage, monitor=monitor)
+        self.futures = self.capture_screen(self.path, self.fps, size_percentage, int(monitor))
         self.clear_thread_queues()
 
     def stop_video_recording(self):
@@ -52,7 +52,7 @@ class VideoClient(Client):
     def _record_mss(self, path, fps, size_percentage, monitor):
         fourcc = cv2.VideoWriter_fourcc(*'VP08')
         with mss() as sct:
-            mon = sct.monitors[int(monitor)]
+            mon = sct.monitors[monitor]
             if not sct.grab(mon):
                 raise Exception('Monitor not available.')
             width = int(sct.grab(mon).width * size_percentage)
@@ -61,7 +61,7 @@ class VideoClient(Client):
             vid = cv2.VideoWriter('%s' % path, fourcc, fps, (width, height))
         while not self._stop_condition.isSet():
             with mss() as sct:
-                sct_img = sct.grab(sct.monitors[int(monitor)])
+                sct_img = sct.grab(sct.monitors[monitor])
             numpy_array = np.array(sct_img)
             resized_array = cv2.resize(numpy_array, dsize=(width, height), interpolation=cv2.INTER_AREA) \
                 if size_percentage != 1 else numpy_array

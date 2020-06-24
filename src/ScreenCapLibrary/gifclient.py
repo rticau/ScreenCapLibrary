@@ -24,7 +24,7 @@ class GifClient(Client):
         self.name = name
         self.embed = embed
         self.embed_width = embed_width
-        self.futures = self.grab_frames(size_percentage, self._stop_condition, monitor)
+        self.futures = self.grab_frames(size_percentage, self._stop_condition, int(monitor))
         self.clear_thread_queues()
 
     def stop_gif_recording(self):
@@ -58,7 +58,7 @@ class GifClient(Client):
 
     def _grab_frames_mss(self, size_percentage, stop, monitor):
         with mss() as sct:
-            mon = sct.monitors[int(monitor)]
+            mon = sct.monitors[monitor]
             width = int(sct.grab(mon).width * size_percentage)
             height = int(sct.grab(mon).height * size_percentage)
             while not stop.isSet():

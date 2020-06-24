@@ -50,8 +50,14 @@ def _grab_screenshot_gtk_py2(monitor):
         raise RuntimeError('Taking screenshot failed.')
     width, height = window.get_size()
     pb = gdk.Pixbuf(gdk.COLORSPACE_RGB, False, 8, width, height)
-    pb = pb.get_from_drawable(window, window.get_colormap(),
-                              0, 0, 0, 0, width, height)
+    if monitor == 0:
+        pb = pb.get_from_drawable(window, window.get_colormap(),
+                                  0, 0, 0, 0, width, height)
+    else:
+        monitors = _get_monitors(window)
+        pb = pb.get_from_drawable(window, window.get_colormap(),
+                                  monitors[monitor - 1].x, monitors[monitor - 1].y, 0, 0,
+                                  monitors[monitor - 1].width, monitors[monitor - 1].height)
     if not pb:
         raise RuntimeError('Taking screenshot failed.')
     return pb
@@ -65,7 +71,8 @@ def _grab_screenshot_gtk_py3(monitor):
         pb = Gdk.pixbuf_get_from_window(window, 0, 0, window.get_width(), window.get_height())
     else:
         monitors = _get_monitors(window)
-        pb = Gdk.pixbuf_get_from_window(window, monitors[monitor].x, monitors[monitor].y, monitors[monitor].width, monitors[monitor].height)
+        pb = Gdk.pixbuf_get_from_window(window, monitors[monitor - 1].x, monitors[monitor - 1].y,
+                                        monitors[monitor - 1].width, monitors[monitor - 1].height)
     if not pb:
         raise RuntimeError('Taking screenshot failed.')
     return pb
@@ -110,8 +117,11 @@ def _take_gtk_screen_size(monitor):
         window = gdk.get_default_root_window()
         if not window:
             raise RuntimeError('Taking screenshot failed.')
-        width, height = window.get_size()
-        return width, height
+        if monitor == 0:
+            return window.get_size()
+        else:
+            monitors = _get_monitors(window)
+            return monitors[monitor - 1].width, monitors[monitor - 1].height
     elif Gdk:
         window = Gdk.get_default_root_window()
         if not window:
@@ -120,7 +130,7 @@ def _take_gtk_screen_size(monitor):
             return window.get_width(), window.get_height()
         else:
             monitors = _get_monitors(window)
-            return monitors[int(monitor) - 1].width, monitors[int(monitor) - 1].height
+            return monitors[monitor - 1].width, monitors[monitor - 1].height
 
 
 def _get_monitors(window):
