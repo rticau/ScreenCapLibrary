@@ -255,3 +255,7 @@ def benchmark_recording_performance_gtk(width, height, size_percentage):
         os.remove('benchmark_%s.webm' % last_time)  # delete the dummy file
     logger.info('Automatically setting a fps of %s' % str(fps / 2))
     return fps / 2  # return the number of frames per second
+
+
+def is_gdk():
+    return Gdk
