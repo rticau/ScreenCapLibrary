@@ -184,7 +184,7 @@ class ScreenCapLibrary:
         return self.client.take_screenshot(name, format, quality, width, delay, monitor)
 
     def start_gif_recording(self, name="screenshot", size_percentage=0.5,
-                            embed=True, embed_width='800px', monitor=1):
+                            embed=True, embed_width='800px', monitor=1, optimize=True):
         """
         Starts the recording of a GIF in the background with the specified ``name``.
         The recording can be stopped by calling the `Stop Gif Recording` keyword.
@@ -192,7 +192,7 @@ class ScreenCapLibrary:
         ``name`` specifies the name by which the screenshot will be saved.
 
         ``size_percentage`` is used to reduce the size of the GIFs a resize of the
-        screencaptures. It will specify how much this reduction is with respect to
+        screen captures. It will specify how much this reduction is with respect to
         screen resolution. By default this parameter is set to resize the images to
         0.5 of the screen resolution.
 
@@ -204,19 +204,19 @@ class ScreenCapLibrary:
 
         ``monitor`` selects which monitor you want to capture. Use value 0 to capture all.
 
+        ``optimize`` drastically reduces the size (and quality) of the gif file.
+
         Examples:
         | `Start Gif Recording` |            |  # Starts the GIF recording in background |
         | `Sleep`               | 10 seconds |  # Here should be the actions that will be recorded |
         | `Stop Gif Recording`  |            |  # Will create the GIF containing the screen recording \
         since `Start Gif Recording` was called. |
-
-        *Note:* Recommended GIF duration is 100 seconds or lower depending on system memory.
         """
         if len(self.started_gifs) > 0:
             raise Exception('A gif recording is already in progress!')
         gif_client = GifClient(self.client.screenshot_module, self.client.screenshot_dir)
         self.started_gifs.append(gif_client)
-        gif_client.start_gif_recording(name, size_percentage, embed, embed_width, monitor)
+        gif_client.start_gif_recording(name, size_percentage, embed, embed_width, monitor, optimize)
 
     def stop_gif_recording(self):
         """
