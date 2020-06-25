@@ -20,7 +20,7 @@ ScreenCapLibrary has the following extra features:
     - Taking screenshots in PNG, JPG/JPEG, GIF and WebP formats
     - Video capture in WebM format, embeddable in log files
     - Adjusting the compression/quality of the screenshots
-    - Support for GIFs (duration of 100 seconds or lower depending on system memory)
+    - Support for GIFs
     - Taking multiple screenshots in a given amount of time
     - Support for partial screen captures
     - Configurable monitor screen grabbing for screenshots and recording
