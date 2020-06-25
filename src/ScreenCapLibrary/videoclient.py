@@ -28,25 +28,25 @@ class VideoClient(Client):
             if not fps:
                 with suppress_stderr():
                     if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
-                        width, height = _take_gtk_screen_size()
-                        self.fps = benchmark_recording_performance_gtk(width, height, 1)
+                        width, height = _take_gtk_screen_size(monitor=1)
+                        self.fps = benchmark_recording_performance_gtk(width, height, 1, monitor=1)
                     else:
                         with mss() as sct:
                             width = int(sct.grab(sct.monitors[1]).width)
                             height = int(sct.grab(sct.monitors[1]).height)
-                            self.fps = self.benchmark_recording_performance(width, height, 1)
+                            self.fps = self.benchmark_recording_performance(width, height, 1, monitor=1)
             else:
                 self.fps = int(fps)
         except ValueError:
             raise ValueError('The fps argument must be of type integer.')
 
-    def start_video_recording(self, alias, name, size_percentage, embed, embed_width):
+    def start_video_recording(self, alias, name, size_percentage, embed, embed_width, monitor):
         self.alias = alias
         self.name = name
         self.embed = embed
         self.embed_width = embed_width
         self.path = self._save_screenshot_path(basename=self.name, format='webm')
-        self.futures = self.capture_screen(self.path, self.fps, size_percentage=size_percentage)
+        self.futures = self.capture_screen(self.path, self.fps, size_percentage, int(monitor))
         self.clear_thread_queues()
 
     def stop_video_recording(self):
@@ -56,33 +56,34 @@ class VideoClient(Client):
         return self.path
 
     @run_in_background
-    def capture_screen(self, path, fps, size_percentage):
+    def capture_screen(self, path, fps, size_percentage, monitor):
         if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
-            _record_gtk(path, fps, size_percentage, stop=self._stop_condition)
+            _record_gtk(path, fps, size_percentage, self._stop_condition, monitor)
         else:
-            self._record_mss(path, fps, size_percentage)
+            self._record_mss(path, fps, size_percentage, monitor)
 
-    def _record_mss(self, path, fps, size_percentage):
+    def _record_mss(self, path, fps, size_percentage, monitor):
         fourcc = cv2.VideoWriter_fourcc(*'VP08')
         with mss() as sct:
-            if not sct.grab(sct.monitors[1]):
+            mon = sct.monitors[monitor]
+            if not sct.grab(mon):
                 raise Exception('Monitor not available.')
-            width = sct.grab(sct.monitors[1]).width
-            height = sct.grab(sct.monitors[1]).height
+            width = sct.grab(mon).width
+            height = sct.grab(mon).height
         with suppress_stderr():
             if not fps:
-                fps = self.benchmark_recording_performance(width, height, size_percentage)
+                fps = self.benchmark_recording_performance(width, height, size_percentage, monitor)
             vid = cv2.VideoWriter('%s' % path, fourcc, fps,
                                   (int(width * size_percentage), int(height * size_percentage)))
         while not self._stop_condition.isSet():
-            self.record(vid, width, height, size_percentage)
+            self.record(vid, width, height, size_percentage, monitor)
         vid.release()
         cv2.destroyAllWindows()
 
     @staticmethod
-    def record(vid, width, height, size_percentage):
+    def record(vid, width, height, size_percentage, monitor):
         with mss() as sct:
-            sct_img = sct.grab(sct.monitors[1])
+            sct_img = sct.grab(sct.monitors[monitor])
         numpy_array = np.array(sct_img)
         resized_array = cv2.resize(numpy_array, dsize=(int(width * size_percentage), int(height * size_percentage)),
                                    interpolation=cv2.INTER_AREA) if size_percentage != 1 else numpy_array
@@ -94,7 +95,7 @@ class VideoClient(Client):
         logger.info('<a href="%s"><video width="%s" autoplay><source src="%s" type="video/webm"></video></a>' %
                     (link, width, link), html=True)
 
-    def benchmark_recording_performance(self, width, height, size_percentage):
+    def benchmark_recording_performance(self, width, height, size_percentage, monitor):
         fps = 0
         last_time = time.time()
         fourcc = cv2.VideoWriter_fourcc(*'VP08')
@@ -105,7 +106,7 @@ class VideoClient(Client):
         # count the number of frames captured in 2 seconds
         while time.time() - last_time < 2:
             fps += 1
-            self.record(vid, width, height, size_percentage)
+            self.record(vid, width, height, size_percentage, monitor)
 
         vid.release()
         cv2.destroyAllWindows()

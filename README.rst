@@ -23,9 +23,6 @@ ScreenCapLibrary has the following extra features:
     - Support for GIFs (duration of 100 seconds or lower depending on system memory)
     - Taking multiple screenshots in a given amount of time
     - Support for partial screen captures
-
-Features to be implemented in the future:
-
     - Configurable monitor screen grabbing for screenshots and recording
 
 Documentation

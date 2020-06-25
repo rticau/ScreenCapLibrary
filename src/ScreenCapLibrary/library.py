@@ -141,7 +141,7 @@ class ScreenCapLibrary:
         """
         return self.client.set_screenshot_directory(path)
 
-    def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px', delay=0):
+    def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px', delay=0, monitor=1):
         """Takes a screenshot in the specified format at library import and
         embeds it into the log file (PNG by default).
 
@@ -168,6 +168,8 @@ class ScreenCapLibrary:
         ``delay`` specifies the waiting time before taking a screenshot. See
         `Time format` section for more information. By default the delay is 0.
 
+        ``monitor`` selects which monitor you want to capture. Use value 0 to capture all.
+
         Examples: (LOGDIR is determined automatically by the library)
         | `Take Screenshot` |                  |            | # LOGDIR/screenshot_1.png (index automatically incremented) |
         | `Take Screenshot` | mypic            |            | # LOGDIR/mypic_1.png (index automatically incremented) |
@@ -179,10 +181,10 @@ class ScreenCapLibrary:
 
         The path where the screenshot is saved is returned.
         """
-        return self.client.take_screenshot(name, format, quality, width, delay)
+        return self.client.take_screenshot(name, format, quality, width, delay, monitor)
 
     def start_gif_recording(self, name="screenshot", size_percentage=0.5,
-                            embed=True, embed_width='800px', optimize=True):
+                            embed=True, embed_width='800px', monitor=1, optimize=True):
         """
         Starts the recording of a GIF in the background with the specified ``name``.
         The recording can be stopped by calling the `Stop Gif Recording` keyword.
@@ -200,6 +202,8 @@ class ScreenCapLibrary:
         ``embed_width`` specifies the size of the screenshot that is
         embedded in the log file.
 
+        ``monitor`` selects which monitor you want to capture. Use value 0 to capture all.
+
         ``optimize`` drastically reduces the size (and quality) of the gif file.
 
         Examples:
@@ -212,7 +216,7 @@ class ScreenCapLibrary:
             raise Exception('A gif recording is already in progress!')
         gif_client = GifClient(self.client.screenshot_module, self.client.screenshot_dir)
         self.started_gifs.append(gif_client)
-        gif_client.start_gif_recording(name, size_percentage, embed, embed_width, optimize)
+        gif_client.start_gif_recording(name, size_percentage, embed, embed_width, monitor, optimize)
 
     def stop_gif_recording(self):
         """
@@ -228,7 +232,7 @@ class ScreenCapLibrary:
             raise error
 
     def take_partial_screenshot(self, name='screenshot', format=None, quality=None,
-                                left=0, top=0, width=700, height=300, embed=True, embed_width='800px'):
+                                left=0, top=0, width=700, height=300, embed=True, embed_width='800px', monitor=1):
         """
         Takes a partial screenshot in the specified format and dimensions at
         library import and embeds it into the log file (PNG by default).
@@ -247,20 +251,22 @@ class ScreenCapLibrary:
         `Boolean arguments` section for more details.
 
         ``embed_width`` specifies the size of the screenshot that is embedded in the log file.
+
+        ``monitor`` selects which monitor you want to capture. Use value 0 to capture all.
         """
         return self.client.take_partial_screenshot(name, format, quality,
-                                                   left, top, width, height, embed, embed_width)
+                                                   left, top, width, height, embed, embed_width, monitor)
 
-    def take_screenshot_without_embedding(self, name="screenshot", format=None, quality=None, delay=0):
+    def take_screenshot_without_embedding(self, name="screenshot", format=None, quality=None, delay=0, monitor=1):
         """Takes a screenshot and links it from the log file.
         This keyword is otherwise identical to `Take Screenshot` but the saved
         screenshot is not embedded into the log file. The screenshot is linked
         so it is nevertheless easily available.
         """
-        return self.client.take_screenshot_without_embedding(name, format, quality, delay)
+        return self.client.take_screenshot_without_embedding(name, format, quality, delay, monitor)
 
     def take_multiple_screenshots(self, name="screenshot", format=None, quality=None,
-                                  screenshot_number=2, delay_time=0):
+                                  screenshot_number=2, delay_time=0, monitor=1):
         """Takes the specified number of screenshots in the specified format
         at library import and embeds it into the log file (PNG by default).
 
@@ -274,9 +280,9 @@ class ScreenCapLibrary:
         screenshot. See `Time format` section for more information. By
         default the delay time is 0.
         """
-        return self.client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time)
+        return self.client.take_multiple_screenshots(name, format, quality, screenshot_number, delay_time, monitor)
 
-    def start_video_recording(self, alias=None, name="recording", fps=None, size_percentage=1, embed=True, embed_width='800px'):
+    def start_video_recording(self, alias=None, name="recording", fps=None, size_percentage=1, embed=True, embed_width='800px', monitor=1):
         """Starts the recording of a video in the background with the specified ``name``.
         The recording can be stopped by calling the `Stop Video Recording` keyword.
 
@@ -297,6 +303,8 @@ class ScreenCapLibrary:
         ``embed_width`` specifies the size of the video record that is
         embedded in the log file.
 
+        ``monitor`` selects which monitor you want to capture. Use value 0 to capture all.
+
         Examples:
         | `Start Video Recording` |            |  # Starts the video recording in background |
         | `Sleep`                 | 10 seconds |  # Here should be the actions that will be recorded |
@@ -311,7 +319,7 @@ class ScreenCapLibrary:
             raise Exception('Size percentage should take values > than 0 and <= to 1.')
         video_client = VideoClient(self.client.screenshot_module, self.client.screenshot_dir, fps)
         self.started_recordings.append(video_client)
-        video_client.start_video_recording(alias, name, size_percentage, embed, embed_width)
+        video_client.start_video_recording(alias, name, size_percentage, embed, embed_width, monitor)
 
     def stop_all_video_recordings(self):
         """Stops all the video recordings and generates the files in WebM format. If ``embed`` argument
