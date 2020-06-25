@@ -211,7 +211,9 @@ class Client:
             try:
                 original_image = self.take_screenshot(name, format, quality, width, 0, monitor)
                 image = Image.open(original_image)
-                box = (left, top, width, height)
+                right = left + width
+                bottom = top + height
+                box = (left, top, right, bottom)
                 cropped_image = image.crop(box)
                 os.remove(original_image)
                 path = self._save_screenshot_path(basename=name, format=format)
