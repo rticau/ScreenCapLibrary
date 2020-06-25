@@ -37,18 +37,13 @@ the same functionality, except that the screenshots are captured in PNG by defau
 <li><p>Taking screenshots in PNG, JPG/JPEG, GIF and WebP formats</p></li>
 <li><p>Video capture in WebM format, embeddable in log files</p></li>
 <li><p>Adjusting the compression/quality of the screenshots</p></li>
-<li><p>Support for GIFs (duration of 100 seconds or lower depending on system memory)</p></li>
+<li><p>Support for GIFs</p></li>
 <li><p>Taking multiple screenshots in a given amount of time</p></li>
 <li><p>Support for partial screen captures</p></li>
+<li><p>Configurable monitor screen grabbing for screenshots and recording</p></li>
 </ul>
 </dd>
 </dl>
-<p>Features to be implemented in the future:</p>
-<blockquote>
-<ul class="simple">
-<li><p>Configurable monitor screen grabbing for screenshots and recording</p></li>
-</ul>
-</blockquote>
 </div>
 <div class="section" id="documentation">
 <h1><a class="toc-backref" href="#id3">Documentation</a></h1>
@@ -62,7 +57,7 @@ about the library in general.</p>
 <p>The recommended installation method is using <a class="reference external" href="http://pip-installer.org">pip</a>:</p>
 <pre class="literal-block">pip install --upgrade robotframework-screencaplibrary</pre>
 <p>Running this command installs also the latest Robot Framework, <a class="reference external" href="https://python-mss.readthedocs.io">mss</a>,
-<a class="reference external" href="https://pillow.readthedocs.io">pillow</a> and <a class="reference external" href="https://opencv-python-tutroals.readthedocs.io">opencv-python</a> versions. The minimum supported mss version is
+<a class="reference external" href="https://pillow.readthedocs.io">pillow</a>, <a class="reference external" href="https://opencv-python-tutroals.readthedocs.io">opencv-python</a> and <a class="reference external" href="https://imageio.github.io/">imageio</a> versions. The minimum supported mss version is
 <span class="docutils literal">3.2.1</span> and the minimum supported pillow version is <span class="docutils literal">5.2.0</span>.
 For video capture at least version <span class="docutils literal">4.0.0.21</span> of <a class="reference external" href="https://opencv-python-tutroals.readthedocs.io">opencv-python</a> is required.
 The <span class="docutils literal"><span class="pre">--upgrade</span></span> option can be omitted when installing the library for the
