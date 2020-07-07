@@ -9,6 +9,10 @@ from mss import mss
 from robot.utils import get_link_path, is_truthy
 from robot.api import logger
 
+import pyautogui
+x_list = [0,8,6,14,12,4,2,0]
+y_list = [0,2,4,12,14,6,8,0]
+
 try:
     import cv2
     import numpy as np
@@ -84,10 +88,21 @@ class VideoClient(Client):
     def record(vid, width, height, size_percentage, monitor):
         with mss() as sct:
             sct_img = sct.grab(sct.monitors[monitor])
+            mouse_x,mouse_y = pyautogui.position()
         numpy_array = np.array(sct_img)
         resized_array = cv2.resize(numpy_array, dsize=(int(width * size_percentage), int(height * size_percentage)),
                                    interpolation=cv2.INTER_AREA) if size_percentage != 1 else numpy_array
         frame = cv2.cvtColor(resized_array, cv2.COLOR_RGBA2RGB)
+
+        # Synthesize mouse pointer
+        # the factor is used to zoom in/out the cursor size
+        factor = 2
+        x_this = [factor*x+mouse_x for x in x_list]
+        y_this = [factor*y+mouse_y for y in y_list]
+        points = list(zip(x_this,y_this))
+        points = np.array(points, 'int32')
+        cv2.fillPoly(frame,[points],color=[255,255,255])
+ 
         vid.write(frame)
 
     def _embed_video(self, path, width):
