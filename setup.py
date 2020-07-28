@@ -6,7 +6,7 @@ from os.path import abspath, dirname, join
 from setuptools import setup
 
 CURDIR = dirname(abspath(__file__))
-REQUIREMENTS = ['robotframework >= 3.0', 'mss >= 3.2.1', 'pillow >= 5.2.0', 'opencv-python >= 4.0.0.21',
+REQUIREMENTS = ['robotframework >= 3.0', 'pillow >= 5.2.0', 'opencv-python >= 4.0.0.21',
                 'imageio==2.6.1']
 with open(join(CURDIR, 'src', 'ScreenCapLibrary', 'version.py')) as f:
     VERSION = re.search("\nVERSION = '(.*)'", f.read()).group(1)
@@ -14,14 +14,20 @@ with open(join(CURDIR, 'README.rst')) as f:
     DESCRIPTION = f.read()
 if sys.version_info[0] < 3:
     REQUIREMENTS.append('futures >= 3.2.0')
+    REQUIREMENTS.append('mss == 4.0.3')
+else:
+    REQUIREMENTS.append('mss >= 3.2.1')
 CLASSIFIERS = '''
 Development Status :: 5 - Production/Stable
 License :: OSI Approved :: Apache Software License
 Operating System :: OS Independent
 Programming Language :: Python
 Programming Language :: Python :: 2.7
+Programming Language :: Python :: 3.4
+Programming Language :: Python :: 3.5
 Programming Language :: Python :: 3.6
 Programming Language :: Python :: 3.7
+Programming Language :: Python :: 3.8
 Topic :: Software Development :: Testing
 Framework :: Robot Framework
 Framework :: Robot Framework :: Library

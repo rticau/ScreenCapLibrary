@@ -105,8 +105,6 @@ For this to work you need to have the following dependencies installed.
 
     sudo apt install python-gi python-gi-cairo python3-gi python3-gi-cairo gir1.2-gtk-3.0
 
-Note: If you encounter problems with PyGTK when running with Python 3, install the ``python-gi`` packages versions 3.20 or 3.30.
-
 Support
 -------
 
