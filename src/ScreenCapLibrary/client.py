@@ -209,7 +209,7 @@ class Client:
             path = _take_partial_gtk_screenshot(path, format, quality, left, top, width, height, monitor)
         else:
             try:
-                original_image = self.take_screenshot(name, format, quality, width, 0, monitor)
+                original_image = self._take_screenshot_client(name, format, quality, monitor)
                 image = Image.open(original_image)
                 right = left + width
                 bottom = top + height
