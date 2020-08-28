@@ -178,16 +178,16 @@ def _take_partial_gtk_screenshot_py3(path, format, quality, left, top, width, he
     return path
 
 
-def _record_gtk(path, fps, size_percentage, stop, monitor):
+def _record_gtk(path, fps, size_percentage, stop, pause, monitor):
     if not gdk and not Gdk:
         raise RuntimeError('PyGTK not installed/supported on this platform.')
     if gdk:
-        return _record_gtk_py2(path, fps, size_percentage, stop, monitor)
+        return _record_gtk_py2(path, fps, size_percentage, stop, pause, monitor)
     elif Gdk:
-        return _record_gtk_py3(path, fps, size_percentage, stop, monitor)
+        return _record_gtk_py3(path, fps, size_percentage, stop, pause, monitor)
 
 
-def _record_gtk_py2(path, fps, size_percentage, stop, monitor):
+def _record_gtk_py2(path, fps, size_percentage, stop, pause, monitor):
     window = gdk.get_default_root_window()
     if not window:
         raise Exception('Monitor not available.')
@@ -202,6 +202,8 @@ def _record_gtk_py2(path, fps, size_percentage, stop, monitor):
             fps = benchmark_recording_performance_gtk(width, height, size_percentage, monitor)
         vid = cv2.VideoWriter('%s' % path, fourcc, fps, (int(width * size_percentage), int(height * size_percentage)))
     while not stop.isSet():
+        if pause.isSet():
+            continue
         record_gtk2(vid, width, height, size_percentage, monitor)
     vid.release()
     cv2.destroyAllWindows()
@@ -217,7 +219,7 @@ def record_gtk2(vid, width, height, size_percentage, monitor):
     vid.write(frame)
 
 
-def _record_gtk_py3(path, fps, size_percentage, stop, monitor):
+def _record_gtk_py3(path, fps, size_percentage, stop, pause, monitor):
     window = Gdk.get_default_root_window()
     if not window:
         raise Exception('Monitor not available.')
@@ -233,6 +235,8 @@ def _record_gtk_py3(path, fps, size_percentage, stop, monitor):
             fps = benchmark_recording_performance_gtk(width, height, size_percentage, monitor)
         vid = cv2.VideoWriter('%s' % path, fourcc, fps, (int(width * size_percentage), int(height * size_percentage)))
     while not stop.isSet():
+        if pause.isSet():
+            continue
         record_gtk3(vid, width, height, size_percentage, monitor)
     vid.release()
     cv2.destroyAllWindows()

@@ -1,7 +1,7 @@
 *** Settings ***
 Suite Setup    Cleanup Files
 Test Setup     Save Start Time
-Test Teardown  Cleanup Files
+#Test Teardown  Cleanup Files
 Resource       resources/common.robot
 
 *** Variables ***
@@ -282,6 +282,15 @@ Close All Recordings With Same Alias
     Videos Should Exist  ${OUTPUTDIR}  @{paths}
     Video Should Exist  ${FIRST_VIDEO_FILE}
     Video Should Exist  ${SECOND_VIDEO_FILE}
+
+Pause And Resume Video
+    ScreenCapLibrary.Start Video Recording  1
+    Sleep  10s
+    ScreenCapLibrary.Pause Video Recording  1
+    Sleep  10s
+    ScreenCapLibrary.Resume Video Recording  1
+    Sleep  10s
+    ScreenCapLibrary.Stop Video Recording  1
 
 *** Keywords ***
 Take Screenshot And Verify
