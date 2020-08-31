@@ -295,11 +295,11 @@ Pause And Resume Video
 Pause And Resume Video Gtk
     ScreenCapLibraryGtk.Start Video Recording  1
     ScreenCapLibraryGtk.Start Video Recording  1
-    Sleep  10s
+    Sleep  3s
     ScreenCapLibraryGtk.Pause Video Recording  1
-    Sleep  15s
+    Sleep  5s
     ScreenCapLibraryGtk.Resume Video Recording  1
-    Sleep  10s
+    Sleep  3s
     ScreenCapLibraryGtk.Stop Video Recording  1
 
 *** Keywords ***
