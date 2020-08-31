@@ -380,6 +380,8 @@ class ScreenCapLibrary:
                 for recording in self.started_recordings:
                     if recording.alias == alias:
                         recording.pause_video_recording()
+            else:
+                self.started_recordings[-1].pause_video_recording()
         except RuntimeError as error:
             raise error
 
@@ -398,6 +400,7 @@ class ScreenCapLibrary:
                 for recording in self.started_recordings:
                     if recording.alias == alias:
                         recording.resume_video_recording()
-
+            else:
+                self.started_recordings[-1].resume_video_recording()
         except RuntimeError as error:
             raise error

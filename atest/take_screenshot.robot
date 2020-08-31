@@ -1,7 +1,7 @@
 *** Settings ***
 Suite Setup    Cleanup Files
 Test Setup     Save Start Time
-#Test Teardown  Cleanup Files
+Test Teardown  Cleanup Files
 Resource       resources/common.robot
 
 *** Variables ***
@@ -285,12 +285,22 @@ Close All Recordings With Same Alias
 
 Pause And Resume Video
     ScreenCapLibrary.Start Video Recording  1
-    Sleep  10s
+    Sleep  3s
     ScreenCapLibrary.Pause Video Recording  1
-    Sleep  10s
+    Sleep  5s
     ScreenCapLibrary.Resume Video Recording  1
-    Sleep  10s
+    Sleep  3s
     ScreenCapLibrary.Stop Video Recording  1
+
+Pause And Resume Video Gtk
+    ScreenCapLibraryGtk.Start Video Recording  1
+    ScreenCapLibraryGtk.Start Video Recording  1
+    Sleep  10s
+    ScreenCapLibraryGtk.Pause Video Recording  1
+    Sleep  15s
+    ScreenCapLibraryGtk.Resume Video Recording  1
+    Sleep  10s
+    ScreenCapLibraryGtk.Stop Video Recording  1
 
 *** Keywords ***
 Take Screenshot And Verify
