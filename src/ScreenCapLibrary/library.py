@@ -371,7 +371,7 @@ class ScreenCapLibrary:
         alias all of them will be paused.
         """
         if len(self.started_recordings) == 0:
-            raise Exception('No video recordings were started! Please start a video recording and that pause it!')
+            raise Exception('No video recordings were started! Please start a video recording and than pause it!')
         try:
             if alias:
                 aliases = [x.alias for x in self.started_recordings]
@@ -391,7 +391,7 @@ class ScreenCapLibrary:
          will be resumed.
         """
         if len(self.started_recordings) == 0:
-            raise Exception('No video recordings were started! Please start a video recording and that pause it!')
+            raise Exception('No video recordings were started! Please start a video recording and than pause it!')
         try:
             if alias:
                 aliases = [x.alias for x in self.started_recordings]
