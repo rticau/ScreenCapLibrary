@@ -364,3 +364,43 @@ class ScreenCapLibrary:
         except RuntimeError as error:
             del self.started_recordings[:]
             raise error
+
+    def pause_video_recording(self, alias=None):
+        """Temporarily stops the video recording corresponding to the given ``alias``. If no ``alias`` is specified the
+        last started recording would be paused. If there are more recordings with the same
+        alias all of them will be paused.
+        """
+        if len(self.started_recordings) == 0:
+            raise Exception('No video recordings were started! Please start a video recording and then pause it!')
+        try:
+            if alias:
+                aliases = [x.alias for x in self.started_recordings]
+                if alias not in aliases:
+                    raise Exception('No video recording with alias `%s` found!' % alias)
+                for recording in self.started_recordings:
+                    if recording.alias == alias:
+                        recording.pause_video_recording()
+            else:
+                self.started_recordings[-1].pause_video_recording()
+        except RuntimeError as error:
+            raise error
+
+    def resume_video_recording(self, alias=None):
+        """Resumes the previous paused video recording corresponding to the given ``alias``. If no ``alias`` is
+        specified the last paused recording would be resumed. If there are more recordings with the same alias all of them
+         will be resumed.
+        """
+        if len(self.started_recordings) == 0:
+            raise Exception('No video recordings were started! Please start a video recording and then pause it!')
+        try:
+            if alias:
+                aliases = [x.alias for x in self.started_recordings]
+                if alias not in aliases:
+                    raise Exception('No video recording with alias `%s` found!' % alias)
+                for recording in self.started_recordings:
+                    if recording.alias == alias:
+                        recording.resume_video_recording()
+            else:
+                self.started_recordings[-1].resume_video_recording()
+        except RuntimeError as error:
+            raise error

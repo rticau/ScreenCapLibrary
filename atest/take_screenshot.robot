@@ -283,6 +283,25 @@ Close All Recordings With Same Alias
     Video Should Exist  ${FIRST_VIDEO_FILE}
     Video Should Exist  ${SECOND_VIDEO_FILE}
 
+Pause And Resume Video
+    ScreenCapLibrary.Start Video Recording  1
+    Sleep  3s
+    ScreenCapLibrary.Pause Video Recording  1
+    Sleep  5s
+    ScreenCapLibrary.Resume Video Recording  1
+    Sleep  3s
+    ScreenCapLibrary.Stop Video Recording  1
+
+Pause And Resume Video Gtk
+    ScreenCapLibraryGtk.Start Video Recording  1
+    ScreenCapLibraryGtk.Start Video Recording  1
+    Sleep  3s
+    ScreenCapLibraryGtk.Pause Video Recording  1
+    Sleep  5s
+    ScreenCapLibraryGtk.Resume Video Recording  1
+    Sleep  3s
+    ScreenCapLibraryGtk.Stop Video Recording  1
+
 *** Keywords ***
 Take Screenshot And Verify
     [Arguments]  @{expected files}

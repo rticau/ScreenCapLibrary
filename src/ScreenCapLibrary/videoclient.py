@@ -58,7 +58,7 @@ class VideoClient(Client):
     @run_in_background
     def capture_screen(self, path, fps, size_percentage, monitor):
         if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
-            _record_gtk(path, fps, size_percentage, self._stop_condition, monitor)
+            _record_gtk(path, fps, size_percentage, self._stop_condition, self._pause_condition, monitor)
         else:
             self._record_mss(path, fps, size_percentage, monitor)
 
@@ -76,6 +76,8 @@ class VideoClient(Client):
             vid = cv2.VideoWriter('%s' % path, fourcc, fps,
                                   (int(width * size_percentage), int(height * size_percentage)))
         while not self._stop_condition.isSet():
+            if self._pause_condition.isSet():
+                continue
             self.record(vid, width, height, size_percentage, monitor)
         vid.release()
         cv2.destroyAllWindows()
@@ -114,3 +116,9 @@ class VideoClient(Client):
             os.remove('benchmark_%s.webm' % last_time)  # delete the dummy file
         logger.info('Automatically setting a fps of %s' % str(fps / 2))
         return fps / 2  # return the number of frames per second
+
+    def pause_video_recording(self):
+        self._pause_thread()
+
+    def resume_video_recording(self):
+        self._resume_thread()
