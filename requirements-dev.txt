@@ -4,4 +4,4 @@ mss==4.0.3
 robotframework
 robotstatuschecker
 pillow
-opencv-python
+opencv-python == 4.2.0.32
