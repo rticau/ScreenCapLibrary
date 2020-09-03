@@ -367,11 +367,11 @@ class ScreenCapLibrary:
 
     def pause_video_recording(self, alias=None):
         """Temporarily stops the video recording corresponding to the given ``alias``. If no ``alias`` is specified the
-        last opened record would be paused. If there are more recordings with the same
+        last started recording would be paused. If there are more recordings with the same
         alias all of them will be paused.
         """
         if len(self.started_recordings) == 0:
-            raise Exception('No video recordings was started! Please start a video video recording and that pause it!')
+            raise Exception('No video recordings were started! Please start a video recording and that pause it!')
         try:
             if alias:
                 aliases = [x.alias for x in self.started_recordings]
@@ -387,11 +387,11 @@ class ScreenCapLibrary:
 
     def resume_video_recording(self, alias=None):
         """Resumes the previous paused video recording corresponding to the given ``alias``. If no ``alias`` is
-        specified the last paused record would be resumed. If there are more recordings with the same alias all of them
+        specified the last paused recording would be resumed. If there are more recordings with the same alias all of them
          will be resumed.
         """
         if len(self.started_recordings) == 0:
-            raise Exception('No video recordings was started! Please start a video video recording and that pause it!')
+            raise Exception('No video recordings were started! Please start a video recording and that pause it!')
         try:
             if alias:
                 aliases = [x.alias for x in self.started_recordings]
