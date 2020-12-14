@@ -22,10 +22,11 @@ cursor_y_list = [0, 2, 4, 12, 14, 6, 8, 0]
 
 class VideoClient(Client):
 
-    def __init__(self, screenshot_module, screenshot_directory, fps):
+    def __init__(self, screenshot_module, screenshot_directory, fps, display_cursor):
         Client.__init__(self)
         self.screenshot_module = screenshot_module
         self._given_screenshot_dir = _norm_path(screenshot_directory)
+        self.display_cursor = is_truthy(display_cursor)
         self._stop_condition = threading.Event()
         self.alias = None
         try:
@@ -62,7 +63,8 @@ class VideoClient(Client):
     @run_in_background
     def capture_screen(self, path, fps, size_percentage, monitor):
         if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
-            _record_gtk(path, fps, size_percentage, self._stop_condition, self._pause_condition, monitor)
+            _record_gtk(path, fps, size_percentage, self._stop_condition, self._pause_condition, monitor,
+                        self.display_cursor)
         else:
             self._record_mss(path, fps, size_percentage, monitor)
 
@@ -82,24 +84,26 @@ class VideoClient(Client):
         while not self._stop_condition.isSet():
             if self._pause_condition.isSet():
                 continue
-            self.record(vid, width, height, size_percentage, monitor)
+            self.record(vid, width, height, size_percentage, monitor, display_cursor=self.display_cursor)
         vid.release()
         cv2.destroyAllWindows()
 
     @staticmethod
-    def record(vid, width, height, size_percentage, monitor):
+    def record(vid, width, height, size_percentage, monitor, display_cursor=False):
         with mss() as sct:
             sct_img = sct.grab(sct.monitors[monitor])
-            mouse_x, mouse_y = pyautogui.position()
+            if display_cursor:
+                mouse_x, mouse_y = pyautogui.position()
         numpy_array = np.array(sct_img)
         resized_array = cv2.resize(numpy_array, dsize=(int(width * size_percentage), int(height * size_percentage)),
                                    interpolation=cv2.INTER_AREA) if size_percentage != 1 else numpy_array
         frame = cv2.cvtColor(resized_array, cv2.COLOR_RGBA2RGB)
-        cursor_x = [x+mouse_x for x in cursor_x_list]
-        cursor_y = [y+mouse_y for y in cursor_y_list]
-        cursor_points = list(zip(cursor_x, cursor_y))
-        cursor_points = np.array(cursor_points, 'int32')
-        cv2.fillPoly(frame, [cursor_points], color=[0, 255, 255])
+        if display_cursor:
+            cursor_x = [x+mouse_x for x in cursor_x_list]
+            cursor_y = [y+mouse_y for y in cursor_y_list]
+            cursor_points = list(zip(cursor_x, cursor_y))
+            cursor_points = np.array(cursor_points, 'int32')
+            cv2.fillPoly(frame, [cursor_points], color=[0, 255, 255])
         vid.write(frame)
 
     def _embed_video(self, path, width):
@@ -118,7 +122,7 @@ class VideoClient(Client):
         # count the number of frames captured in 2 seconds
         while time.time() - last_time < 2:
             fps += 1
-            self.record(vid, width, height, size_percentage, monitor)
+            self.record(vid, width, height, size_percentage, monitor, self.display_cursor)
 
         vid.release()
         cv2.destroyAllWindows()
