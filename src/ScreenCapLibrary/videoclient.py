@@ -11,7 +11,7 @@ from robot.api import logger
 
 try:
     import pyautogui
-except ImportError:
+except:
     pass
 
 try:

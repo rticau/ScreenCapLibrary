@@ -19,7 +19,7 @@ import numpy as np
 
 try:
     import pyautogui
-except ImportError:
+except:
     pass
 
 from .utils import suppress_stderr
