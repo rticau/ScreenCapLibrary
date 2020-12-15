@@ -16,7 +16,12 @@ import cv2
 import os
 import time
 import numpy as np
-import pyautogui
+
+try:
+    import pyautogui
+except ImportError:
+    pass
+
 from .utils import suppress_stderr
 from robot.api import logger
 

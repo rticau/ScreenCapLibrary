@@ -1,7 +1,6 @@
 import os
 import threading
 import time
-import pyautogui
 
 from .client import Client, run_in_background
 from .pygtk import _record_gtk, benchmark_recording_performance_gtk, _take_gtk_screen_size
@@ -9,6 +8,11 @@ from .utils import _norm_path, suppress_stderr
 from mss import mss
 from robot.utils import get_link_path, is_truthy
 from robot.api import logger
+
+try:
+    import pyautogui
+except ImportError:
+    pass
 
 try:
     import cv2
