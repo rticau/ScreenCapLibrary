@@ -16,6 +16,12 @@ import cv2
 import os
 import time
 import numpy as np
+
+try:
+    import pyautogui
+except:
+    pass
+
 from .utils import suppress_stderr
 from robot.api import logger
 
@@ -39,6 +45,9 @@ try:
     from gi.repository import GdkPixbuf
 except ImportError:
     GdkPixbuf = None
+
+cursor_x_list = [0, 8, 6, 14, 12, 4, 2, 0]
+cursor_y_list = [0, 2, 4, 12, 14, 6, 8, 0]
 
 
 def _gtk_quality(format, quality):
@@ -178,13 +187,13 @@ def _take_partial_gtk_screenshot_py3(path, format, quality, left, top, width, he
     return path
 
 
-def _record_gtk(path, fps, size_percentage, stop, pause, monitor):
+def _record_gtk(path, fps, size_percentage, stop, pause, monitor, display_cursor):
     if not gdk and not Gdk:
         raise RuntimeError('PyGTK not installed/supported on this platform.')
     if gdk:
         return _record_gtk_py2(path, fps, size_percentage, stop, pause, monitor)
     elif Gdk:
-        return _record_gtk_py3(path, fps, size_percentage, stop, pause, monitor)
+        return _record_gtk_py3(path, fps, size_percentage, stop, pause, monitor, display_cursor)
 
 
 def _record_gtk_py2(path, fps, size_percentage, stop, pause, monitor):
@@ -219,7 +228,7 @@ def record_gtk2(vid, width, height, size_percentage, monitor):
     vid.write(frame)
 
 
-def _record_gtk_py3(path, fps, size_percentage, stop, pause, monitor):
+def _record_gtk_py3(path, fps, size_percentage, stop, pause, monitor, display_cursor):
     window = Gdk.get_default_root_window()
     if not window:
         raise Exception('Monitor not available.')
@@ -232,23 +241,31 @@ def _record_gtk_py3(path, fps, size_percentage, stop, pause, monitor):
 
     with suppress_stderr():
         if not fps:
-            fps = benchmark_recording_performance_gtk(width, height, size_percentage, monitor)
+            fps = benchmark_recording_performance_gtk(width, height, size_percentage, monitor, display_cursor)
         vid = cv2.VideoWriter('%s' % path, fourcc, fps, (int(width * size_percentage), int(height * size_percentage)))
     while not stop.isSet():
         if pause.isSet():
             continue
-        record_gtk3(vid, width, height, size_percentage, monitor)
+        record_gtk3(vid, width, height, size_percentage, monitor, display_cursor)
     vid.release()
     cv2.destroyAllWindows()
 
 
-def record_gtk3(vid, width, height, size_percentage, monitor):
+def record_gtk3(vid, width, height, size_percentage, monitor, display_cursor=False):
     pb = _grab_screenshot_gtk_py3(monitor)
+    if display_cursor:
+        mouse_x, mouse_y = pyautogui.position()
     numpy_array = _convert_pixbuf_to_numpy(pb)
     resized_array = cv2.resize(numpy_array, dsize=(int(width * size_percentage), int(height * size_percentage)),
                                interpolation=cv2.INTER_AREA) \
         if size_percentage != 1 else numpy_array
     frame = cv2.cvtColor(resized_array, cv2.COLOR_RGB2BGR)
+    if display_cursor:
+        cursor_x = [x+mouse_x for x in cursor_x_list]
+        cursor_y = [y+mouse_y for y in cursor_y_list]
+        cursor_points = list(zip(cursor_x, cursor_y))
+        cursor_points = np.array(cursor_points, 'int32')
+        cv2.fillPoly(frame, [cursor_points], color=[0, 255, 255])
     vid.write(frame)
 
 
@@ -264,7 +281,7 @@ def _convert_pixbuf_to_numpy(pixbuf):
         return b.reshape((h, w, c))
 
 
-def benchmark_recording_performance_gtk(width, height, size_percentage, monitor):
+def benchmark_recording_performance_gtk(width, height, size_percentage, monitor, display_cursor=False):
     fps = 0
     last_time = time.time()
     fourcc = cv2.VideoWriter_fourcc(*'VP08')
@@ -275,7 +292,7 @@ def benchmark_recording_performance_gtk(width, height, size_percentage, monitor)
     while time.time() - last_time < 2:
         fps += 1
         if Gdk:
-            record_gtk3(vid, width, height, size_percentage, monitor)
+            record_gtk3(vid, width, height, size_percentage, monitor, display_cursor)
         else:
             record_gtk2(vid, width, height, size_percentage, monitor)
 

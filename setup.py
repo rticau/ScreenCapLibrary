@@ -20,6 +20,7 @@ else:
     REQUIREMENTS.append('imageio >= 2.6.1')
     REQUIREMENTS.append('mss >= 4.0.3')
     REQUIREMENTS.append('opencv-python >= 4.2.0.32')
+    REQUIREMENTS.append('pyautogui >= 0.9.52')
 CLASSIFIERS = '''
 Development Status :: 5 - Production/Stable
 License :: OSI Approved :: Apache Software License

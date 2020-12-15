@@ -92,7 +92,8 @@ class ScreenCapLibrary:
     started_recordings = []
     started_gifs = []
 
-    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0):
+    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0,
+                 display_cursor=False):
         """
         ``screenshot_module`` specifies the module or tool to use when taking screenshots using this library.
         If no tool or module is specified, ``mss`` will be used by default. For running
@@ -114,6 +115,13 @@ class ScreenCapLibrary:
         ``delay`` specifies the waiting time before taking a screenshot. See
         `Time format` section for more information. By default the delay is 0.
 
+        ``display_cursor`` displays a cursor which copies the mouse
+        movements in order to perform an enhanced visualization of mouse
+        position. By default ``display_cursor`` is set to False. See
+        `Boolean arguments` section for more details.
+
+        ``display_cursor`` is new in ScreenCapLibrary 1.5.0.
+
         Examples (use only one of these):
         | =Setting= |  =Value=   |  =Value=                        |
         | Library   | Screenshot |                                 |
@@ -128,7 +136,8 @@ class ScreenCapLibrary:
             screenshot_directory=screenshot_directory,
             format=format,
             quality=quality,
-            delay=delay
+            delay=delay,
+            display_cursor=display_cursor
         )
 
     def set_screenshot_directory(self, path):
@@ -317,7 +326,7 @@ class ScreenCapLibrary:
         """
         if size_percentage <= 0 or size_percentage > 1:
             raise Exception('Size percentage should take values > than 0 and <= to 1.')
-        video_client = VideoClient(self.client.screenshot_module, self.client.screenshot_dir, fps)
+        video_client = VideoClient(self.client.screenshot_module, self.client.screenshot_dir, fps, self.client.cursor)
         self.started_recordings.append(video_client)
         video_client.start_video_recording(alias, name, size_percentage, embed, embed_width, monitor)
 

@@ -47,12 +47,14 @@ def run_in_background(f):
 
 class Client:
 
-    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0):
+    def __init__(self, screenshot_module=None, screenshot_directory=None, format='png', quality=50, delay=0,
+                 display_cursor=False):
         self.screenshot_module = screenshot_module
         self._given_screenshot_dir = _norm_path(screenshot_directory)
         self._format = format
         self._quality = quality
         self._delay = delay
+        self._display_cursor = display_cursor
         self.frames = []
         self.name = 'screenshot'
         self.path = None
@@ -61,6 +63,10 @@ class Client:
         self._stop_condition = threading.Event()
         self._pause_condition = threading.Event()
         self.futures = None
+
+    @property
+    def cursor(self):
+        return self._display_cursor
 
     @property
     def screenshot_dir(self):
