@@ -125,28 +125,27 @@ def _take_gtk_screenshot_py3(path, format, quality, monitor):
 def _take_gtk_screen_size(monitor):
     if not gdk and not Gdk:
         raise RuntimeError('PyGTK not installed/supported on this platform.')
-    if gdk:
-        window = get_default_root_window()
-        if not window:
-            raise RuntimeError('Taking screenshot failed.')
-        if monitor == 0:
-            return get_window_size(window)
-        else:
-            monitors = _get_monitors(window)
-            return monitors[monitor - 1].width, monitors[monitor - 1].height
+    window = get_default_root_window()
+    if not window:
+        raise RuntimeError('Taking screenshot failed.')
+    if monitor == 0:
+        return get_window_size(window)
+    else:
+        monitors = _get_monitors(window)
+        return monitors[monitor - 1].width, monitors[monitor - 1].height
 
 
 def get_default_root_window():
     if gdk:
         return gdk.get_default_root_window()
-    else:
+    elif Gdk:
         return Gdk.get_default_root_window()
 
 
 def get_window_size(window):
     if gdk:
         return window.get_size()
-    else:
+    elif Gdk:
         return window.get_width(), window.get_height()
 
 
@@ -208,10 +207,10 @@ def _record_gtk(path, fps, size_percentage, stop, pause, monitor, display_cursor
     while not stop.isSet():
         if pause.isSet():
             continue
-        if Gdk:
-            record_gtk3(vid, width, height, size_percentage, monitor, display_cursor)
-        else:
+        if gdk:
             record_gtk2(vid, width, height, size_percentage, monitor)
+        elif Gdk:
+            record_gtk3(vid, width, height, size_percentage, monitor, display_cursor)
     vid.release()
     cv2.destroyAllWindows()
 
