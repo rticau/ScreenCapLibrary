@@ -30,7 +30,7 @@ from robot.api import logger
 from robot.utils import get_link_path, abspath, timestr_to_secs, is_truthy
 from robot.libraries.BuiltIn import BuiltIn
 from .pygtk import _take_gtk_screenshot, _take_partial_gtk_screenshot, _take_gtk_screen_size, _grab_gtk_pb
-from .utils import _norm_path, _compression_value_conversion, _pil_quality_conversion
+from .utils import _norm_path, _compression_value_conversion, _pil_quality_conversion, is_pygtk
 
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures.thread import _threads_queues
@@ -122,7 +122,7 @@ class Client:
     def _take_screenshot_client(self, name, format, quality, monitor):
         format = (format or self._format).lower()
         quality = quality or self._quality
-        if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
+        if is_pygtk(self.screenshot_module):
             return self._take_screenshot_client_gtk(name, format, quality, monitor)
         else:
             return self._take_screenshot_client_mss(name, format, quality, monitor)
@@ -171,7 +171,7 @@ class Client:
 
     @run_in_background
     def _take_multiple_screenshots(self, name, format, quality, delay, shot_number, monitor):
-        if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
+        if is_pygtk(self.screenshot_module):
             self._take_multiple_screenshots_gtk(delay, shot_number, monitor)
         else:
             self._take_multiple_screenshots_mss(delay, shot_number, monitor)
@@ -208,7 +208,7 @@ class Client:
         format = (format or self._format).lower()
         quality = quality or self._quality
 
-        if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
+        if is_pygtk(self.screenshot_module):
             format = 'jpeg' if format == 'jpg' else format
             if format == 'png':
                 quality = _compression_value_conversion(quality)

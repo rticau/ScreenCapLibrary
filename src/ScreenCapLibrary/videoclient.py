@@ -4,7 +4,7 @@ import time
 
 from .client import Client, run_in_background
 from .pygtk import _record_gtk, benchmark_recording_performance_gtk, _take_gtk_screen_size
-from .utils import _norm_path, suppress_stderr
+from .utils import _norm_path, suppress_stderr, resize_array, draw_cursor, is_pygtk
 from mss import mss
 from robot.utils import get_link_path, is_truthy
 from robot.api import logger
@@ -20,9 +20,6 @@ try:
 except ImportError:
     raise ImportError('Importing cv2 failed. Make sure you have opencv-python installed.')
 
-cursor_x_list = [0, 8, 6, 14, 12, 4, 2, 0]
-cursor_y_list = [0, 2, 4, 12, 14, 6, 8, 0]
-
 
 class VideoClient(Client):
 
@@ -36,7 +33,7 @@ class VideoClient(Client):
         try:
             if not fps:
                 with suppress_stderr():
-                    if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
+                    if is_pygtk(self.screenshot_module):
                         width, height = _take_gtk_screen_size(monitor=1)
                         self.fps = benchmark_recording_performance_gtk(width, height, 1, monitor=1)
                     else:
@@ -66,7 +63,7 @@ class VideoClient(Client):
 
     @run_in_background
     def capture_screen(self, path, fps, size_percentage, monitor):
-        if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
+        if is_pygtk(self.screenshot_module):
             _record_gtk(path, fps, size_percentage, self._stop_condition, self._pause_condition, monitor,
                         self.display_cursor)
         else:
@@ -99,15 +96,10 @@ class VideoClient(Client):
             if display_cursor:
                 mouse_x, mouse_y = pyautogui.position()
         numpy_array = np.array(sct_img)
-        resized_array = cv2.resize(numpy_array, dsize=(int(width * size_percentage), int(height * size_percentage)),
-                                   interpolation=cv2.INTER_AREA) if size_percentage != 1 else numpy_array
+        resized_array = resize_array(width, height, numpy_array, size_percentage)
         frame = cv2.cvtColor(resized_array, cv2.COLOR_RGBA2RGB)
         if display_cursor:
-            cursor_x = [x+mouse_x for x in cursor_x_list]
-            cursor_y = [y+mouse_y for y in cursor_y_list]
-            cursor_points = list(zip(cursor_x, cursor_y))
-            cursor_points = np.array(cursor_points, 'int32')
-            cv2.fillPoly(frame, [cursor_points], color=[0, 255, 255])
+            draw_cursor(frame, mouse_x, mouse_y)
         vid.write(frame)
 
     def _embed_video(self, path, width):

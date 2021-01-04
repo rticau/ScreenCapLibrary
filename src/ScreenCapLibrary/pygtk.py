@@ -22,7 +22,7 @@ try:
 except:
     pass
 
-from .utils import suppress_stderr
+from .utils import suppress_stderr, resize_array, draw_cursor
 from robot.api import logger
 
 try:
@@ -45,9 +45,6 @@ try:
     from gi.repository import GdkPixbuf
 except ImportError:
     GdkPixbuf = None
-
-cursor_x_list = [0, 8, 6, 14, 12, 4, 2, 0]
-cursor_y_list = [0, 2, 4, 12, 14, 6, 8, 0]
 
 
 def _gtk_quality(format, quality):
@@ -129,23 +126,28 @@ def _take_gtk_screen_size(monitor):
     if not gdk and not Gdk:
         raise RuntimeError('PyGTK not installed/supported on this platform.')
     if gdk:
-        window = gdk.get_default_root_window()
+        window = get_default_root_window()
         if not window:
             raise RuntimeError('Taking screenshot failed.')
         if monitor == 0:
-            return window.get_size()
+            return get_window_size(window)
         else:
             monitors = _get_monitors(window)
             return monitors[monitor - 1].width, monitors[monitor - 1].height
-    elif Gdk:
-        window = Gdk.get_default_root_window()
-        if not window:
-            raise RuntimeError('Taking screenshot failed.')
-        if monitor == 0:
-            return window.get_width(), window.get_height()
-        else:
-            monitors = _get_monitors(window)
-            return monitors[monitor - 1].width, monitors[monitor - 1].height
+
+
+def get_default_root_window():
+    if gdk:
+        return gdk.get_default_root_window()
+    else:
+        return Gdk.get_default_root_window()
+
+
+def get_window_size(window):
+    if gdk:
+        return window.get_size()
+    else:
+        return window.get_width(), window.get_height()
 
 
 def _get_monitors(window):
@@ -190,52 +192,12 @@ def _take_partial_gtk_screenshot_py3(path, format, quality, left, top, width, he
 def _record_gtk(path, fps, size_percentage, stop, pause, monitor, display_cursor):
     if not gdk and not Gdk:
         raise RuntimeError('PyGTK not installed/supported on this platform.')
-    if gdk:
-        return _record_gtk_py2(path, fps, size_percentage, stop, pause, monitor)
-    elif Gdk:
-        return _record_gtk_py3(path, fps, size_percentage, stop, pause, monitor, display_cursor)
-
-
-def _record_gtk_py2(path, fps, size_percentage, stop, pause, monitor):
-    window = gdk.get_default_root_window()
+    window = get_default_root_window()
     if not window:
         raise Exception('Monitor not available.')
     fourcc = cv2.VideoWriter_fourcc(*'VP08')
     if monitor == 0:
-        width, height = window.get_size()
-    else:
-        width, height = _take_gtk_screen_size(monitor)
-
-    with suppress_stderr():
-        if not fps:
-            fps = benchmark_recording_performance_gtk(width, height, size_percentage, monitor)
-        vid = cv2.VideoWriter('%s' % path, fourcc, fps, (int(width * size_percentage), int(height * size_percentage)))
-    while not stop.isSet():
-        if pause.isSet():
-            continue
-        record_gtk2(vid, width, height, size_percentage, monitor)
-    vid.release()
-    cv2.destroyAllWindows()
-
-
-def record_gtk2(vid, width, height, size_percentage, monitor):
-    pb = _grab_screenshot_gtk_py2(monitor)
-    numpy_array = pb.get_pixels_array()
-    resized_array = cv2.resize(numpy_array, dsize=(int(width * size_percentage), int(height * size_percentage)),
-                               interpolation=cv2.INTER_AREA) \
-        if size_percentage != 1 else numpy_array
-    frame = cv2.cvtColor(resized_array, cv2.COLOR_RGB2BGR)
-    vid.write(frame)
-
-
-def _record_gtk_py3(path, fps, size_percentage, stop, pause, monitor, display_cursor):
-    window = Gdk.get_default_root_window()
-    if not window:
-        raise Exception('Monitor not available.')
-    fourcc = cv2.VideoWriter_fourcc(*'VP08')
-    if monitor == 0:
-        width = window.get_width()
-        height = window.get_height()
+        width, height = get_window_size(window)
     else:
         width, height = _take_gtk_screen_size(monitor)
 
@@ -246,9 +208,20 @@ def _record_gtk_py3(path, fps, size_percentage, stop, pause, monitor, display_cu
     while not stop.isSet():
         if pause.isSet():
             continue
-        record_gtk3(vid, width, height, size_percentage, monitor, display_cursor)
+        if Gdk:
+            record_gtk3(vid, width, height, size_percentage, monitor, display_cursor)
+        else:
+            record_gtk2(vid, width, height, size_percentage, monitor)
     vid.release()
     cv2.destroyAllWindows()
+
+
+def record_gtk2(vid, width, height, size_percentage, monitor):
+    pb = _grab_screenshot_gtk_py2(monitor)
+    numpy_array = pb.get_pixels_array()
+    resized_array = resize_array(width, height, numpy_array, size_percentage)
+    frame = cv2.cvtColor(resized_array, cv2.COLOR_RGB2BGR)
+    vid.write(frame)
 
 
 def record_gtk3(vid, width, height, size_percentage, monitor, display_cursor=False):
@@ -256,16 +229,10 @@ def record_gtk3(vid, width, height, size_percentage, monitor, display_cursor=Fal
     if display_cursor:
         mouse_x, mouse_y = pyautogui.position()
     numpy_array = _convert_pixbuf_to_numpy(pb)
-    resized_array = cv2.resize(numpy_array, dsize=(int(width * size_percentage), int(height * size_percentage)),
-                               interpolation=cv2.INTER_AREA) \
-        if size_percentage != 1 else numpy_array
+    resized_array = resize_array(width, height, numpy_array, size_percentage)
     frame = cv2.cvtColor(resized_array, cv2.COLOR_RGB2BGR)
     if display_cursor:
-        cursor_x = [x+mouse_x for x in cursor_x_list]
-        cursor_y = [y+mouse_y for y in cursor_y_list]
-        cursor_points = list(zip(cursor_x, cursor_y))
-        cursor_points = np.array(cursor_points, 'int32')
-        cv2.fillPoly(frame, [cursor_points], color=[0, 255, 255])
+        draw_cursor(frame, mouse_x, mouse_y)
     vid.write(frame)
 
 
