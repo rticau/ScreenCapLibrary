@@ -14,6 +14,11 @@
 #  limitations under the License.
 
 import os
+import cv2
+import numpy as np
+
+cursor_x_list = [0, 8, 6, 14, 12, 4, 2, 0]
+cursor_y_list = [0, 2, 4, 12, 14, 6, 8, 0]
 
 
 def _norm_path(path):
@@ -50,6 +55,25 @@ def _pil_quality_conversion(value):
         return int(value)
     except ValueError:
         raise RuntimeError("The image quality argument must be of type integer.")
+
+
+def resize_array(width, height, numpy_array, size_percentage):
+    resized_array = cv2.resize(numpy_array, dsize=(int(width * size_percentage), int(height * size_percentage)),
+                               interpolation=cv2.INTER_AREA) \
+        if size_percentage != 1 else numpy_array
+    return resized_array
+
+
+def draw_cursor(frame, mouse_x, mouse_y):
+    cursor_x = [x + mouse_x for x in cursor_x_list]
+    cursor_y = [y + mouse_y for y in cursor_y_list]
+    cursor_points = list(zip(cursor_x, cursor_y))
+    cursor_points = np.array(cursor_points, 'int32')
+    cv2.fillPoly(frame, [cursor_points], color=[0, 255, 255])
+
+
+def is_pygtk(screenshot_module):
+    return screenshot_module and screenshot_module.lower() == 'pygtk'
 
 
 class suppress_stderr(object):

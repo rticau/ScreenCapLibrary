@@ -3,7 +3,7 @@ import threading
 
 from .client import Client, run_in_background
 from .pygtk import _take_gtk_screen_size, _grab_gtk_pb, _convert_pixbuf_to_numpy, is_gdk
-from .utils import _norm_path
+from .utils import _norm_path, resize_array, is_pygtk
 from mss import mss
 from PIL import Image, ImageSequence
 from robot.utils import is_truthy
@@ -49,15 +49,15 @@ class GifClient(Client):
 
     @run_in_background
     def grab_frames(self, size_percentage, stop, monitor):
-        if self.screenshot_module and self.screenshot_module.lower() == 'pygtk':
+        if is_pygtk(self.screenshot_module):
             self._grab_frames_gtk(size_percentage, stop, monitor)
         else:
             self._grab_frames_mss(size_percentage, stop, monitor)
 
     def _grab_frames_gtk(self, size_percentage, stop, monitor):
-        width, height = _take_gtk_screen_size(monitor)
-        w = int(width * size_percentage)
-        h = int(height * size_percentage)
+        w, h = _take_gtk_screen_size(monitor)
+        width = int(w * size_percentage)
+        height = int(h * size_percentage)
         with imageio.get_writer(self.path, mode='I') as writer:
             while not stop.isSet():
                 pb = _grab_gtk_pb(monitor)
@@ -65,8 +65,7 @@ class GifClient(Client):
                     numpy_array = _convert_pixbuf_to_numpy(pb)
                 else:
                     numpy_array = pb.get_pixels_array()
-                resized_array = cv2.resize(numpy_array, dsize=(w, h), interpolation=cv2.INTER_AREA) \
-                    if size_percentage != 1 else numpy_array
+                resized_array = resize_array(width, height, numpy_array, size_percentage)
                 frame = cv2.cvtColor(resized_array, cv2.COLOR_RGBA2RGB)
                 writer.append_data(frame)
 
@@ -78,8 +77,6 @@ class GifClient(Client):
             with imageio.get_writer(self.path, mode='I') as writer:
                 while not stop.isSet():
                     sct_img = sct.grab(mon)
-                    numpy_array = np.array(sct_img)
-                    resized_array = cv2.resize(numpy_array, dsize=(width, height), interpolation=cv2.INTER_AREA) \
-                        if size_percentage != 1 else numpy_array
+                    resized_array = resize_array(width, height, np.array(sct_img), size_percentage)
                     frame = cv2.cvtColor(resized_array, cv2.COLOR_RGB2BGR)
                     writer.append_data(frame)
