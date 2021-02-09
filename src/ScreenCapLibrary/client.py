@@ -35,13 +35,11 @@ from .utils import _norm_path, _compression_value_conversion, _pil_quality_conve
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures.thread import _threads_queues
 
-_THREAD_POOL = ThreadPoolExecutor()
-
 
 def run_in_background(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        return _THREAD_POOL.submit(f, *args, **kwargs)
+        return ThreadPoolExecutor().submit(f, *args, **kwargs)
     return wrap
 
 

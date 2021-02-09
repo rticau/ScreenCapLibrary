@@ -1,5 +1,4 @@
 import os
-import threading
 import time
 
 from .client import Client, run_in_background
@@ -28,7 +27,6 @@ class VideoClient(Client):
         self.screenshot_module = screenshot_module
         self._given_screenshot_dir = _norm_path(screenshot_directory)
         self.display_cursor = is_truthy(display_cursor)
-        self._stop_condition = threading.Event()
         self.alias = None
         try:
             if not fps:
