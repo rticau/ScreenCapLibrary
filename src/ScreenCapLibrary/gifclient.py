@@ -22,7 +22,6 @@ class GifClient(Client):
         Client.__init__(self)
         self.screenshot_module = screenshot_module
         self._given_screenshot_dir = _norm_path(screenshot_directory)
-        self._stop_condition = threading.Event()
         self.optimize = None
 
     def start_gif_recording(self, name, size_percentage,
