@@ -21,7 +21,7 @@ ${FIRST_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_1.webm
 ${SECOND_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_2.webm
 ${THIRD_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_3.webm
 ${VIDEO_PERCENT}  25
-${SCREENSHOT_PERCENT}  50
+${SCREENSHOT_PERCENT}  40
 
 *** Test Cases ***
 Screenshot Is Taken
@@ -256,7 +256,7 @@ Video Capture With Size Percentage
     Should ${high_quality_size} Be Greater Than ${low_quality_size} By ${VIDEO_PERCENT}
 
 Video Capture With Size Percentage Gtk
-    [Tags]    gtk
+    [Tags]    gtk  no-xvfb
     ScreenCapLibraryGtk.Start Video Recording  size_percentage=1
     Sleep  3
     ScreenCapLibraryGtk.Stop Video Recording
