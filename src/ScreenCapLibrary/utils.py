@@ -17,8 +17,8 @@ import os
 import cv2
 import numpy as np
 
-cursor_x_list = [0, 8, 6, 14, 12, 4, 2, 0]
-cursor_y_list = [0, 2, 4, 12, 14, 6, 8, 0]
+cursor_x_list = [0, 10, 5, 9, 7, 3, 0, 0]
+cursor_y_list = [0, 10, 10, 18, 19, 12, 15, 0]
 
 
 def _norm_path(path):
@@ -69,7 +69,7 @@ def draw_cursor(frame, mouse_x, mouse_y):
     cursor_y = [y + mouse_y for y in cursor_y_list]
     cursor_points = list(zip(cursor_x, cursor_y))
     cursor_points = np.array(cursor_points, 'int32')
-    cv2.fillPoly(frame, [cursor_points], color=[0, 255, 255])
+    cv2.fillPoly(frame, [cursor_points], color=[0, 0, 0])
 
 
 def is_pygtk(screenshot_module):
