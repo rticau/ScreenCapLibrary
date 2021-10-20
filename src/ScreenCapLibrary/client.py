@@ -16,6 +16,7 @@
 import os
 import time
 import threading
+import base64
 
 try:
     import cv2
@@ -251,9 +252,13 @@ class Client:
     def clear_thread_queues():
         _threads_queues.clear()
 
-    def _embed_screenshot(self, path, width):
+    def _embed_screenshot(self, path, width, save_to_file = False):
         link = get_link_path(path, self._log_dir)
-        logger.info('<a href="%s"><img src="%s" width="%s"></a>' % (link, link, width), html=True)
+        if save_to_file:
+            logger.info('<a href="%s"><img src="%s" width="%s"></a>' % (link, link, width), html=True)
+        else:
+            with open(path, "rb") as image_file:
+                logger.info('<img src="data:image/png;base64, ' + (base64.b64encode(image_file.read())).decode("utf-8") + '">', html=True)
 
     def _link_screenshot(self, path):
         link = get_link_path(path, self._log_dir)
