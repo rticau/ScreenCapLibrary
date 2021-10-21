@@ -53,3 +53,8 @@ Video Should Exist
     File Should Exist  ${path}
     ${filetime} =  Get Modified Time  ${path}
     Should Be True  '${filetime}' >= '${START TIME}'
+
+Video Should Not Exist
+    [Arguments]  ${path}
+    [Documentation]  Checks that video file does not exist.
+    File Should Not Exist  ${path}

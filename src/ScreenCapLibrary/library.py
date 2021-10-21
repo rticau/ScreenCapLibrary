@@ -230,15 +230,16 @@ class ScreenCapLibrary:
         self.started_gifs.append(gif_client)
         gif_client.start_gif_recording(name, size_percentage, embed, embed_width, monitor, optimize)
 
-    def stop_gif_recording(self):
+    def stop_gif_recording(self, save_to_disk=True):
         """
         Stops the GIF recording and generates the file. If ``embed`` argument was set to ``True`` the
-        GIF will be displayed in the log file.
+        GIF will be displayed in the log file. Furthermore, if the ``save_to_disk`` parameter is set to ``False``, the
+        video will be embedded and available in the log file only.
         """
         if len(self.started_gifs) == 0:
             raise Exception('No gif recordings are started!')
         try:
-            return self.started_gifs.pop().stop_gif_recording()
+            return self.started_gifs.pop().stop_gif_recording(save_to_disk)
         except RuntimeError as error:
             del self.started_gifs[:]
             raise error

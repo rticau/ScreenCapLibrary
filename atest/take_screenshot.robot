@@ -100,11 +100,11 @@ Take Screenshot With Partial Dimensions
 
 Take Screenshot With Partial Dimensions And Encode In Log
     ${partial_screenshot}=  ScreenCapLibrary.Take Partial Screenshot  left=50  height=300  width=700  save_to_disk=False
-    File Should Not Exist  ${partial_screenshot}
+    Screenshot Should Not Exist  ${partial_screenshot}
 
 Take Screenshot And Encode In Log
     ${partial_screenshot}=  ScreenCapLibrary.Take Screenshot  save_to_disk=False
-    File Should Not Exist  ${partial_screenshot}
+    Screenshot Should Not Exist  ${partial_screenshot}
 
 Take Partial Gtk Screenshot
     [Tags]    gtk
@@ -117,6 +117,12 @@ Take Gif
     ${path}=  ScreenCapLibrary.Stop Gif Recording
     Screenshot Should Exist  ${GIF_SCREENSHOT}
     Should Be Equal  ${path}  ${GIF_SCREENSHOT}
+
+Take Gif And Encode In Log
+    ScreenCapLibrary.Start Gif Recording
+    Sleep  2
+    ${path}=  ScreenCapLibrary.Stop Gif Recording  save_to_disk=False
+    Screenshot Should Not Exist  ${GIF_SCREENSHOT}
 
 Take Gtk Gif
     [Tags]    gtk
@@ -145,7 +151,7 @@ Video Capture And Encode In Log
     ScreenCapLibrary.Start Video Recording
     Sleep  3
     ${path}=  ScreenCapLibrary.Stop Video Recording  save_to_disk=False
-    File Should Not Exist  ${FIRST_VIDEO_FILE}
+    Video Should Not Exist  ${FIRST_VIDEO_FILE}
 
 Nested And Consecutive Video Captures
     ScreenCapLibrary.Start Video Recording  1
