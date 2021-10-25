@@ -6,6 +6,11 @@ Library  Collections
 Library  DateTime
 
 *** Keywords ***
+Screenshot Is Embedded And Not On Disk
+	[Arguments]  ${path}
+	[Documentation]  LOG 4 GLOB: *data:image*;base64*
+	File Should Not Exist  ${path}
+
 Screenshot Should Exist
     [Arguments]  ${path}
     [Documentation]  Checks that screenshot file exists and is newer than
@@ -58,3 +63,8 @@ Video Should Not Exist
     [Arguments]  ${path}
     [Documentation]  Checks that video file does not exist.
     File Should Not Exist  ${path}
+
+Video Is Embedded And Not On Disk
+	[Arguments]  ${path}
+	[Documentation]  LOG 4 GLOB: *data:video*;base64*
+	File Should Not Exist  ${path}
