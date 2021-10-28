@@ -19,11 +19,6 @@ Screenshot Should Exist
     ${filetime} =  Get Modified Time  ${path}
     Should Be True  '${filetime}' >= '${START TIME}'
 
-Screenshot Should Not Exist
-	[Arguments]  ${path}
-	[Documentation]  Checks that screenshot file does not exist.
-	File Should Not Exist  ${path}
-
 Save Start Time
     ${start time} =  Get Time
     Set Test Variable  \${START TIME}
@@ -58,11 +53,6 @@ Video Should Exist
     File Should Exist  ${path}
     ${filetime} =  Get Modified Time  ${path}
     Should Be True  '${filetime}' >= '${START TIME}'
-
-Video Should Not Exist
-    [Arguments]  ${path}
-    [Documentation]  Checks that video file does not exist.
-    File Should Not Exist  ${path}
 
 Video Is Embedded And Not On Disk
 	[Arguments]  ${path}
