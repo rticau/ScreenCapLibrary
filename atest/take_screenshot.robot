@@ -99,12 +99,12 @@ Take Screenshot With Partial Dimensions
     Screenshot Should Exist  ${partial_screenshot}
 
 Take Screenshot With Partial Dimensions And Encode In Log
-    [Documentation]  LOG 2 GLOB: *data:*;base64*
+    [Documentation]  LOG 1:1 GLOB: *data:*;base64*
     ${partial_screenshot}=  ScreenCapLibrary.Take Partial Screenshot  left=50  height=300  width=700  save_to_disk=False
     Screenshot Is Embedded And Not On Disk  ${partial_screenshot}
 
 Take Screenshot And Encode In Log
-    [Documentation]  LOG 2 GLOB: *data:*;base64*
+    [Documentation]  LOG 1:1 GLOB: *data:*;base64*
     ${partial_screenshot}=  ScreenCapLibrary.Take Screenshot  save_to_disk=False
     Screenshot Is Embedded And Not On Disk  ${partial_screenshot}
 
@@ -121,6 +121,7 @@ Take Gif
     Should Be Equal  ${path}  ${GIF_SCREENSHOT}
 
 Take Gif And Encode In Log
+    [Documentation]  LOG 3:1 GLOB: *data:*;base64*
     ScreenCapLibrary.Start Gif Recording
     Sleep  2
     ${path}=  ScreenCapLibrary.Stop Gif Recording  save_to_disk=False
@@ -150,7 +151,7 @@ Video Capture Gtk
     Should Be Equal  ${path}  ${FIRST_VIDEO_FILE}
 
 Video Capture And Encode In Log
-    [Documentation]  LOG 4 GLOB: *data:*;base64*
+    [Documentation]  LOG 3:1 GLOB: *data:*;base64*
     ScreenCapLibrary.Start Video Recording
     Sleep  3
     ${path}=  ScreenCapLibrary.Stop Video Recording  save_to_disk=False
