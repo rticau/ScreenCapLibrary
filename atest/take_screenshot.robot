@@ -23,7 +23,6 @@ ${THIRD_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_3.webm
 ${VIDEO_PERCENT}  25
 ${SCREENSHOT_PERCENT}  40
 
-
 *** Test Cases ***
 Screenshot Is Taken
     ${path}=  Take Screenshot and Verify  ${FIRST_SCREENSHOT}
