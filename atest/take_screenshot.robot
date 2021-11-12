@@ -23,6 +23,7 @@ ${THIRD_VIDEO_FILE}  ${OUTPUTDIR}${/}recording_3.webm
 ${VIDEO_PERCENT}  25
 ${SCREENSHOT_PERCENT}  40
 
+
 *** Test Cases ***
 Screenshot Is Taken
     ${path}=  Take Screenshot and Verify  ${FIRST_SCREENSHOT}
@@ -99,14 +100,12 @@ Take Screenshot With Partial Dimensions
     Screenshot Should Exist  ${partial_screenshot}
 
 Take Screenshot With Partial Dimensions And Encode In Log
-    [Documentation]  LOG 1:1 GLOB: *data:*;base64*
     ${partial_screenshot}=  ScreenCapLibrary.Take Partial Screenshot  left=50  height=300  width=700  save_to_disk=False
     Screenshot Is Embedded And Not On Disk  ${partial_screenshot}
 
 Take Screenshot And Encode In Log
-    [Documentation]  LOG 1:1 GLOB: *data:*;base64*
-    ${partial_screenshot}=  ScreenCapLibrary.Take Screenshot  save_to_disk=False
-    Screenshot Is Embedded And Not On Disk  ${partial_screenshot}
+    ${screenshot}=  ScreenCapLibrary.Take Screenshot  save_to_disk=False
+    Screenshot Is Embedded And Not On Disk  ${screenshot}
 
 Take Partial Gtk Screenshot
     [Tags]    gtk
@@ -121,11 +120,10 @@ Take Gif
     Should Be Equal  ${path}  ${GIF_SCREENSHOT}
 
 Take Gif And Encode In Log
-    [Documentation]  LOG 3:1 GLOB: *data:*;base64*
     ScreenCapLibrary.Start Gif Recording
     Sleep  2
     ${path}=  ScreenCapLibrary.Stop Gif Recording  save_to_disk=False
-    Screenshot Is Embedded And Not On Disk  ${GIF_SCREENSHOT}
+    Gif Is Embedded And Not On Disk  ${path}
 
 Take Gtk Gif
     [Tags]    gtk
@@ -151,11 +149,10 @@ Video Capture Gtk
     Should Be Equal  ${path}  ${FIRST_VIDEO_FILE}
 
 Video Capture And Encode In Log
-    [Documentation]  LOG 3:1 GLOB: *data:*;base64*
     ScreenCapLibrary.Start Video Recording
     Sleep  3
     ${path}=  ScreenCapLibrary.Stop Video Recording  save_to_disk=False
-    Video Is Embedded And Not On Disk  ${FIRST_VIDEO_FILE}
+    Video Is Embedded And Not On Disk  ${path}
 
 Nested And Consecutive Video Captures
     ScreenCapLibrary.Start Video Recording  1
