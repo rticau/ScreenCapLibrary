@@ -21,6 +21,7 @@ ScreenCapLibrary has the following extra features:
     - Video capture in WebM format, embeddable in log files
     - Adjusting the compression/quality of the screenshots
     - Support for GIFs
+    - optional base64 encoded embedding of images into log files 
     - Taking multiple screenshots in a given amount of time
     - Support for partial screen captures
     - Configurable monitor screen grabbing for screenshots and recording

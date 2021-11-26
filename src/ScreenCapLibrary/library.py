@@ -57,6 +57,12 @@ class ScreenCapLibrary:
     `Set Screenshot Directory` keyword during execution. It is also possible
     to save screenshots using an absolute path.
 
+    Screenshots and GIF recordings can also be integrated into the log file. 
+    The `embed` parameter links the image into the HTML log. 
+    The `embed64` parameter integrates the images base64 encoded into the
+    HTML log. This makes RF logs processable by 3rd party tools without caring 
+    for external linked image files. (File size must be kept in view, though...)
+
     = Time format =
 
     All delays and time intervals can be given as numbers considered seconds
@@ -150,7 +156,7 @@ class ScreenCapLibrary:
         """
         return self.client.set_screenshot_directory(path)
 
-    def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px', delay=0, monitor=1):
+    def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px', delay=0, monitor=1, embed64=False):
         """Takes a screenshot in the specified format at library import and
         embeds it into the log file (PNG by default).
 
@@ -172,12 +178,16 @@ class ScreenCapLibrary:
         ``quality`` can take values in range [0, 100]. In case of JPEG format
         it can drastically reduce the file size of the image.
 
-        ``width`` specifies the size of the screenshot in the log file.
+        ``width`` specifies the size of the screenshot in the log file (default: 800px)
+        To have inscaled screenshots in the HTML log, set `width=None`.
 
         ``delay`` specifies the waiting time before taking a screenshot. See
         `Time format` section for more information. By default the delay is 0.
 
         ``monitor`` selects which monitor you want to capture. Use value 0 to capture all.
+
+        ``embed64`` integrates the screenshot as base64 encoded image into the 
+        HTML log file instead of linking it.
 
         Examples: (LOGDIR is determined automatically by the library)
         | `Take Screenshot` |                  |            | # LOGDIR/screenshot_1.png (index automatically incremented) |
@@ -187,13 +197,14 @@ class ScreenCapLibrary:
         | `Take Screenshot` | images/login.jpg | 300px      | # Specify both name and width. |
         | `Take Screenshot` | width=550px      |            | # Specify only width. |
         | `Take Screenshot` | format=jpg       | quality=15 | # Specify both image format and quality |
+        | `Take Screenshot` | embed64=true     |            | # Embed as base64 image |
 
         The path where the screenshot is saved is returned.
         """
-        return self.client.take_screenshot(name, format, quality, width, delay, monitor)
+        return self.client.take_screenshot(name, format, quality, width, delay, monitor, embed64)
 
     def start_gif_recording(self, name="screenshot", size_percentage=0.5,
-                            embed=True, embed_width='800px', monitor=1, optimize=True):
+                            embed=True, embed_width='800px', embed64=False, monitor=1, optimize=True):
         """
         Starts the recording of a GIF in the background with the specified ``name``.
         The recording can be stopped by calling the `Stop Gif Recording` keyword.
@@ -208,12 +219,16 @@ class ScreenCapLibrary:
         ``embed`` specifies if the screenshot should be embedded in the log file
         or not. See `Boolean arguments` section for more details.
 
-        ``embed_width`` specifies the size of the screenshot that is
-        embedded in the log file.
+        ``embed_width`` specifies the size of the screenshot that is embedded in the 
+        log file (default: 800px). 
+        To have unscaled screenshots in the HTML log, set `embed_width=None`.
 
         ``monitor`` selects which monitor you want to capture. Use value 0 to capture all.
 
         ``optimize`` drastically reduces the size (and quality) of the gif file.
+
+        ``embed64`` integrates the GIF recording as base64 encoded image into the 
+        HTML log file instead of linking it.
 
         Examples:
         | `Start Gif Recording` |            |  # Starts the GIF recording in background |
@@ -225,7 +240,7 @@ class ScreenCapLibrary:
             raise Exception('A gif recording is already in progress!')
         gif_client = GifClient(self.client.screenshot_module, self.client.screenshot_dir)
         self.started_gifs.append(gif_client)
-        gif_client.start_gif_recording(name, size_percentage, embed, embed_width, monitor, optimize)
+        gif_client.start_gif_recording(name, size_percentage, embed, embed_width, embed64, monitor, optimize)
 
     def stop_gif_recording(self):
         """
@@ -241,7 +256,7 @@ class ScreenCapLibrary:
             raise error
 
     def take_partial_screenshot(self, name='screenshot', format=None, quality=None,
-                                left=0, top=0, width=700, height=300, embed=True, embed_width='800px', monitor=1):
+                                left=0, top=0, width=700, height=300, embed=True, embed_width='800px', monitor=1, embed64=False):
         """
         Takes a partial screenshot in the specified format and dimensions at
         library import and embeds it into the log file (PNG by default).
@@ -259,12 +274,18 @@ class ScreenCapLibrary:
         ``embed`` specifies if the screenshot should be embedded in the log file or not. See
         `Boolean arguments` section for more details.
 
-        ``embed_width`` specifies the size of the screenshot that is embedded in the log file.
+        ``embed_width`` specifies the size of the screenshot that is embedded in the HTML 
+        log file (default: 800px).
+        To have inscaled screenshots in the HTML log, set `width=None`.
 
         ``monitor`` selects which monitor you want to capture. Use value 0 to capture all.
+
+        ``embed64`` integrates the screenshot as base64 encoded image into the 
+        HTML log file instead of linking it.
+        
         """
         return self.client.take_partial_screenshot(name, format, quality,
-                                                   left, top, width, height, embed, embed_width, monitor)
+                                                   left, top, width, height, embed, embed_width, monitor, embed64)
 
     def take_screenshot_without_embedding(self, name="screenshot", format=None, quality=None, delay=0, monitor=1):
         """Takes a screenshot and links it from the log file.

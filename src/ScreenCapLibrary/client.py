@@ -35,6 +35,7 @@ from .utils import _norm_path, _compression_value_conversion, _pil_quality_conve
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures.thread import _threads_queues
 
+import base64
 
 def run_in_background(f):
     @wraps(f)
@@ -109,12 +110,15 @@ class Client:
         path = self._get_screenshot_path(basename, format, self.screenshot_dir)
         return self._validate_screenshot_path(path)
 
-    def take_screenshot(self, name, format, quality, width, delay, monitor):
+    def take_screenshot(self, name, format, quality, width, delay, monitor, embed64):
         delay = delay or self._delay
         if delay:
             time.sleep(timestr_to_secs(delay))
         path = self._take_screenshot_client(name, format, quality, monitor)
-        self._embed_screenshot(path, width)
+        if embed64:
+            self._embed_base64_screenshot(path, width, format)
+        else:
+            self._embed_screenshot(path, width)
         return path
 
     def _take_screenshot_client(self, name, format, quality, monitor):
@@ -198,7 +202,7 @@ class Client:
             taken += 1
 
     def take_partial_screenshot(self, name, format, quality,
-                                left, top, width, height, embed, embed_width, monitor):
+                                left, top, width, height, embed, embed_width, monitor, embed64):
         left = int(left)
         top = int(top)
         width = int(width)
@@ -229,7 +233,9 @@ class Client:
                 raise RuntimeError('Taking screenshot failed.')
             except SystemError:
                 raise SystemError("Top and left parameters must be lower than screen resolution.")
-        if is_truthy(embed):
+        if is_truthy(embed64):
+            self._embed_base64_screenshot(path, width, format)
+        elif is_truthy(embed):
             self._embed_screenshot(path, embed_width)
         return path
 
@@ -254,6 +260,26 @@ class Client:
     def _embed_screenshot(self, path, width):
         link = get_link_path(path, self._log_dir)
         logger.info('<a href="%s"><img src="%s" width="%s"></a>' % (link, link, width), html=True)
+
+    def _embed_base64_screenshot(self, path, width, format):
+        with open(path, "rb") as file:
+            encoded_string = base64.b64encode(file.read())
+        # log statement is copied from:
+        # https://github.com/robotframework/SeleniumLibrary/blob/master/src/SeleniumLibrary/keywords/screenshot.py
+        if width == 'None': 
+            width = ""
+        else: 
+            width = f'width="{width}"'
+        logger.info(
+            '</td></tr><tr><td colspan="3">'
+            '<img alt="screenshot" class="robot-seleniumlibrary-screenshot" '
+            f'src="data:image/{format};base64,{encoded_string.decode()}" {width}>',
+            html=True,
+        )
+        try:
+            os.unlink(path)
+        except Exception:
+            logger.warn(f"Could not remove {path}")
 
     def _link_screenshot(self, path):
         link = get_link_path(path, self._log_dir)
