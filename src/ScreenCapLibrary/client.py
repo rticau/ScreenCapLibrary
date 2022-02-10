@@ -16,6 +16,7 @@
 import os
 import time
 import threading
+import base64
 
 try:
     import cv2
@@ -109,12 +110,12 @@ class Client:
         path = self._get_screenshot_path(basename, format, self.screenshot_dir)
         return self._validate_screenshot_path(path)
 
-    def take_screenshot(self, name, format, quality, width, delay, monitor):
+    def take_screenshot(self, name, format, quality, width, delay, monitor, save_to_disk):
         delay = delay or self._delay
         if delay:
             time.sleep(timestr_to_secs(delay))
         path = self._take_screenshot_client(name, format, quality, monitor)
-        self._embed_screenshot(path, width)
+        self._embed_screenshot(path, width, save_to_disk)
         return path
 
     def _take_screenshot_client(self, name, format, quality, monitor):
@@ -198,7 +199,7 @@ class Client:
             taken += 1
 
     def take_partial_screenshot(self, name, format, quality,
-                                left, top, width, height, embed, embed_width, monitor):
+                                left, top, width, height, embed, embed_width, monitor, save_to_disk):
         left = int(left)
         top = int(top)
         width = int(width)
@@ -230,7 +231,7 @@ class Client:
             except SystemError:
                 raise SystemError("Top and left parameters must be lower than screen resolution.")
         if is_truthy(embed):
-            self._embed_screenshot(path, embed_width)
+            self._embed_screenshot(path, embed_width, save_to_disk)
         return path
 
     def take_screenshot_without_embedding(self, name, format, quality, delay, monitor):
@@ -251,9 +252,14 @@ class Client:
     def clear_thread_queues():
         _threads_queues.clear()
 
-    def _embed_screenshot(self, path, width):
+    def _embed_screenshot(self, path, width, save_to_disk):
         link = get_link_path(path, self._log_dir)
-        logger.info('<a href="%s"><img src="%s" width="%s"></a>' % (link, link, width), html=True)
+        if save_to_disk:
+            logger.info('<a href="%s"><img src="%s" width="%s"></a>' % (link, link, width), html=True)
+        else:
+            with open(path, "rb") as image_file:
+                logger.info('<img src="data:image/png;base64, %s" width="%s">' % ((base64.b64encode(image_file.read())).decode("utf-8"), width), html=True)
+            os.remove(path)
 
     def _link_screenshot(self, path):
         link = get_link_path(path, self._log_dir)

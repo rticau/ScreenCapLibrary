@@ -150,7 +150,8 @@ class ScreenCapLibrary:
         """
         return self.client.set_screenshot_directory(path)
 
-    def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px', delay=0, monitor=1):
+    def take_screenshot(self, name='screenshot', format=None, quality=None, width='800px', delay=0,
+                        monitor=1, save_to_disk=True):
         """Takes a screenshot in the specified format at library import and
         embeds it into the log file (PNG by default).
 
@@ -179,6 +180,8 @@ class ScreenCapLibrary:
 
         ``monitor`` selects which monitor you want to capture. Use value 0 to capture all.
 
+        ``save_to_disk`` specifies whether the image will be saved on the disk or only be available in the log file
+
         Examples: (LOGDIR is determined automatically by the library)
         | `Take Screenshot` |                  |            | # LOGDIR/screenshot_1.png (index automatically incremented) |
         | `Take Screenshot` | mypic            |            | # LOGDIR/mypic_1.png (index automatically incremented) |
@@ -190,7 +193,7 @@ class ScreenCapLibrary:
 
         The path where the screenshot is saved is returned.
         """
-        return self.client.take_screenshot(name, format, quality, width, delay, monitor)
+        return self.client.take_screenshot(name, format, quality, width, delay, monitor, save_to_disk)
 
     def start_gif_recording(self, name="screenshot", size_percentage=0.5,
                             embed=True, embed_width='800px', monitor=1, optimize=True):
@@ -227,21 +230,22 @@ class ScreenCapLibrary:
         self.started_gifs.append(gif_client)
         gif_client.start_gif_recording(name, size_percentage, embed, embed_width, monitor, optimize)
 
-    def stop_gif_recording(self):
+    def stop_gif_recording(self, save_to_disk=True):
         """
         Stops the GIF recording and generates the file. If ``embed`` argument was set to ``True`` the
-        GIF will be displayed in the log file.
+        GIF will be displayed in the log file. Furthermore, if the ``save_to_disk`` parameter is set to ``False``, the
+        video will be embedded and available in the log file only.
         """
         if len(self.started_gifs) == 0:
             raise Exception('No gif recordings are started!')
         try:
-            return self.started_gifs.pop().stop_gif_recording()
+            return self.started_gifs.pop().stop_gif_recording(save_to_disk)
         except RuntimeError as error:
             del self.started_gifs[:]
             raise error
 
     def take_partial_screenshot(self, name='screenshot', format=None, quality=None,
-                                left=0, top=0, width=700, height=300, embed=True, embed_width='800px', monitor=1):
+                                left=0, top=0, width=700, height=300, embed=True, embed_width='800px', monitor=1, save_to_disk=True):
         """
         Takes a partial screenshot in the specified format and dimensions at
         library import and embeds it into the log file (PNG by default).
@@ -262,9 +266,11 @@ class ScreenCapLibrary:
         ``embed_width`` specifies the size of the screenshot that is embedded in the log file.
 
         ``monitor`` selects which monitor you want to capture. Use value 0 to capture all.
+
+        ``save_to_disk`` specifies whether the image will be saved on the disk or only be available in the log file
         """
         return self.client.take_partial_screenshot(name, format, quality,
-                                                   left, top, width, height, embed, embed_width, monitor)
+                                                   left, top, width, height, embed, embed_width, monitor, save_to_disk)
 
     def take_screenshot_without_embedding(self, name="screenshot", format=None, quality=None, delay=0, monitor=1):
         """Takes a screenshot and links it from the log file.
@@ -330,7 +336,7 @@ class ScreenCapLibrary:
         self.started_recordings.append(video_client)
         video_client.start_video_recording(alias, name, size_percentage, embed, embed_width, monitor)
 
-    def stop_all_video_recordings(self):
+    def stop_all_video_recordings(self, save_to_disk=True):
         """Stops all the video recordings and generates the files in WebM format. If ``embed`` argument
         was set to ``True`` the videos will be displayed in the log file.
 
@@ -340,16 +346,18 @@ class ScreenCapLibrary:
         if len(self.started_recordings) == 0:
             raise Exception('No video recordings are started!')
         for recording in self.started_recordings:
-            recording.stop_video_recording()
+            recording.stop_video_recording(save_to_disk)
             paths.append(recording.path)
         del self.started_recordings[:]
         return paths
 
-    def stop_video_recording(self, alias=None):
+    def stop_video_recording(self, alias=None, save_to_disk=True):
         """Stops the video recording corresponding to the given ``alias`` and generates the file in WebM format. If no
         ``alias`` is specified, the last opened recording will be closed. If there are more recordings with the same
         alias all of them will be closed. If ``embed`` argument was set to
         ``True`` the video will be displayed in the log file.
+        Furthermore, if the ``save_to_disk`` parameter is set to ``False``, the video will be embedded and available in
+        the log file only.
 
         The path where the video is saved is returned.
         """
@@ -365,11 +373,11 @@ class ScreenCapLibrary:
                 for recording in copy_list:
                     if recording.alias == alias:
                         self.started_recordings.remove(recording)
-                        recording.stop_video_recording()
+                        recording.stop_video_recording(save_to_disk)
                         paths.append(recording.path)
                 return paths if len(paths) > 1 else paths[0]
             else:
-                return self.started_recordings.pop().stop_video_recording()
+                return self.started_recordings.pop().stop_video_recording(save_to_disk)
         except RuntimeError as error:
             del self.started_recordings[:]
             raise error

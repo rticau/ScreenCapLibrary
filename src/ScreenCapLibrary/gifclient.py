@@ -34,16 +34,16 @@ class GifClient(Client):
         self.futures = self.grab_frames(size_percentage, self._stop_condition, int(monitor))
         self.clear_thread_queues()
 
-    def stop_gif_recording(self):
+    def stop_gif_recording(self, save_to_disk):
         self._stop_thread()
-        if is_truthy(self.embed):
-            self._embed_screenshot(self.path, self.embed_width)
         if is_truthy(self.optimize):
             frames = []
             for frame in ImageSequence.Iterator(Image.open(self.path)):
                 frame = frame.copy()
                 frames.append(frame)
             frames[0].save(self.path, save_all=True, append_images=frames[1:], optimize=True)
+        if is_truthy(self.embed):
+            self._embed_screenshot(self.path, self.embed_width, save_to_disk)
         return self.path
 
     @run_in_background
