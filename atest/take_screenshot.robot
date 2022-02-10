@@ -46,8 +46,7 @@ Screenshot Width Can Be Given
     Screenshots Should Exist  ${OUTPUTDIR}  ${FIRST_SCREENSHOT}
 
 Basename With Non-existing Directories Fails
-    [Documentation]  FAIL Directory '${OUTPUTDIR}${/}non-existing' where to save the screenshot does not exist
-    ScreenCapLibrary.Take Screenshot  ${OUTPUTDIR}${/}non-existing${/}foo
+    Run Keyword And Expect Error  *where to save the screenshot does not exist  ScreenCapLibrary.Take Screenshot  ${OUTPUTDIR}${/}non-existing${/}foo
 
 Without Embedding
     ScreenCapLibrary.Take Screenshot Without Embedding  no_embed.png
