@@ -10,7 +10,7 @@ jobs:
       matrix:
         os: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
         python-version: [ 2.7, 3.8, 3.9 ]
-        rf-version: [ 4.0 ]
+        rf-version: [ 4.1.3 ]
         include:
           - os: ubuntu-latest
             set_display: export DISPLAY=:99; Xvfb :99 -screen 0 800x600x24 -ac -noreset & sleep 3
@@ -37,9 +37,6 @@ jobs:
           sudo apt-get update
           sudo apt install xvfb python-gi python-gi-cairo python3-gi python3-gi-cairo gir1.2-gtk-3.0 libgirepository1.0-dev
           pip install PyGObject
-      - name: Install RF ${{ matrix.rf-version }}
-        run: |
-          pip install -U --pre robotframework==${{ matrix.rf-version }}
       - name: Run tests with Python 2.7 on Linux
         if: matrix.python-version == '2.7' && runner.os == 'Linux'
         run: |
