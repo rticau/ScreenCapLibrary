@@ -14,6 +14,9 @@ jobs:
         include:
           - os: ubuntu-latest
             set_display: export DISPLAY=:99; Xvfb :99 -screen 0 800x600x24 -ac -noreset & sleep 3
+        exclude:
+          - os: macos-latest
+            python-version: 2.7
 
     steps:
       - uses: actions/checkout@v2
