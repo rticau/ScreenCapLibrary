@@ -1,5 +1,6 @@
 import os
 import time
+import threading
 
 from .client import Client, run_in_background
 from .pygtk import _record_gtk, benchmark_recording_performance_gtk, _take_gtk_screen_size
@@ -27,6 +28,8 @@ class VideoClient(Client):
         self.screenshot_module = screenshot_module
         self._given_screenshot_dir = _norm_path(screenshot_directory)
         self.display_cursor = is_truthy(display_cursor)
+        self._active_condition = threading.Event()
+        self._active_condition.set()
         self.alias = None
         try:
             if not fps:
@@ -59,10 +62,16 @@ class VideoClient(Client):
             self._embed_video(self.path, self.embed_width, save_to_disk)
         return self.path
 
+    def _pause_thread(self):
+        self._active_condition.clear()
+
+    def _resume_thread(self):
+        self._active_condition.set()
+
     @run_in_background
     def capture_screen(self, path, fps, size_percentage, monitor):
         if is_pygtk(self.screenshot_module):
-            _record_gtk(path, fps, size_percentage, self._stop_condition, self._pause_condition, monitor,
+            _record_gtk(path, fps, size_percentage, self._stop_condition, self._active_condition, monitor,
                         self.display_cursor)
         else:
             self._record_mss(path, fps, size_percentage, monitor)
@@ -81,7 +90,7 @@ class VideoClient(Client):
             vid = cv2.VideoWriter('%s' % path, fourcc, fps,
                                   (int(width * size_percentage), int(height * size_percentage)))
         while not self._stop_condition.isSet():
-            if self._pause_condition.isSet():
+            if not self._active_condition.wait(1.0 / fps):
                 continue
             self.record(vid, width, height, size_percentage, monitor, display_cursor=self.display_cursor)
         vid.release()

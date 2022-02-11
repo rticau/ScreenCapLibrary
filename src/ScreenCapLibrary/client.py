@@ -60,7 +60,6 @@ class Client:
         self.embed = False
         self.embed_width = None
         self._stop_condition = threading.Event()
-        self._pause_condition = threading.Event()
         self.futures = None
 
     @property
@@ -264,9 +263,3 @@ class Client:
     def _link_screenshot(self, path):
         link = get_link_path(path, self._log_dir)
         logger.info("Screenshot saved to '<a href=\"%s\">%s</a>'." % (link, path), html=True)
-
-    def _pause_thread(self):
-        self._pause_condition.set()
-
-    def _resume_thread(self):
-        self._pause_condition.clear()

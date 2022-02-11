@@ -188,7 +188,7 @@ def _take_partial_gtk_screenshot_py3(path, format, quality, left, top, width, he
     return path
 
 
-def _record_gtk(path, fps, size_percentage, stop, pause, monitor, display_cursor):
+def _record_gtk(path, fps, size_percentage, stop, active, monitor, display_cursor):
     if not gdk and not Gdk:
         raise RuntimeError('PyGTK not installed/supported on this platform.')
     window = get_default_root_window()
@@ -205,7 +205,7 @@ def _record_gtk(path, fps, size_percentage, stop, pause, monitor, display_cursor
             fps = benchmark_recording_performance_gtk(width, height, size_percentage, monitor, display_cursor)
         vid = cv2.VideoWriter('%s' % path, fourcc, fps, (int(width * size_percentage), int(height * size_percentage)))
     while not stop.isSet():
-        if pause.isSet():
+        if not active.wait(1.0 / fps):
             continue
         if gdk:
             record_gtk2(vid, width, height, size_percentage, monitor)
