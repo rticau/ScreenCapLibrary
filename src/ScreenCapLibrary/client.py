@@ -59,6 +59,7 @@ class Client:
         self.path = None
         self.embed = False
         self.embed_width = None
+        self._stop_condition = threading.Event()
         self.futures = None
 
     @property
