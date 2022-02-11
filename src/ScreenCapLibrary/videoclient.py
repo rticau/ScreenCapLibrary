@@ -1,5 +1,6 @@
 import os
 import time
+import threading
 
 from .client import Client, run_in_background
 from .pygtk import _record_gtk, benchmark_recording_performance_gtk, _take_gtk_screen_size
