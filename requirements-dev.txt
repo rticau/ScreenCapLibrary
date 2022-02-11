@@ -4,5 +4,6 @@ mss==4.0.3
 robotframework
 robotstatuschecker
 pillow
-opencv-python == 4.2.0.32
+opencv-python == 4.2.0.32; python_version == '2.7'
+opencv-python; python_version > '3.4'
 pyautogui

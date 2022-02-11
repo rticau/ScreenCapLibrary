@@ -3,6 +3,7 @@ Library  ScreenCapLibrary
 Library  ScreenCapLibrary  screenshot_module=PyGTK  WITH NAME  ScreenCapLibraryGtk
 Library  OperatingSystem
 Library  Collections
+Library  Process
 Library  DateTime
 
 *** Keywords ***
@@ -48,3 +49,33 @@ Video Should Exist
     File Should Exist  ${path}
     ${filetime} =  Get Modified Time  ${path}
     Should Be True  '${filetime}' >= '${START TIME}'
+
+Screenshot Is Embedded And Not On Disk
+	[Arguments]  ${path}
+	${PYTHON_VERSION} =  Run Process  python  -c  import sys;print(sys.version[0])
+	IF  ${PYTHON_VERSION.stdout} == 2
+        Set Test Documentation  LOG 2:1 GLOB: *data:*;base64*
+    ELSE
+        Set Test Documentation  LOG 1:1 GLOB: *data:*;base64*
+    END
+	File Should Not Exist  ${path}
+
+Gif Is Embedded And Not On Disk
+	[Arguments]  ${path}
+	${PYTHON_VERSION} =  Run Process  python  -c  import sys;print(sys.version[0])
+	IF  ${PYTHON_VERSION.stdout} == 2
+        Set Test Documentation  LOG 4:1 GLOB: *data:*;base64*
+    ELSE
+        Set Test Documentation  LOG 3:1 GLOB: *data:*;base64*
+    END
+	File Should Not Exist  ${path}
+
+Video Is Embedded And Not On Disk
+	[Arguments]  ${path}
+	${PYTHON_VERSION} =  Run Process  python  -c  import sys;print(sys.version[0])
+	IF  ${PYTHON_VERSION.stdout} == 2
+        Set Test Documentation  LOG 4:1 GLOB: *data:*;base64*
+    ELSE
+        Set Test Documentation  LOG 3:1 GLOB: *data:*;base64*
+    END
+	File Should Not Exist  ${path}

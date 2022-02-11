@@ -4,7 +4,7 @@
     Examples:
     Running all the tests with Robot:
     python atest/run.py atest
-    Robot results are found in path 'atest/results/python/'
+    Robot results are found in path 'atest/results/'
 """
 import sys
 
@@ -13,6 +13,7 @@ from robot import run_cli, rebot
 from robotstatuschecker import process_output
 
 CURDIR = dirname(abspath(__file__))
+OUTPUT_DIR = join(CURDIR, 'results')
 
 sys.path.append(join(CURDIR, '..', 'src'))
 
@@ -21,13 +22,13 @@ COMMON_OPTS = ('--log', 'NONE', '--report', 'NONE')
 
 def atests(*opts):
     python(*opts)
-    process_output(join(CURDIR, 'output.xml'))
-    return rebot(join(CURDIR, 'output.xml'), outputdir=CURDIR)
+    process_output(join(OUTPUT_DIR, 'output.xml'))
+    return rebot(join(OUTPUT_DIR, 'output.xml'), outputdir=OUTPUT_DIR)
 
 
 def python(*opts):
     try:
-        run_cli(['--outputdir', CURDIR]
+        run_cli(['--outputdir', OUTPUT_DIR]
                 + list(COMMON_OPTS + opts))
     except SystemExit:
         pass

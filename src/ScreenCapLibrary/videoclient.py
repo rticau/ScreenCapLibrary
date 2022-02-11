@@ -1,5 +1,4 @@
 import os
-import threading
 import time
 
 from .client import Client, run_in_background
@@ -8,7 +7,7 @@ from .utils import _norm_path, suppress_stderr, resize_array, draw_cursor, is_py
 from mss import mss
 from robot.utils import get_link_path, is_truthy
 from robot.api import logger
-
+import base64
 try:
     import pyautogui
 except:
@@ -28,7 +27,6 @@ class VideoClient(Client):
         self.screenshot_module = screenshot_module
         self._given_screenshot_dir = _norm_path(screenshot_directory)
         self.display_cursor = is_truthy(display_cursor)
-        self._stop_condition = threading.Event()
         self._active_condition = threading.Event()
         self._active_condition.set()
         self.alias = None
@@ -57,10 +55,10 @@ class VideoClient(Client):
         self.futures = self.capture_screen(self.path, self.fps, size_percentage, int(monitor))
         self.clear_thread_queues()
 
-    def stop_video_recording(self):
+    def stop_video_recording(self, save_to_disk):
         self._stop_thread()
         if is_truthy(self.embed):
-            self._embed_video(self.path, self.embed_width)
+            self._embed_video(self.path, self.embed_width, save_to_disk)
         return self.path
 
     def _pause_thread(self):
@@ -110,10 +108,16 @@ class VideoClient(Client):
             draw_cursor(frame, mouse_x, mouse_y)
         vid.write(frame)
 
-    def _embed_video(self, path, width):
+    def _embed_video(self, path, width, save_to_disk):
         link = get_link_path(path, self._log_dir)
-        logger.info('<a href="%s"><video width="%s" autoplay><source src="%s" type="video/webm"></video></a>' %
-                    (link, width, link), html=True)
+        if save_to_disk:
+            logger.info('<a href="%s"><video width="%s" autoplay><source src="%s" type="video/webm"></video></a>' %
+                        (link, width, link), html=True)
+        else:
+            with open(path, "rb") as image_file:
+                logger.info('<video width="%s" autoplay><source src="data:video/webm;base64, %s" type="video/webm"></video>' %
+                            (width, (base64.b64encode(image_file.read())).decode("utf-8")), html=True)
+            os.remove(path)
 
     def benchmark_recording_performance(self, width, height, size_percentage, monitor):
         fps = 0
