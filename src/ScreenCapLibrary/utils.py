@@ -17,9 +17,6 @@ import os
 import cv2
 import numpy as np
 
-cursor_x_list = [0, 8, 6, 14, 12, 4, 2, 0]
-cursor_y_list = [0, 2, 4, 12, 14, 6, 8, 0]
-
 
 def _norm_path(path):
     if not path:
@@ -65,11 +62,43 @@ def resize_array(width, height, numpy_array, size_percentage):
 
 
 def draw_cursor(frame, mouse_x, mouse_y):
-    cursor_x = [x + mouse_x for x in cursor_x_list]
-    cursor_y = [y + mouse_y for y in cursor_y_list]
-    cursor_points = list(zip(cursor_x, cursor_y))
-    cursor_points = np.array(cursor_points, 'int32')
-    cv2.fillPoly(frame, [cursor_points], color=[0, 255, 255])
+    """
+    Draw a PNG image as cursor.
+    """
+    cur_path = os.path.join(os.path.dirname(__file__), "cursor.png")
+    cur_img = cv2.imread(cur_path, -1)
+
+    alpha_mask = cur_img[:, :, 3] / 255.0
+    img_overlay = cur_img[:, :, :3]
+    _overlay_image_alpha(frame, img_overlay, mouse_x, mouse_y, alpha_mask)
+
+
+def _overlay_image_alpha(img, img_overlay, x, y, alpha_mask):
+    """Overlay `img_overlay` onto `img` at (x, y) and blend using `alpha_mask`.
+
+    `alpha_mask` must have same HxW as `img_overlay` and values in range [0, 1].
+
+    [https://stackoverflow.com/a/45118011] use @Mateen Ulhaq's overlay method
+    """
+    # Image ranges
+    y1, y2 = max(0, y), min(img.shape[0], y + img_overlay.shape[0])
+    x1, x2 = max(0, x), min(img.shape[1], x + img_overlay.shape[1])
+
+    # Overlay ranges
+    y1o, y2o = max(0, -y), min(img_overlay.shape[0], img.shape[0] - y)
+    x1o, x2o = max(0, -x), min(img_overlay.shape[1], img.shape[1] - x)
+
+    # Exit if nothing to do
+    if y1 >= y2 or x1 >= x2 or y1o >= y2o or x1o >= x2o:
+        return
+
+    # Blend overlay within the determined ranges
+    img_crop = img[y1:y2, x1:x2]
+    img_overlay_crop = img_overlay[y1o:y2o, x1o:x2o]
+    alpha = alpha_mask[y1o:y2o, x1o:x2o, np.newaxis]
+    alpha_inv = 1.0 - alpha
+
+    img_crop[:] = alpha * img_overlay_crop + alpha_inv * img_crop
 
 
 def is_pygtk(screenshot_module):
