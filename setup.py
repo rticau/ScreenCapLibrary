@@ -44,7 +44,7 @@ setup(
     long_description=DESCRIPTION,
     author=u'Mihai Pârvu',
     author_email='mihai-catalin.parvu@nokia.com',
-    url='https://github.com/mihaiparvu/ScreenCapLibrary',
+    url='https://github.com/rticau/ScreenCapLibrary',
     license='Apache License 2.0',
     keywords='robotframework testing testautomation screenshot screencap',
     platforms='any',
