@@ -52,7 +52,7 @@ With recent versions of ``pip`` it is possible to install directly from the
 GitHub_ repository. To install latest source from the master branch, use
 this command::
 
-    pip install git+https://github.com/mihaiparvu/ScreenCapLibrary.git
+    pip install git+https://github.com/rticau/ScreenCapLibrary.git
 
 Alternatively you can download the source distribution from PyPI_, extract
 it, and install it::
@@ -118,8 +118,8 @@ available:
 
 .. _Robot Framework: http://robotframework.org
 .. _Robot Framework User Guide: http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#using-test-libraries
-.. _ScreenCapLibrary: https://github.com/mihaiparvu/ScreenCapLibrary
-.. _GitHub: https://github.com/mihaiparvu/ScreenCapLibrary
+.. _ScreenCapLibrary: https://github.com/rticau/ScreenCapLibrary
+.. _GitHub: https://github.com/rticau/ScreenCapLibrary
 .. _Python: http://python.org
 .. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-screencaplibrary
@@ -128,7 +128,7 @@ available:
 .. _opencv-python: https://opencv-python-tutroals.readthedocs.io
 .. _imageio: https://imageio.github.io/
 .. _Screenshot: http://robotframework.org/robotframework/latest/libraries/Screenshot.html
-.. _Keyword Documentation: https://mihaiparvu.github.io/ScreenCapLibrary/ScreenCapLibrary.html
+.. _Keyword Documentation: https://rticau.github.io/ScreenCapLibrary/ScreenCapLibrary.html
 .. _robotframework-users: http://groups.google.com/group/robotframework-users
 .. _Slack community: https://robotframework-slack-invite.herokuapp.com
-.. _issue tracker: https://github.com/mihaiparvu/ScreenCapLibrary/issues
+.. _issue tracker: https://github.com/rticau/ScreenCapLibrary/issues
