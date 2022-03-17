@@ -11,7 +11,7 @@ from robot.libdoc import libdoc
 assert Path.cwd() == Path(__file__).parent
 
 
-REPOSITORY = 'mihaiparvu/ScreenCapLibrary'
+REPOSITORY = 'rticau/ScreenCapLibrary'
 VERSION_PATH = Path('src/ScreenCapLibrary/version.py')
 VERSION_PATTERN = "VERSION = '(.*)'"
 RELEASE_NOTES_PATH = Path('docs/ScreenCapLibrary-{version}.rst')
@@ -48,10 +48,10 @@ distribution from PyPI_ and install it manually.
 ScreenCapLibrary {version} was released on {date}.
 
 .. _Robot Framework: http://robotframework.org
-.. _ScreenCapLibrary: https://github.com/mihaiparvu/ScreenCapLibrary
+.. _ScreenCapLibrary: https://github.com/rticau/ScreenCapLibrary
 .. _pip: http://pip-installer.org
 .. _PyPI: https://pypi.python.org/pypi/robotframework-screencaplibrary
-.. _issue tracker: https://github.com/mihaiparvu/ScreenCapLibrary/issues?q=milestone%3A{version.milestone}
+.. _issue tracker: https://github.com/rticau/ScreenCapLibrary/issues?q=milestone%3A{version.milestone}
 '''
 
 
